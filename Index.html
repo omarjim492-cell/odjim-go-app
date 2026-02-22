@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
+<head rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a1cff">
   <meta charset="UTF-8">
   <title>ODJIM GO</title>
 </head>
@@ -8,4 +9,8 @@
   <h1>ODJIM GO</h1>
   <p>App em teste online 🚀</p>
 </body>
+  <script if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
 </html>
