@@ -5,11 +5,17 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0a1cff",
+  "description": "Aplicação oficial ODJIM GO",
   "icons": [
     {
-      "src": "file_00000000f73071fdafcd68862988b7bb (1).jpg",
+      "src": "file_00000000f73071fdafcd68862988b7bb",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
