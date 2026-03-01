@@ -8,6 +8,11 @@
 <body>
   <h1>ODJIM GO</h1>
   <p>App em teste online 🚀</p>
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
 </body>
   <script if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
