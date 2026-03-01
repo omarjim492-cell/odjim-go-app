@@ -1,15 +1,14 @@
 {
   "name": "ODJIM GO",
   "short_name": "ODJIM GO",
-  "description": "Aplicativo ODJIM GO",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0a1cff",
   "icons": [
     {
-      "src": "17727379108147.png",
-      "sizes": "192x192",
+      "src": "icon.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
