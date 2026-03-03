@@ -1,144 +1,159 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>ODJIM GO</title>
-
-  <!-- Manifest PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0a1cff">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #0a1cff;
-      color: #ffffff;
-      text-align: center;
-      padding: 20px;
       margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6ff;
+      color: #222;
     }
 
-    img {
-      width: 150px;
-      margin: 20px 0;
+    header {
+      background: #0a1cff;
+      color: white;
+      padding: 15px;
+      text-align: center;
     }
 
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
     }
 
-    p {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
-
-    button {
-      padding: 12px 25px;
-      background-color: #ffffff;
+    nav a {
+      padding: 10px;
+      text-decoration: none;
       color: #0a1cff;
-      border: none;
+      font-weight: bold;
+    }
+
+    section {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      display: block;
+      text-align: center;
+      background: #0a1cff;
+      color: white;
+      padding: 12px;
       border-radius: 8px;
+      text-decoration: none;
       font-size: 18px;
-      cursor: pointer;
-      transition: 0.2s;
-      margin: 5px;
+      margin-top: 10px;
     }
 
-    button:hover {
-      background-color: #e0e0e0;
-    }
-
-    iframe {
-      margin-top: 15px;
-      border: none;
-      width: 90%;
-      max-width: 400px;
-      height: 200px;
-    }
-
-    .links-rapidos {
-      margin-top: 20px;
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #eee;
+      font-size: 14px;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Logo -->
-  <img src="1771728384245.jpg" alt="ODJIM GO">
-
-  <!-- Texto de boas-vindas -->
+<header>
   <h1>ODJIM GO</h1>
-  <p>App em teste online 🚀</p>
+  <p>Prestação de serviços</p>
+</header>
 
-  <!-- Botão WhatsApp -->
-  <button onclick="window.location.href='https://wa.me/244951945715'">
-    Contactar WhatsApp
-  </button>
+<nav>
+  <a href="#inicio">Início</a>
+  <a href="#sobre">Sobre</a>
+  <a href="#servicos">Serviços</a>
+  <a href="#como">Como funciona</a>
+  <a href="#contacto">Contacto</a>
+</nav>
 
-  <!-- Mapa -->
-  <p>Visite-nos:</p>
-  <iframe 
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.123456789!2d13.234567!3d-8.876543!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a2b3c4d5e6f7g8h%3A0xabcdef123456789!2sODJIM%20GO!5e0!3m2!1spt-PT!2sao!4v1234567890" 
-    allowfullscreen="" loading="lazy">
-  </iframe>
-
-  <!-- Links rápidos -->
-  <div class="links-rapidos">
-    <a href="https://www.facebook.com/ODJIMSolution" target="_blank">
-      <button>Facebook</button>
-    </a>
-    <a href="https://www.instagram.com/SEU_INSTAGRAM" target="_blank">
-      <button>Instagram</button>
-    </a>
-    <a href="https://odjimsolution.co.ao" target="_blank">
-      <button>Website</button>
+<section id="inicio">
+  <div class="card">
+    <h2>Bem-vindo</h2>
+    <p>
+      ODJIM GO é uma plataforma de prestação de serviços que facilita o contacto
+      entre clientes e profissionais.
+    </p>
+    <a class="btn" href="https://wa.me/244951945715" target="_blank">
+      Falar no WhatsApp
     </a>
   </div>
+</section>
 
-  <!-- Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
-</body>
-</html>    button {
-      padding: 12px 25px;
-      background-color: #ffffff;
-      color: #0a1cff;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+<section id="sobre">
+  <div class="card">
+    <h2>Sobre nós</h2>
+    <p>
+      A ODJIM GO foi criada para ajudar pessoas e empresas a encontrarem serviços
+      rápidos, práticos e confiáveis.
+    </p>
+  </div>
+</section>
 
-    button:hover {
-      background-color: #e0e0e0;
-    }
-  </style>
-</head>
-<body>
+<section id="servicos">
+  <div class="card">
+    <h2>Serviços</h2>
+    <ul>
+      <li>Informática e tecnologia</li>
+      <li>Instalação de software</li>
+      <li>Design e marketing digital</li>
+      <li>Consultoria</li>
+      <li>Arrumação de escritórios</li>
+      <li>Arrumação de Stocks</li>
+      <li>Acabamentos Civil</li>
+      <li>Personalização de cozinhas</li>
+      <li>Manutenções e Montagens de Ar-condicionados</li>
+      <li>Manutenções e Montagens de Câmeras de video vigilância</li>
+      <li>Confeiteiros por trabalhos</li>
+      <li>Trabalhos diários como: Baba, Lavadeira, Arrumadeira, Bar-men e outros</li>
+      <li>Outros serviços sob pedido</li>
+    </ul>
+  </div>
+</section>
 
-  <!-- Logo -->
-  <img src="logo.png" alt="ODJIM GO">
+<section id="como">
+  <div class="card">
+    <h2>Como funciona</h2>
+    <ol>
+      <li>Escolhe o serviço</li>
+      <li>Clica no botão WhatsApp</li>
+      <li>Explica o que precisas</li>
+      <li>Recebe atendimento</li>
+    </ol>
+  </div>
+</section>
 
-  <!-- Texto de boas-vindas -->
-  <h1>ODJIM GO</h1>
-  <p>App em teste online 🚀</p>
+<section id="contacto">
+  <div class="card">
+    <h2>Contacto</h2>
+    <p>Email: od761722@gmail.com</p>
+    <a class="btn" href="https://wa.me/244951945715" target="_blank">
+      Contactar no WhatsApp
+    </a>
+  </div>
+</section>
 
-  <!-- Botão WhatsApp -->
-  <button onclick="window.location.href='https://wa.me/244946761722'">
-    Contactar WhatsApp
-  </button>
+<footer>
+  © 2026 ODJIM GO - Todos os direitos reservados
+</footer>
 
-  <!-- Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
 </body>
 </html>
