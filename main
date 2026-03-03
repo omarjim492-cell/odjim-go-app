@@ -1,1 +1,158 @@
-index.html
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>ODJIM GO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f4ff;
+  color: #222;
+}
+header {
+  background: linear-gradient(135deg, #0a1cff, #3b5cff);
+  color: white;
+  padding: 25px;
+  text-align: center;
+  animation: fadeIn 1s ease;
+}
+nav {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #ddd;
+}
+nav a {
+  padding: 10px;
+  text-decoration: none;
+  color: #0a1cff;
+  font-weight: bold;
+}
+section {
+  padding: 20px;
+  animation: fadeUp 0.8s ease;
+}
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.btn {
+  display: block;
+  background: #0a1cff;
+  color: white;
+  text-align: center;
+  padding: 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 18px;
+  margin-top: 10px;
+}
+ul, ol {
+  padding-left: 20px;
+}
+footer {
+  text-align: center;
+  padding: 15px;
+  background: #eee;
+  font-size: 14px;
+}
+@keyframes fadeIn {
+  from {opacity:0;}
+  to {opacity:1;}
+}
+@keyframes fadeUp {
+  from {opacity:0; transform: translateY(20px);}
+  to {opacity:1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1><i class="fa-solid fa-rocket"></i> ODJIM GO</h1>
+  <p>Prestação de serviços digitais</p>
+</header>
+
+<nav>
+  <a href="#inicio"><i class="fa fa-house"></i></a>
+  <a href="#sobre"><i class="fa fa-circle-info"></i></a>
+  <a href="#servicos"><i class="fa fa-briefcase"></i></a>
+  <a href="#como"><i class="fa fa-gears"></i></a>
+  <a href="#contacto"><i class="fa fa-phone"></i></a>
+</nav>
+
+<section id="inicio">
+  <div class="card">
+    <h2>Bem-vindo</h2>
+    <p>
+      ODJIM GO é uma plataforma criada para facilitar o acesso a serviços digitais,
+      ligando clientes a soluções rápidas e eficientes.
+    </p>
+    <a class="btn" href="https://wa.me/244951945715" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp
+    </a>
+  </div>
+</section>
+
+<section id="sobre">
+  <div class="card">
+    <h2>Sobre nós</h2>
+    <p>
+      A ODJIM GO nasceu com o objetivo de tornar o atendimento mais simples,
+      rápido e acessível, usando tecnologia para aproximar pessoas e serviços.
+    </p>
+  </div>
+</section>
+
+<section id="servicos">
+  <div class="card">
+    <h2>Serviços</h2>
+    <ul>
+      <li>💻 Informática e tecnologia</li>
+      <li>🧩 Instalação de software</li>
+      <li>🎨 Design e marketing digital</li>
+      <li>📊 Consultoria</li>
+      <li>⚙️ Outros serviços sob pedido</li>
+    </ul>
+  </div>
+</section>
+
+<section id="como">
+  <div class="card">
+    <h2>Como funciona</h2>
+    <ol>
+      <li>Escolhe o serviço</li>
+      <li>Clica no botão WhatsApp</li>
+      <li>Explica o que precisas</li>
+      <li>Recebe atendimento personalizado</li>
+    </ol>
+  </div>
+</section>
+
+<section id="contacto">
+  <div class="card">
+    <h2>Contacto</h2>
+    <p>Email: odjimgo@gmail.com</p>
+    <a class="btn" href="https://wa.me/244951945715" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i> Contactar no WhatsApp
+    </a>
+  </div>
+</section>
+
+<footer>
+  © 2026 ODJIM GO — Todos os direitos reservados
+</footer>
+
+</body>
+</html>
