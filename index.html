@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
@@ -22,23 +22,19 @@ body.dark{
   --texto:#f1f1f1;
   --card:#1e1e1e;
 }
-
 body{
   margin:0;
   font-family:Arial, sans-serif;
   background:var(--cinza);
   color:var(--texto);
-  transition:0.3s;
+  transition:.3s;
 }
-
 header{
   background:linear-gradient(135deg,var(--azul),var(--azul2));
   color:white;
   padding:25px;
   text-align:center;
-  animation:fadeIn 1s;
 }
-
 nav{
   display:flex;
   justify-content:space-around;
@@ -46,25 +42,23 @@ nav{
   position:sticky;
   top:0;
   border-bottom:2px solid #ccc;
+  flex-wrap:wrap;
 }
-
 nav a{
-  padding:12px;
+  padding:10px;
   text-decoration:none;
   color:var(--azul);
   font-weight:bold;
+  font-size:14px;
 }
-
-section{padding:20px; animation:fadeUp 0.8s;}
-
+section{padding:20px;}
 .card{
   background:var(--card);
   border-radius:15px;
   padding:20px;
   margin-bottom:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  box-shadow:0 4px 10px rgba(0,0,0,.1);
 }
-
 .btn{
   display:flex;
   align-items:center;
@@ -75,27 +69,23 @@ section{padding:20px; animation:fadeUp 0.8s;}
   color:white;
   text-decoration:none;
   margin-top:10px;
-  font-size:18px;
+  font-size:17px;
 }
-
 .whatsapp{background:var(--verde);}
 .facebook{background:#1877f2;}
 .instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af);}
 .website{background:var(--laranja);}
-
 .fab-btn{
   position:fixed;
   bottom:20px;
   right:20px;
   background:var(--verde);
   color:white;
-  font-size:28px;
+  font-size:26px;
   padding:15px;
   border-radius:50%;
   text-decoration:none;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
 }
-
 .toggle{
   position:fixed;
   bottom:20px;
@@ -105,25 +95,13 @@ section{padding:20px; animation:fadeUp 0.8s;}
   padding:10px 15px;
   border-radius:20px;
   cursor:pointer;
-  font-size:14px;
 }
-
 ul{padding-left:20px;}
-
 footer{
   text-align:center;
   padding:15px;
   background:#e0e3ee;
   font-size:14px;
-}
-
-@keyframes fadeIn{
-  from{opacity:0;}
-  to{opacity:1;}
-}
-@keyframes fadeUp{
-  from{opacity:0; transform:translateY(20px);}
-  to{opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -131,106 +109,113 @@ footer{
 <body>
 
 <header>
-  <h1><i class="fa-solid fa-rocket"></i> ODJIM GO</h1>
-  <p>Prestação de serviços</p>
+<h1><i class="fa-solid fa-rocket"></i> ODJIM Solution</h1>
+<p>Prestação de serviços</p>
 </header>
 
 <nav>
-  <a href="#inicio">Início</a>
-  <a href="#sobre">Sobre</a>
-  <a href="#servicos">Serviços</a>
-  <a href="#como">Como funciona</a>
-  <a href="#contacto">Contacto</a>
+<a href="#inicio">Início</a>
+<a href="#sobre">Sobre</a>
+<a href="#servicos">Serviços</a>
+<a href="#vantagens">Vantagens</a>
+<a href="#faq">FAQ</a>
+<a href="#pro">Versão Pro</a>
+<a href="#contacto">Contacto</a>
 </nav>
 
 <section id="inicio">
-  <div class="card">
-    <h2>Bem-vindo</h2>
-    <p>
-      A ODJIM GO é uma plataforma que conecta clientes a profissionais
-      para vários tipos de serviços.
-    </p>
+<div class="card">
+<h2>Bem-vindo</h2>
+<p>ODJIM GO conecta clientes a profissionais para vários tipos de serviços.</p>
 
-    <a class="btn whatsapp" href="https://wa.me/244951945715" target="_blank">
-      <i class="fa-brands fa-whatsapp fa-2x"></i> WhatsApp
-    </a>
-
-    <a class="btn facebook" href="https://facebook.com/Odjimsolution" target="_blank">
-      <i class="fa-brands fa-facebook fa-2x"></i> Facebook
-    </a>
-
-    <a class="btn instagram" href="https://instagram.com/Omard780" target="_blank">
-      <i class="fa-brands fa-instagram fa-2x"></i> Instagram
-    </a>
-
-    <a class="btn website" href="https://omarjim492-cell.github.io/odjim-go-app/" target="_blank">
-      <i class="fa-solid fa-globe fa-2x"></i> Website
-    </a>
-  </div>
+<a class="btn whatsapp" href="https://wa.me/244951945715" target="_blank">
+<i class="fa-brands fa-whatsapp"></i> WhatsApp
+</a>
+<a class="btn facebook" href="https://facebook.com/Odjimsolution" target="_blank">
+<i class="fa-brands fa-facebook"></i> Facebook
+</a>
+<a class="btn instagram" href="https://instagram.com/Odjimsolution" target="_blank">
+<i class="fa-brands fa-instagram"></i> Instagram
+</a>
+<a class="btn website" href="https://omarjim492-cell.github.io/odjim-go-app/" target="_blank">
+<i class="fa-solid fa-globe"></i> Website
+</a>
+</div>
 </section>
 
 <section id="sobre">
-  <div class="card">
-    <h2>Sobre nós</h2>
-    <p>
-      A ODJIM GO foi criada para facilitar o acesso a serviços
-      confiáveis e rápidos, usando tecnologia moderna.
-    </p>
-  </div>
+<div class="card">
+<h2>Sobre nós</h2>
+<p>A ODJIM Solution foi criada para facilitar o acesso a serviços confiáveis e rápidos.</p>
+</div>
 </section>
 
 <section id="servicos">
-  <div class="card">
-    <h2>Serviços</h2>
-    <ul>
-      <li>Informática e tecnologia</li>
-      <li>Instalação de software</li>
-      <li>Design e marketing digital</li>
-      <li>Consultoria</li>
-      <li>Arrumação de escritórios</li>
-      <li>Arrumação de stocks</li>
-      <li>Acabamentos civil</li>
-      <li>Personalização de cozinhas</li>
-      <li>Manutenções e montagens de ar-condicionados</li>
-      <li>Mecânica de Motorizadas (manutenções e reparação a domicílio) </li>
-      <li>Manutenções e montagens de câmeras de vídeo vigilância</li>
-      <li>Confeiteiros por trabalhos</li>
-      <li>Trabalhos diários: Babá, Lavadeira, Arrumadeira, Bar-man e outros</li>
-      <li>Outros serviços sob pedido</li>
-    </ul>
-  </div>
+<div class="card">
+<h2>Serviços (Categorias)</h2>
+<ul>
+<li><b>Digitais:</b> Informática, Software, Design, Marketing</li>
+<li><b>Organização:</b> Arrumação de escritórios e stocks</li>
+<li><b>Construção:</b> Acabamentos civil geral e Personalização de Cozinhas</li>
+<li><b>Técnicos:</b> Ar-condicionado, Câmeras, Pedreiros qualificados, Fiscal de obras</li>
+<li><b>Domésticos:</b> Babá, Lavadeira, Engomadeira, Arrumadeira, Bar-man</li>
+<li><b>Outros:</b> Sob pedido</li>
+</ul>
+</div>
 </section>
 
-<section id="como">
-  <div class="card">
-    <h2>Como funciona</h2>
-    <ol>
-      <li>Escolhe o serviço</li>
-      <li>Entra em contacto</li>
-      <li>Explica a tua necessidade</li>
-      <li>Recebe atendimento personalizado</li>
-    </ol>
-  </div>
+<section id="vantagens">
+<div class="card">
+<h2>Vantagens</h2>
+<ul>
+<li>Atendimento rápido</li>
+<li>Comunicação direta</li>
+<li>Serviços personalizados</li>
+<li>Preços acessíveis</li>
+<li>Sem intermediários</li>
+</ul>
+</div>
+</section>
+
+<section id="faq">
+<div class="card">
+<h2>Perguntas Frequentes (FAQ)</h2>
+<p><b>❓ Como funciona?</b><br>Escolhe o serviço e entra em contacto.</p>
+<p><b>❓ É pago?</b><br>Alguns serviços podem ser pagos conforme a proposta de negociação.</p>
+<p><b>❓ Funciona em todo o país?</b><br>Sim, conforme a disponibilidade.</p>
+</div>
+</section>
+
+<section id="pro">
+<div class="card">
+<h2>Versão Pro</h2>
+<p>Na versão Pro vais ter:</p>
+<ul>
+<li>Atendimento prioritário</li>
+<li>Mais serviços disponíveis</li>
+<li>Suporte dedicado</li>
+<li>Sem anúncios</li>
+</ul>
+</div>
 </section>
 
 <section id="contacto">
-  <div class="card">
-    <h2>Contacto</h2>
-    <p>Email: odjimgo@gmail.com</p>
-    <p>Telefone: 951945715/946761722</p>
-  </div>
+<div class="card">
+<h2>Contacto</h2>
+<p>Email: odjimgo@gmail.com</p>
+</div>
 </section>
 
 <footer>
-  © 2026 ODJIM GO - Todos os direitos reservados
+© 2026 ODJIM GO - Todos os direitos reservados
 </footer>
 
-<a class="fab-btn" href="https://wa.me/244946761722" target="_blank">
-  <i class="fa-brands fa-whatsapp"></i>
+<a class="fab-btn" href="https://wa.me/244951945715" target="_blank">
+<i class="fa-brands fa-whatsapp"></i>
 </a>
 
 <div class="toggle" onclick="document.body.classList.toggle('dark')">
-  🌙 / ☀️
+🌙 / ☀️
 </div>
 
 </body>
