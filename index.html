@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
@@ -14,14 +14,21 @@
   --laranja:#ff9800;
   --verde:#25d366;
   --cinza:#f4f6fb;
-  --amarelo:#f4f6fb;
+  --texto:#222;
+  --card:#ffffff;
+}
+body.dark{
+  --cinza:#121212;
+  --texto:#f1f1f1;
+  --card:#1e1e1e;
 }
 
 body{
   margin:0;
   font-family:Arial, sans-serif;
   background:var(--cinza);
-  color:#222;
+  color:var(--texto);
+  transition:0.3s;
 }
 
 header{
@@ -29,15 +36,16 @@ header{
   color:white;
   padding:25px;
   text-align:center;
+  animation:fadeIn 1s;
 }
 
 nav{
   display:flex;
   justify-content:space-around;
-  background:white;
-  border-bottom:2px solid #ddd;
+  background:var(--card);
   position:sticky;
   top:0;
+  border-bottom:2px solid #ccc;
 }
 
 nav a{
@@ -45,13 +53,12 @@ nav a{
   text-decoration:none;
   color:var(--azul);
   font-weight:bold;
-  font-size:14px;
 }
 
-section{padding:20px;}
+section{padding:20px; animation:fadeUp 0.8s;}
 
 .card{
-  background:white;
+  background:var(--card);
   border-radius:15px;
   padding:20px;
   margin-bottom:15px;
@@ -59,20 +66,47 @@ section{padding:20px;}
 }
 
 .btn{
-  display:block;
-  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
   padding:14px;
-  border-radius:10px;
+  border-radius:12px;
   color:white;
   text-decoration:none;
   margin-top:10px;
-  font-size:17px;
+  font-size:18px;
 }
 
 .whatsapp{background:var(--verde);}
 .facebook{background:#1877f2;}
 .instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af);}
 .website{background:var(--laranja);}
+
+.fab-btn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--verde);
+  color:white;
+  font-size:28px;
+  padding:15px;
+  border-radius:50%;
+  text-decoration:none;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+}
+
+.toggle{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:var(--azul2);
+  color:white;
+  padding:10px 15px;
+  border-radius:20px;
+  cursor:pointer;
+  font-size:14px;
+}
 
 ul{padding-left:20px;}
 
@@ -82,13 +116,22 @@ footer{
   background:#e0e3ee;
   font-size:14px;
 }
+
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>ODJIM GO</h1>
+  <h1><i class="fa-solid fa-rocket"></i> ODJIM GO</h1>
   <p>Prestação de serviços</p>
 </header>
 
@@ -105,23 +148,23 @@ footer{
     <h2>Bem-vindo</h2>
     <p>
       A ODJIM GO é uma plataforma que conecta clientes a profissionais
-      para diversos tipos de serviços.
+      para vários tipos de serviços.
     </p>
 
     <a class="btn whatsapp" href="https://wa.me/244951945715" target="_blank">
-      <i class="fa-brands fa-whatsapp"></i> WhatsApp
+      <i class="fa-brands fa-whatsapp fa-2x"></i> WhatsApp
     </a>
 
     <a class="btn facebook" href="https://facebook.com/Odjimsolution" target="_blank">
-      <i class="fa-brands fa-facebook"></i> Facebook
+      <i class="fa-brands fa-facebook fa-2x"></i> Facebook
     </a>
 
     <a class="btn instagram" href="https://instagram.com/Omard780" target="_blank">
-      <i class="fa-brands fa-instagram"></i> Instagram
+      <i class="fa-brands fa-instagram fa-2x"></i> Instagram
     </a>
 
     <a class="btn website" href="https://omarjim492-cell.github.io/odjim-go-app/" target="_blank">
-      <i class="fa-solid fa-globe"></i> Website
+      <i class="fa-solid fa-globe fa-2x"></i> Website
     </a>
   </div>
 </section>
@@ -149,6 +192,7 @@ footer{
       <li>Acabamentos civil</li>
       <li>Personalização de cozinhas</li>
       <li>Manutenções e montagens de ar-condicionados</li>
+      <li>Mecânica de Motorizadas (manutenções e reparação a domicílio) </li>
       <li>Manutenções e montagens de câmeras de vídeo vigilância</li>
       <li>Confeiteiros por trabalhos</li>
       <li>Trabalhos diários: Babá, Lavadeira, Arrumadeira, Bar-man e outros</li>
@@ -173,12 +217,21 @@ footer{
   <div class="card">
     <h2>Contacto</h2>
     <p>Email: odjimgo@gmail.com</p>
+    <p>Telefone: 951945715/946761722</p>
   </div>
 </section>
 
 <footer>
   © 2026 ODJIM GO - Todos os direitos reservados
 </footer>
+
+<a class="fab-btn" href="https://wa.me/244946761722" target="_blank">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+
+<div class="toggle" onclick="document.body.classList.toggle('dark')">
+  🌙 / ☀️
+</div>
 
 </body>
 </html>
