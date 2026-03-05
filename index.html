@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
 <style>
 :root{
@@ -22,93 +23,32 @@ body.dark{
   --texto:#f1f1f1;
   --card:#1e1e1e;
 }
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:var(--cinza);
-  color:var(--texto);
-  transition:.3s;
-}
-header{
-  background:linear-gradient(135deg,var(--azul),var(--azul2));
-  color:white;
-  padding:25px;
-  text-align:center;
-}
-nav{
-  display:flex; justify-content:space-around;
-  background:var(--card);
-  position:sticky; top:0;
-  border-bottom:2px solid #ccc;
-  flex-wrap:wrap;
-}
-nav a{
-  padding:10px;
-  text-decoration:none;
-  color:var(--azul);
-  font-weight:bold;
-  font-size:14px;
-}
+body{margin:0;font-family:Arial,sans-serif;background:var(--cinza);color:var(--texto);transition:.3s;}
+header{background:linear-gradient(135deg,var(--azul),var(--azul2));color:white;padding:25px;text-align:center;}
+nav{display:flex;justify-content:space-around;background:var(--card);position:sticky;top:0;border-bottom:2px solid #ccc;flex-wrap:wrap;}
+nav a{padding:10px;text-decoration:none;color:var(--azul);font-weight:bold;font-size:14px;}
 section{padding:20px;}
-.card{
-  background:var(--card);
-  border-radius:15px;
-  padding:20px;
-  margin-bottom:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,.1);
-}
-.btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:14px;
-  border-radius:12px;
-  color:white;
-  text-decoration:none;
-  margin-top:10px;
-  font-size:17px;
-}
+.card{background:var(--card);border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 4px 10px rgba(0,0,0,.1);opacity:0;transform:translateY(20px);transition:all .6s ease;}
+.card.visible{opacity:1;transform:translateY(0);}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:12px;color:white;text-decoration:none;margin-top:10px;font-size:17px;transition:.3s;}
+.btn:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
 .whatsapp{background:var(--verde);}
 .facebook{background:#1877f2;}
 .instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af);}
 .website{background:var(--laranja);}
-.fab-btn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:var(--verde);
-  color:white;
-  font-size:26px;
-  padding:15px;
-  border-radius:50%;
-  text-decoration:none;
-}
-.toggle{
-  position:fixed;
-  bottom:20px;
-  left:20px;
-  background:var(--azul2);
-  color:white;
-  padding:10px 15px;
-  border-radius:20px;
-  cursor:pointer;
-}
+.fab-btn{position:fixed;bottom:20px;right:20px;background:var(--verde);color:white;font-size:26px;padding:15px;border-radius:50%;text-decoration:none;}
+.toggle{position:fixed;bottom:20px;left:20px;background:var(--azul2);color:white;padding:10px 15px;border-radius:20px;cursor:pointer;}
 ul{padding-left:20px;}
-footer{
-  text-align:center;
-  padding:15px;
-  background:#e0e3ee;
-  font-size:14px;
-}
+footer{text-align:center;padding:15px;background:#e0e3ee;font-size:14px;}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1><i class="fa-solid fa-rocket"></i> ODJIM Solution</h1>
-<p>Serviços rápidos, soluções brilhantes.</p>
+<lottie-player src="https://assets9.lottiefiles.com/packages/lf20_usmfx6bp.json" background="transparent" speed="1" style="width:150px; height:150px;" loop autoplay></lottie-player>
+<h1>ODJIM Solution</h1>
+<p>Serviços rápidos, soluções brilhantes!</p>
 </header>
 
 <nav>
@@ -145,6 +85,7 @@ footer{
 <h2>Sobre nós</h2>
 <p>A ODJIM Solution é uma empresa angolana dedicada a serviços profissionais e soluções rápidas e eficientes.</p>
 <p>Email: geral@odjimsolution.co.ao | Cidade: Luanda</p>
+<img src="logo-banner.png" alt="ODJIM Solution" style="width:100%;border-radius:15px;margin-top:10px;">
 </div>
 </section>
 
@@ -156,7 +97,7 @@ footer{
 <li>Instalação de software</li>
 <li>Design gráfico e marketing digital</li>
 <li>Consultoria</li>
-<li>Fabricação e instalação de Moves planejados</li>
+<li>Fabricação sobre medidas e Instalações de Móveis Planejados</li>
 <li>Arrumação de escritórios</li>
 <li>Arrumação de stocks</li>
 <li>Acabamentos civil</li>
@@ -165,7 +106,6 @@ footer{
 <li>Montagem e manutenção de câmeras</li>
 <li>Confeiteiros por trabalhos</li>
 <li>Babá, Lavadeira, Arrumadeira, Barmen</li>
-<li>Corte de cabelo domiciliar</li>
 <li>Outros serviços sob pedido</li>
 </ul>
 </div>
@@ -175,13 +115,6 @@ footer{
 <div class="card">
 <h2>Pedir Serviço</h2>
 <p>Preencha os dados e receba atendimento rápido no WhatsApp:</p>
-
-<p><b>Nome:</b></p>
-<p><b>Telefone:</b></p>
-<p><b>Serviço pretendido:</b></p>
-<p><b>Localização:</b></p>
-<p><b>Descrição do problema:</b></p>
-<p><b>Data de agendamento:</b></p>
 
 <a class="btn whatsapp" href="https://wa.me/244951945715?text=Pedido%20de%20serviço%20-%20ODJIM%20Solution:%20Nome:%20...%20Telefone:%20...%20Serviço:%20...%20Localização:%20...%20Descrição:%20..." target="_blank">
 <i class="fa-brands fa-whatsapp"></i> Enviar no WhatsApp
@@ -203,7 +136,7 @@ footer{
 <div class="card">
 <h2>Contacto</h2>
 <p>Email: oj761722@gmail.com</p>
-<p>Telefone: 951945715</p>
+<p>Telefone: 951945715/946761722</p>
 <p>Cidade: Luanda</p>
 </div>
 </section>
@@ -219,6 +152,17 @@ footer{
 <div class="toggle" onclick="document.body.classList.toggle('dark')">
 🌙 / ☀️
 </div>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.querySelectorAll('.card').forEach(card => {
+    const rect = card.getBoundingClientRect();
+    if(rect.top < window.innerHeight - 50){
+      card.classList.add('visible');
+    }
+  });
+});
+</script>
 
 </body>
 </html>
