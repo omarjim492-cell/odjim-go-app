@@ -2,167 +2,233 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>ODJIM GO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ODJIM GO</title>
+
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
 <style>
-:root{
-  --azul:#0b1c3f;
-  --azul2:#123a7a;
-  --laranja:#ff9800;
-  --verde:#25d366;
-  --cinza:#f4f6fb;
-  --texto:#222;
-  --card:#ffffff;
+
+body{
+font-family: Arial;
+margin:0;
+background:#f4f6fb;
+color:#333;
 }
-body.dark{
-  --cinza:#121212;
-  --texto:#f1f1f1;
-  --card:#1e1e1e;
+
+header{
+background:#0a1f44;
+color:white;
+text-align:center;
+padding:40px 20px;
 }
-body{margin:0;font-family:Arial,sans-serif;background:var(--cinza);color:var(--texto);transition:.3s;}
-header{background:linear-gradient(135deg,var(--azul),var(--azul2));color:white;padding:25px;text-align:center;}
-nav{display:flex;justify-content:space-around;background:var(--card);position:sticky;top:0;border-bottom:2px solid #ccc;flex-wrap:wrap;}
-nav a{padding:10px;text-decoration:none;color:var(--azul);font-weight:bold;font-size:14px;}
-section{padding:20px;}
-.card{background:var(--card);border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 4px 10px rgba(0,0,0,.1);opacity:0;transform:translateY(20px);transition:all .6s ease;}
-.card.visible{opacity:1;transform:translateY(0);}
-.btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:12px;color:white;text-decoration:none;margin-top:10px;font-size:17px;transition:.3s;}
-.btn:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.whatsapp{background:var(--verde);}
-.facebook{background:#1877f2;}
-.instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af);}
-.website{background:var(--laranja);}
-.fab-btn{position:fixed;bottom:20px;right:20px;background:var(--verde);color:white;font-size:26px;padding:15px;border-radius:50%;text-decoration:none;}
-.toggle{position:fixed;bottom:20px;left:20px;background:var(--azul2);color:white;padding:10px 15px;border-radius:20px;cursor:pointer;}
-ul{padding-left:20px;}
-footer{text-align:center;padding:15px;background:#e0e3ee;font-size:14px;}
+
+header img{
+width:120px;
+}
+
+h1{
+margin:10px 0;
+}
+
+.slogan{
+font-size:18px;
+opacity:0.9;
+}
+
+.container{
+padding:20px;
+max-width:900px;
+margin:auto;
+}
+
+.card{
+background:white;
+border-radius:12px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.services{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.service{
+background:#eef2ff;
+padding:10px;
+border-radius:8px;
+}
+
+button{
+background:#0a1f44;
+color:white;
+border:none;
+padding:12px;
+border-radius:8px;
+cursor:pointer;
+}
+
+input,textarea,select{
+width:100%;
+padding:10px;
+margin-top:8px;
+margin-bottom:15px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.social a{
+display:inline-block;
+margin:5px;
+padding:10px 15px;
+border-radius:8px;
+color:white;
+text-decoration:none;
+}
+
+.whatsapp{background:#25D366}
+.facebook{background:#1877F2}
+.instagram{background:#E4405F}
+.website{background:#ff8800}
+
+footer{
+background:#0a1f44;
+color:white;
+text-align:center;
+padding:20px;
+margin-top:30px;
+}
+
 </style>
 </head>
 
 <body>
 
 <header>
-<lottie-player src="https://assets9.lottiefiles.com/packages/lf20_usmfx6bp.json" background="transparent" speed="1" style="width:150px; height:150px;" loop autoplay></lottie-player>
+
+<img src="icon-512.png">
+
 <h1>ODJIM Solution</h1>
-<p>Serviços rápidos, soluções brilhantes!</p>
+
+<div class="slogan">
+Serviços rápidos, soluções brilhantes!
+</div>
+
 </header>
 
-<nav>
-<a href="#inicio">Início</a>
-<a href="#sobre">Sobre</a>
-<a href="#servicos">Serviços</a>
-<a href="#pedido">Pedir Serviço</a>
-<a href="#trabalhar">Trabalhar Connosco</a>
-<a href="#contacto">Contacto</a>
-</nav>
+<div class="container">
 
-<section id="inicio">
 <div class="card">
-<h2>Bem-vindo</h2>
-<p>A ODJIM Solution conecta clientes a profissionais para vários tipos de serviços.</p>
 
-<a class="btn whatsapp" href="https://wa.me/244951945715?text=Olá%20ODJIM%20Solution,%20preciso%20de%20um%20serviço." target="_blank">
-<i class="fa-brands fa-whatsapp"></i> WhatsApp
-</a>
-<a class="btn facebook" href="https://facebook.com/odjimsolution" target="_blank">
-<i class="fa-brands fa-facebook"></i> Facebook
-</a>
-<a class="btn instagram" href="https://instagram.com/odjimsolution" target="_blank">
-<i class="fa-brands fa-instagram"></i> Instagram
-</a>
-<a class="btn website" href="https://omarjim492-cell.github.io/odjim-go-app/" target="_blank">
-<i class="fa-solid fa-globe"></i> Website
-</a>
+<h2>Serviços</h2>
+
+<div class="services">
+
+<div class="service">Informática e tecnologia</div>
+<div class="service">Instalação de software</div>
+<div class="service">Design e marketing digital</div>
+<div class="service">Consultoria</div>
+<div class="service">Arrumação de escritórios</div>
+<div class="service">Arrumação de stocks</div>
+<div class="service">Acabamentos civil</div>
+<div class="service">Personalização de cozinhas</div>
+<div class="service">Manutenção de ar-condicionado</div>
+<div class="service">Instalação de câmeras de vigilância</div>
+<div class="service">Confeitaria</div>
+<div class="service">Baba / Lavadeira / Arrumadeira</div>
+<div class="service">Fabricação e montagem de Móveis planejados</div>
+<div class="service">Móveis planejados para escritórios</div>
+<div class="service">Móveis planejados para residências</div>
+<div class="service">Outros serviços sob pedido</div>
+
 </div>
-</section>
 
-<section id="sobre">
+</div>
+
 <div class="card">
-<h2>Sobre nós</h2>
-<p>A ODJIM Solution é uma empresa angolana dedicada a serviços profissionais e soluções rápidas e eficientes.</p>
-<p>Email: geral@odjimsolution.co.ao | Cidade: Luanda</p>
-<img src="logo-banner.png" alt="ODJIM Solution" style="width:100%;border-radius:15px;margin-top:10px;">
+
+<h2>Solicitar Serviço</h2>
+
+<form>
+
+<label>Nome</label>
+<input type="text" required>
+
+<label>Telefone</label>
+<input type="tel" required>
+
+<label>Serviço desejado</label>
+<select>
+<option>Informática</option>
+<option>Design</option>
+<option>Ar-condicionado</option>
+<option>Câmeras</option>
+<option>Móveis planejados</option>
+<option>Limpeza</option>
+<option>Outro</option>
+</select>
+
+<label>Data de início</label>
+<input type="date">
+
+<label>Data de término</label>
+<input type="date">
+
+<label>Descrição do serviço</label>
+<textarea rows="4"></textarea>
+
+<button type="submit">
+Enviar pedido
+</button>
+
+</form>
+
 </div>
-</section>
 
-<section id="servicos">
 <div class="card">
-<h2>Serviços (Categorias)</h2>
-<ul>
-<li>Informática e tecnologia</li>
-<li>Instalação de software</li>
-<li>Design gráfico e marketing digital</li>
-<li>Consultoria</li>
-<li>Fabricação sobre medidas e Instalações de Móveis Planejados</li>
-<li>Arrumação de escritórios</li>
-<li>Arrumação de stocks</li>
-<li>Acabamentos civil</li>
-<li>Personalização de cozinhas</li>
-<li>Manutenções de ar-condicionado</li>
-<li>Montagem e manutenção de câmeras</li>
-<li>Confeiteiros por trabalhos</li>
-<li>Babá, Lavadeira, Arrumadeira, Barmen</li>
-<li>Outros serviços sob pedido</li>
-</ul>
-</div>
-</section>
 
-<section id="pedido">
-<div class="card">
-<h2>Pedir Serviço</h2>
-<p>Preencha os dados e receba atendimento rápido no WhatsApp:</p>
+<h2>Contactos</h2>
 
-<a class="btn whatsapp" href="https://wa.me/244951945715?text=Pedido%20de%20serviço%20-%20ODJIM%20Solution:%20Nome:%20...%20Telefone:%20...%20Serviço:%20...%20Localização:%20...%20Descrição:%20..." target="_blank">
-<i class="fa-brands fa-whatsapp"></i> Enviar no WhatsApp
+<p>📞 951945715 / 946761722</p>
+
+<p>📧 oj761722@gmail.com</p>
+
+<div class="social">
+
+<a class="whatsapp"
+href="https://wa.me/244951945715">
+WhatsApp
 </a>
-</div>
-</section>
 
-<section id="trabalhar">
-<div class="card">
-<h2>Trabalhar Connosco</h2>
-<p>Envie sua candidatura pelo WhatsApp:</p>
-<a class="btn whatsapp" href="https://wa.me/244951945715?text=Olá,%20gostaria%20de%20trabalhar%20com%20vocês." target="_blank">
-<i class="fa-brands fa-whatsapp"></i> Candidatar no WhatsApp
+<a class="facebook" href="#">
+Facebook
 </a>
-</div>
-</section>
 
-<section id="contacto">
-<div class="card">
-<h2>Contacto</h2>
-<p>Email: oj761722@gmail.com</p>
-<p>Telefone: 951945715/946761722</p>
-<p>Cidade: Luanda</p>
+<a class="instagram" href="#">
+Instagram
+</a>
+
+<a class="website"
+href="https://www.odjimsolution.co.ao/">
+Website
+</a>
+
 </div>
-</section>
+
+</div>
+
+</div>
 
 <footer>
-© 2026 ODJIM Solution - Todos os direitos reservados
+
+ODJIM Solution  
+Luanda – Angola
+
 </footer>
-
-<a class="fab-btn" href="https://wa.me/244951945715?text=Olá%20ODJIM%20Solution,%20preciso%20de%20um%20serviço." target="_blank">
-<i class="fa-brands fa-whatsapp"></i>
-</a>
-
-<div class="toggle" onclick="document.body.classList.toggle('dark')">
-🌙 / ☀️
-</div>
-
-<script>
-window.addEventListener('scroll', () => {
-  document.querySelectorAll('.card').forEach(card => {
-    const rect = card.getBoundingClientRect();
-    if(rect.top < window.innerHeight - 50){
-      card.classList.add('visible');
-    }
-  });
-});
-</script>
 
 </body>
 </html>
