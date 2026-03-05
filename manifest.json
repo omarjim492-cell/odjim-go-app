@@ -4,7 +4,8 @@
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0a1cff",
+  "theme_color": "#0a1f44",
+  "description": "Aplicativo ODJIM Solution",
   "icons": [
     {
       "src": "1772379108147.png",
