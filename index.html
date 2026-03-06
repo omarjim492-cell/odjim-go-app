@@ -1,234 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ODJIM GO</title>
-
-<link rel="manifest" href="manifest.json">
+<title>ODJIM GO 2.0</title>
 
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 margin:0;
 background:#f4f6fb;
 color:#333;
 }
 
+/* CABEÇALHO */
+
 header{
-background:#0a1f44;
+background:linear-gradient(135deg,#081f3f,#0d3c78);
 color:white;
 text-align:center;
 padding:40px 20px;
 }
 
 header img{
-width:120px;
+width:90px;
+margin-bottom:10px;
+animation:flutuar 3s infinite;
+}
+
+@keyframes flutuar{
+0%{transform:translateY(0)}
+50%{transform:translateY(-6px)}
+100%{transform:translateY(0)}
 }
 
 h1{
-margin:10px 0;
+margin:5px;
 }
 
 .slogan{
-font-size:18px;
 opacity:0.9;
 }
 
-.container{
-padding:20px;
-max-width:900px;
-margin:auto;
+/* SERVIÇOS */
+
+.servicos{
+padding:25px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
 }
 
 .card{
 background:white;
-border-radius:12px;
-padding:20px;
-margin-bottom:20px;
+padding:18px;
+border-radius:14px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
+transition:0.3s;
+font-size:14px;
 }
 
-.services{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
+.card:hover{
+transform:scale(1.05);
 }
 
-.service{
-background:#eef2ff;
-padding:10px;
-border-radius:8px;
+/* FORMULÁRIO */
+
+.form{
+padding:25px;
 }
 
-button{
-background:#0a1f44;
-color:white;
-border:none;
-padding:12px;
-border-radius:8px;
-cursor:pointer;
-}
-
-input,textarea,select{
+input,select,textarea{
 width:100%;
-padding:10px;
+padding:12px;
 margin-top:8px;
 margin-bottom:15px;
-border-radius:6px;
+border-radius:8px;
 border:1px solid #ccc;
 }
 
-.social a{
-display:inline-block;
-margin:5px;
-padding:10px 15px;
-border-radius:8px;
+button{
+background:#0d3c78;
 color:white;
-text-decoration:none;
+padding:15px;
+border:none;
+border-radius:10px;
+width:100%;
+font-size:16px;
 }
 
-.whatsapp{background:#25D366}
-.facebook{background:#1877F2}
-.instagram{background:#E4405F}
-.website{background:#ff8800}
+/* CONTACTOS */
+
+.contactos{
+padding:25px;
+text-align:center;
+}
+
+.btn{
+display:block;
+margin:10px auto;
+padding:14px;
+width:80%;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+}
+
+.whatsapp{
+background:#25D366;
+color:white;
+}
 
 footer{
-background:#0a1f44;
-color:white;
 text-align:center;
 padding:20px;
-margin-top:30px;
+font-size:13px;
+opacity:0.7;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <header>
 
-<img src="icon-512.png">
+<img src="logo.png">
 
 <h1>ODJIM Solution</h1>
 
-<div class="slogan">
+<p class="slogan">
 Serviços rápidos, soluções brilhantes!
-</div>
+</p>
 
 </header>
 
-<div class="container">
-
-<div class="card">
+<section class="servicos">
 
 <h2>Serviços</h2>
 
-<div class="services">
+<div class="grid">
 
-<div class="service">Informática e tecnologia</div>
-<div class="service">Instalação de software</div>
-<div class="service">Design e marketing digital</div>
-<div class="service">Consultoria</div>
-<div class="service">Arrumação de escritórios</div>
-<div class="service">Arrumação de stocks</div>
-<div class="service">Acabamentos civil</div>
-<div class="service">Personalização de cozinhas</div>
-<div class="service">Manutenção de ar-condicionado</div>
-<div class="service">Instalação de câmeras de vigilância</div>
-<div class="service">Confeitaria</div>
-<div class="service">Baba / Lavadeira / Arrumadeira</div>
-<div class="service">Fabricação e montagem de Móveis planejados</div>
-<div class="service">Móveis planejados para escritórios</div>
-<div class="service">Móveis planejados para residências</div>
-<div class="service">Outros serviços sob pedido</div>
+<div class="card">💻 Informática e tecnologia</div>
+
+<div class="card">⚙ Instalação de software</div>
+
+<div class="card">📢 Design e marketing digital</div>
+
+<div class="card">📊 Consultoria</div>
+
+<div class="card">🪑 Arrumação de escritórios</div>
+
+<div class="card">📦 Arrumação de stocks</div>
+
+<div class="card">🏗 Acabamentos civil</div>
+
+<div class="card">🍽 Personalização de cozinhas</div>
+
+<div class="card">❄ Manutenção de Ar-condicionado</div>
+
+<div class="card">📷 Instalação de câmeras</div>
+
+<div class="card">🍰 Confeitaria por trabalhos</div>
+
+<div class="card">👶 Baba / Lavadeira / Arrumadeira</div>
+
+<div class="card">🪚 Fabricação sobre medidas</div>
+
+<div class="card">🪑 Móveis Planejados</div>
 
 </div>
 
-</div>
+</section>
 
-<div class="card">
+<section class="form">
 
 <h2>Solicitar Serviço</h2>
 
-<form>
+<input type="text" placeholder="Seu nome">
 
-<label>Nome</label>
-<input type="text" required>
+<input type="tel" placeholder="Telefone">
 
-<label>Telefone</label>
-<input type="tel" required>
-
-<label>Serviço desejado</label>
 <select>
+
+<option>Escolher serviço</option>
+
 <option>Informática</option>
-<option>Design</option>
-<option>Ar-condicionado</option>
-<option>Câmeras</option>
+
+<option>Marketing digital</option>
+
+<option>Instalação de câmeras</option>
+
 <option>Móveis planejados</option>
-<option>Limpeza</option>
-<option>Outro</option>
+
 </select>
 
 <label>Data de início</label>
+
 <input type="date">
 
-<label>Data de término</label>
+<label>Data de fim</label>
+
 <input type="date">
 
-<label>Descrição do serviço</label>
-<textarea rows="4"></textarea>
+<textarea placeholder="Descreva o serviço"></textarea>
 
-<button type="submit">
-Enviar pedido
-</button>
+<button>Enviar solicitação</button>
 
-</form>
+</section>
 
-</div>
-
-<div class="card">
+<section class="contactos">
 
 <h2>Contactos</h2>
 
-<p>📞 951945715 / 946761722</p>
-
-<p>📧 oj761722@gmail.com</p>
-
-<div class="social">
-
-<a class="whatsapp"
+<a class="btn whatsapp" 
 href="https://wa.me/244951945715">
 WhatsApp
 </a>
 
-<a class="facebook" href="#">
-Facebook
-</a>
+<p>
 
-<a class="instagram" href="#">
-Instagram
-</a>
+📞 951 945 715 / 946 761 722
 
-<a class="website"
-href="https://www.odjimsolution.co.ao/">
-Website
-</a>
+</p>
 
-</div>
+<p>
 
-</div>
+✉ oj761722@gmail.com
 
-</div>
+</p>
+
+</section>
 
 <footer>
 
-ODJIM Solution  
-Luanda – Angola
+ODJIM Solution • Luanda
 
 </footer>
 
 </body>
+
 </html>
