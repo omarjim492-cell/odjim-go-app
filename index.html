@@ -127,6 +127,32 @@ opacity:0.7;
 </style>
 
 </head>
+<script>
+
+function enviarPedido(){
+
+let nome = document.getElementById("nome").value;
+let telefone = document.getElementById("telefone").value;
+let servico = document.getElementById("servico").value;
+let inicio = document.getElementById("inicio").value;
+let fim = document.getElementById("fim").value;
+let descricao = document.getElementById("descricao").value;
+
+let mensagem = "📋 NOVA SOLICITAÇÃO - ODJIM GO\n\n"
++ "Nome: " + nome + "\n"
++ "Telefone: " + telefone + "\n"
++ "Serviço: " + servico + "\n"
++ "Data início: " + inicio + "\n"
++ "Data fim: " + fim + "\n"
++ "Descrição: " + descricao;
+
+let url = "https://wa.me/244951945715?text=" + encodeURIComponent(mensagem);
+
+window.open(url,"_blank");
+
+}
+
+</script>
 
 <body>
 
