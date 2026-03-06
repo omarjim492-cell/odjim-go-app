@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>ODJIM GO</title>
 
@@ -12,8 +13,8 @@
 body{
 margin:0;
 font-family:Arial;
-background:#f2f2f2;
-padding-bottom:70px;
+background:#f4f6f9;
+padding-bottom:80px;
 }
 
 /* HEADER */
@@ -33,7 +34,7 @@ header p{
 color:#ddd;
 }
 
-/* SECTIONS */
+/* PÁGINAS */
 
 .page{
 display:none;
@@ -44,18 +45,14 @@ padding:20px;
 display:block;
 }
 
-/* CARDS */
+/* CARD */
 
 .card{
 background:white;
 padding:20px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+border-radius:14px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 margin-bottom:20px;
-}
-
-h2{
-text-align:center;
 }
 
 /* SERVIÇOS */
@@ -63,18 +60,18 @@ text-align:center;
 .servicos{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:10px;
+gap:12px;
 }
 
 .servico{
 padding:14px;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
 text-align:center;
 }
 
-.servico:nth-child(1){background:#cfe2ff}
-.servico:nth-child(2){background:#d1e7dd}
+.servico:nth-child(1){background:#d1e7dd}
+.servico:nth-child(2){background:#cfe2ff}
 .servico:nth-child(3){background:#fff3cd}
 .servico:nth-child(4){background:#e2e3e5}
 .servico:nth-child(5){background:#cff4fc}
@@ -83,6 +80,8 @@ text-align:center;
 .servico:nth-child(8){background:#d8f3dc}
 .servico:nth-child(9){background:#dee2ff}
 .servico:nth-child(10){background:#fcd5ce}
+.servico:nth-child(11){background:#f1f3f5}
+.servico:nth-child(12){background:#ffe5d9}
 
 /* FORMULÁRIO */
 
@@ -90,43 +89,61 @@ input,select,textarea{
 width:100%;
 padding:12px;
 margin:8px 0;
-border-radius:8px;
+border-radius:10px;
 border:1px solid #ccc;
+font-size:15px;
 }
 
 textarea{
-height:80px;
+height:90px;
 }
+
+/* BOTÃO */
 
 .btn{
 background:#0b2c5f;
 color:white;
-padding:14px;
+padding:15px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 width:100%;
 font-size:16px;
 }
 
-/* REDES */
+/* CONTACTOS */
+
+.redes a{
+text-decoration:none;
+}
 
 .redes button{
+
 width:100%;
 padding:14px;
-margin:6px 0;
+margin:8px 0;
 border:none;
-border-radius:10px;
-color:white;
+border-radius:30px;
 font-size:16px;
+color:white;
+cursor:pointer;
 }
 
 .whatsapp{background:#25D366}
-.facebook{background:#1877F2}
-.instagram{background:#E4405F}
-.tiktok{background:black}
-.ligar{background:#f4b400;color:black}
 
-/* MENU INFERIOR */
+.facebook{background:#1877F2}
+
+.instagram{
+background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4)
+}
+
+.tiktok{background:#000}
+
+.ligar{
+background:#f4b400;
+color:black;
+}
+
+/* MENU */
 
 .menu{
 position:fixed;
@@ -135,8 +152,8 @@ width:100%;
 background:white;
 display:flex;
 justify-content:space-around;
+padding:12px 0;
 box-shadow:0 -2px 10px rgba(0,0,0,0.2);
-padding:10px 0;
 }
 
 .menu button{
@@ -170,7 +187,7 @@ font-size:14px;
 <div class="servicos">
 
 <div class="servico">Informática</div>
-<div class="servico">Instalação software</div>
+<div class="servico">Instalação de software</div>
 <div class="servico">Marketing digital</div>
 <div class="servico">Consultoria</div>
 <div class="servico">Arrumação escritório</div>
@@ -178,10 +195,10 @@ font-size:14px;
 <div class="servico">Acabamentos civil</div>
 <div class="servico">Cozinhas</div>
 <div class="servico">Ar condicionado</div>
-<div class="servico">Câmeras</div>
+<div class="servico">Câmeras vigilância</div>
 <div class="servico">Confeitaria</div>
 <div class="servico">Baba / Lavadeira</div>
-<div class="servico">Móveis planejados</div>
+<div class="servico">Móveis Planejados</div>
 
 </div>
 
@@ -208,7 +225,7 @@ font-size:14px;
 <option>Instalação software</option>
 <option>Marketing digital</option>
 <option>Consultoria</option>
-<option>Móveis planejados</option>
+<option>Móveis Planejados</option>
 
 </select>
 
@@ -236,23 +253,59 @@ Enviar solicitação
 
 <div id="contactos" class="page">
 
-<div class="card">
+<div class="card redes">
 
 <h2>Contactos</h2>
 
 <a href="https://wa.me/244951945715">
-<button class="whatsapp">WhatsApp</button>
+
+<button class="whatsapp">
+
+WhatsApp
+
+</button>
+
 </a>
 
 <a href="tel:951945715">
-<button class="ligar">Ligar</button>
+
+<button class="ligar">
+
+Ligar
+
+</button>
+
 </a>
 
-<button class="ODJIM Solution">Facebook</button>
+<a href="https://facebook.com/odjimsolution">
 
-<button class="instagram">Instagram</button>
+<button class="facebook">
 
-<button class="tiktok">TikTok</button>
+Facebook
+
+</button>
+
+</a>
+
+<a href="https://instagram.com/odjimsolution">
+
+<button class="instagram">
+
+Instagram
+
+</button>
+
+</a>
+
+<a href="https://tiktok.com/@odjimsolution">
+
+<button class="tiktok">
+
+TikTok
+
+</button>
+
+</a>
 
 </div>
 
@@ -264,12 +317,12 @@ Enviar solicitação
 
 <div class="card">
 
-<h2>Sobre a Empresa</h2>
+<h2>Sobre</h2>
 
 <p>
 
 A ODJIM Solution oferece serviços profissionais em tecnologia,
-design, construção, organização e fabricação de móveis planejados.
+design, consultoria, organização, construção e móveis planejados.
 
 </p>
 
@@ -311,8 +364,6 @@ design, construção, organização e fabricação de móveis planejados.
 
 <script>
 
-/* NAVEGAÇÃO */
-
 function abrir(pagina){
 
 document.querySelectorAll(".page").forEach(p=>{
@@ -324,8 +375,6 @@ p.classList.remove("active")
 document.getElementById(pagina).classList.add("active")
 
 }
-
-/* ENVIAR WHATSAPP */
 
 function enviarPedido(){
 
@@ -353,4 +402,5 @@ window.open(url)
 </script>
 
 </body>
+
 </html>
