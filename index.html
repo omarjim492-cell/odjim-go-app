@@ -1,41 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ODJIM Solution</title>
+<title>ODJIM GO</title>
 
 <style>
 
 body{
-font-family: Arial;
 margin:0;
+font-family:Arial;
 background:#f2f2f2;
-color:#333;
+padding-bottom:70px;
 }
+
+/* HEADER */
 
 header{
 background:#0b2c5f;
 color:white;
-padding:30px;
 text-align:center;
+padding:25px;
 }
 
 header h1{
 margin:0;
-font-size:28px;
 }
 
 header p{
-margin-top:8px;
-font-size:16px;
 color:#ddd;
 }
 
-section{
+/* SECTIONS */
+
+.page{
+display:none;
 padding:20px;
 }
+
+.active{
+display:block;
+}
+
+/* CARDS */
 
 .card{
 background:white;
@@ -45,24 +54,35 @@ box-shadow:0 4px 10px rgba(0,0,0,0.1);
 margin-bottom:20px;
 }
 
+h2{
+text-align:center;
+}
+
+/* SERVIÇOS */
+
 .servicos{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:12px;
+gap:10px;
 }
 
 .servico{
-background:#e4e8ef;
-padding:15px;
+padding:14px;
 border-radius:10px;
-text-align:center;
 font-weight:bold;
+text-align:center;
 }
 
-h2{
-text-align:center;
-margin-bottom:20px;
-}
+.servico:nth-child(1){background:#cfe2ff}
+.servico:nth-child(2){background:#d1e7dd}
+.servico:nth-child(3){background:#fff3cd}
+.servico:nth-child(4){background:#e2e3e5}
+.servico:nth-child(5){background:#cff4fc}
+.servico:nth-child(6){background:#f8d7da}
+.servico:nth-child(7){background:#e7d8ff}
+.servico:nth-child(8){background:#d8f3dc}
+.servico:nth-child(9){background:#dee2ff}
+.servico:nth-child(10){background:#fcd5ce}
 
 /* FORMULÁRIO */
 
@@ -72,25 +92,23 @@ padding:12px;
 margin:8px 0;
 border-radius:8px;
 border:1px solid #ccc;
-font-size:15px;
 }
 
 textarea{
 height:80px;
 }
 
-.btn-enviar{
+.btn{
 background:#0b2c5f;
 color:white;
 padding:14px;
 border:none;
 border-radius:10px;
-font-size:16px;
 width:100%;
-margin-top:10px;
+font-size:16px;
 }
 
-/* CONTACTOS */
+/* REDES */
 
 .redes button{
 width:100%;
@@ -98,54 +116,37 @@ padding:14px;
 margin:6px 0;
 border:none;
 border-radius:10px;
-font-size:16px;
 color:white;
+font-size:16px;
 }
 
-.btn-whatsapp{
-background:#25D366;
+.whatsapp{background:#25D366}
+.facebook{background:#1877F2}
+.instagram{background:#E4405F}
+.tiktok{background:black}
+.ligar{background:#f4b400;color:black}
+
+/* MENU INFERIOR */
+
+.menu{
+position:fixed;
+bottom:0;
+width:100%;
+background:white;
+display:flex;
+justify-content:space-around;
+box-shadow:0 -2px 10px rgba(0,0,0,0.2);
+padding:10px 0;
 }
 
-.btn-facebook{
-background:#1877F2;
-}
-
-.btn-instagram{
-background:#E4405F;
-}
-
-.btn-tiktok{
-background:#000;
-}
-
-.btn-ligar{
-background:#f4b400;
-color:black;
-}
-
-/* CORES DOS SERVIÇOS */
-
-.servico:nth-child(1){background:#cfe2ff}
-.servico:nth-child(2){background:#d9fdd3}
-.servico:nth-child(3){background:#fff3cd}
-.servico:nth-child(4){background:#e2e3e5}
-.servico:nth-child(5){background:#d1e7dd}
-.servico:nth-child(6){background:#f8d7da}
-.servico:nth-child(7){background:#cff4fc}
-.servico:nth-child(8){background:#fef7e0}
-.servico:nth-child(9){background:#e7d8ff}
-.servico:nth-child(10){background:#fcd5ce}
-.servico:nth-child(11){background:#d8f3dc}
-.servico:nth-child(12){background:#dee2ff}
-
-footer{
-text-align:center;
-padding:20px;
+.menu button{
+background:none;
+border:none;
 font-size:14px;
-color:#777;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -158,7 +159,9 @@ color:#777;
 
 </header>
 
-<section>
+<!-- INICIO -->
+
+<div id="inicio" class="page active">
 
 <div class="card">
 
@@ -166,27 +169,29 @@ color:#777;
 
 <div class="servicos">
 
-<div class="servico">Informática e tecnologia</div>
-<div class="servico">Instalação de software</div>
-<div class="servico">Design e marketing digital</div>
+<div class="servico">Informática</div>
+<div class="servico">Instalação software</div>
+<div class="servico">Marketing digital</div>
 <div class="servico">Consultoria</div>
-<div class="servico">Arrumação de escritórios</div>
-<div class="servico">Arrumação de stocks</div>
+<div class="servico">Arrumação escritório</div>
+<div class="servico">Arrumação stock</div>
 <div class="servico">Acabamentos civil</div>
-<div class="servico">Personalização de cozinhas</div>
-<div class="servico">Manutenção de ar condicionado</div>
-<div class="servico">Instalação de câmeras</div>
+<div class="servico">Cozinhas</div>
+<div class="servico">Ar condicionado</div>
+<div class="servico">Câmeras</div>
 <div class="servico">Confeitaria</div>
 <div class="servico">Baba / Lavadeira</div>
-<div class="servico">Fabricação de móveis planejados</div>
+<div class="servico">Móveis planejados</div>
 
 </div>
 
 </div>
 
-</section>
+</div>
 
-<section>
+<!-- SOLICITAR -->
+
+<div id="solicitar" class="page">
 
 <div class="card">
 
@@ -199,31 +204,25 @@ color:#777;
 <select id="servico">
 
 <option>Escolher serviço</option>
-<option>Informática e tecnologia</option>
-<option>Instalação de software</option>
-<option>Design e marketing digital</option>
+<option>Informática</option>
+<option>Instalação software</option>
+<option>Marketing digital</option>
 <option>Consultoria</option>
-<option>Arrumação de escritórios</option>
-<option>Arrumação de stocks</option>
-<option>Acabamentos civil</option>
-<option>Personalização de cozinhas</option>
-<option>Manutenção de ar condicionado</option>
-<option>Instalação de câmeras</option>
-<option>Fabricação de móveis planejados</option>
+<option>Móveis planejados</option>
 
 </select>
 
-<label>Data de início</label>
+<label>Data início</label>
 
-<input id="inicio" type="date">
+<input id="inicioData" type="date">
 
-<label>Data de fim</label>
+<label>Data fim</label>
 
-<input id="fim" type="date">
+<input id="fimData" type="date">
 
 <textarea id="descricao" placeholder="Descreva o serviço"></textarea>
 
-<button class="btn-enviar" onclick="enviarPedido()">
+<button class="btn" onclick="enviarPedido()">
 
 Enviar solicitação
 
@@ -231,70 +230,123 @@ Enviar solicitação
 
 </div>
 
-</section>
+</div>
 
-<section>
+<!-- CONTACTOS -->
+
+<div id="contactos" class="page">
 
 <div class="card">
 
 <h2>Contactos</h2>
 
-<div class="redes">
-
-<a href="https://wa.me/244951945715" target="_blank">
-<button class="btn-whatsapp">WhatsApp</button>
+<a href="https://wa.me/244951945715">
+<button class="whatsapp">WhatsApp</button>
 </a>
 
 <a href="tel:951945715">
-<button class="btn-ligar">Ligar</button>
+<button class="ligar">Ligar</button>
 </a>
 
-<a href="https://facebook.com" target="_blank">
-<button class="btn-facebook">Facebook</button>
-</a>
+<button class="ODJIM Solution">Facebook</button>
 
-<a href="https://instagram.com" target="_blank">
-<button class="btn-instagram">Instagram</button>
-</a>
+<button class="instagram">Instagram</button>
 
-<a href="https://tiktok.com" target="_blank">
-<button class="btn-tiktok">TikTok</button>
-</a>
+<button class="tiktok">TikTok</button>
 
 </div>
 
 </div>
 
-</section>
+<!-- SOBRE -->
 
-<footer>
+<div id="sobre" class="page">
 
-ODJIM Solution • Luanda • Angola
+<div class="card">
 
-</footer>
+<h2>Sobre a Empresa</h2>
+
+<p>
+
+A ODJIM Solution oferece serviços profissionais em tecnologia,
+design, construção, organização e fabricação de móveis planejados.
+
+</p>
+
+<p>
+
+📍 Luanda - Angola
+
+</p>
+
+<p>
+
+📧 oj761722@gmail.com
+
+</p>
+
+<p>
+
+📞 951945715 / 946761722
+
+</p>
+
+</div>
+
+</div>
+
+<!-- MENU -->
+
+<div class="menu">
+
+<button onclick="abrir('inicio')">🏠 Início</button>
+
+<button onclick="abrir('solicitar')">📋 Solicitar</button>
+
+<button onclick="abrir('contactos')">📞 Contactos</button>
+
+<button onclick="abrir('sobre')">🏢 Sobre</button>
+
+</div>
 
 <script>
 
+/* NAVEGAÇÃO */
+
+function abrir(pagina){
+
+document.querySelectorAll(".page").forEach(p=>{
+
+p.classList.remove("active")
+
+})
+
+document.getElementById(pagina).classList.add("active")
+
+}
+
+/* ENVIAR WHATSAPP */
+
 function enviarPedido(){
 
-let nome = document.getElementById("nome").value;
-let telefone = document.getElementById("telefone").value;
-let servico = document.getElementById("servico").value;
-let inicio = document.getElementById("inicio").value;
-let fim = document.getElementById("fim").value;
-let descricao = document.getElementById("descricao").value;
+let nome=document.getElementById("nome").value
+let telefone=document.getElementById("telefone").value
+let servico=document.getElementById("servico").value
+let inicio=document.getElementById("inicioData").value
+let fim=document.getElementById("fimData").value
+let descricao=document.getElementById("descricao").value
 
-let mensagem = "📋 NOVA SOLICITAÇÃO - ODJIM GO\n\n"
-+ "Nome: " + nome + "\n"
-+ "Telefone: " + telefone + "\n"
-+ "Serviço: " + servico + "\n"
-+ "Data início: " + inicio + "\n"
-+ "Data fim: " + fim + "\n"
-+ "Descrição: " + descricao;
+let msg="📋 Solicitação ODJIM GO\n\n"
++"Nome: "+nome+"\n"
++"Telefone: "+telefone+"\n"
++"Serviço: "+servico+"\n"
++"Início: "+inicio+"\n"
++"Fim: "+fim+"\n"
++"Descrição: "+descricao
 
-let url = "https://wa.me/244951945715?text=" + encodeURIComponent(mensagem);
+let url="https://wa.me/244951945715?text="+encodeURIComponent(msg)
 
-window.open(url,"_blank");
+window.open(url)
 
 }
 
