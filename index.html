@@ -299,37 +299,275 @@ let tecnicos = [
 
 tecnicos.forEach(function(pos){
 
-L.marker(pos).addTo(mapa)
-.bindPopup("🔧 Técnico disponível")
+<!DOCTYPE html>
+<html lang="pt">
+<head>
 
-})
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>ODJIM Solution</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f4f4;
 }
 
-function pedirServicoMapa(){
-
-alert("Solicitação enviada! Um técnico irá contactar.")
-
+header{
+background:#0b3d91;
+color:white;
+padding:20px;
+text-align:center;
 }
 
-function mostrar(secao){
-
-document.getElementById("inicio").style.display="none";
-document.getElementById("servicos").style.display="none";
-document.getElementById("solicitar").style.display="none";
-document.getElementById("contacto").style.display="none";
-
-document.getElementById(secao).style.display="block";
-
+header h1{
+margin:0;
 }
 
-function enviar(){
-
-alert("Solicitação enviada com sucesso!");
-
+.menu{
+display:flex;
+justify-content:space-around;
+background:#1e88e5;
+padding:10px;
+flex-wrap:wrap;
 }
 
-</script>
+.menu button{
+background:none;
+border:none;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.section{
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+margin-bottom:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.btn{
+background:#2e7d32;
+color:white;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+input, textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+.social{
+display:flex;
+gap:15px;
+margin-top:10px;
+}
+
+.social a{
+font-size:25px;
+color:white;
+background:#444;
+padding:10px;
+border-radius:50%;
+}
+
+#mapa{
+height:350px;
+border-radius:12px;
+}
+
+footer{
+background:#333;
+color:white;
+text-align:center;
+padding:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>ODJIM Solution</h1>
+
+<p>Serviços rápidos, soluções brilhantes!</p>
+
+</header>
+
+<div class="menu">
+
+<button onclick="mostrar('inicio')">🏠 Início</button>
+<button onclick="mostrar('servicos')">🛠 Serviços</button>
+<button onclick="mostrar('solicitar')">📋 Solicitar</button>
+<button onclick="mostrar('mapaSection')">📍 Encontrar técnico</button>
+<button onclick="mostrar('contacto')">📞 Contactos</button>
+
+</div>
+
+<div class="section" id="inicio">
+
+<div class="card">
+
+<h2>Bem-vindo ao ODJIM Solution</h2>
+
+<p>Aplicativo profissional de prestação de serviços em Luanda.</p>
+
+</div>
+
+</div>
+
+<div class="section" id="servicos" style="display:none">
+
+<div class="card">
+
+<h2>Serviços</h2>
+
+<ul>
+
+<li>Informática e tecnologia</li>
+<li>Instalação de software</li>
+<li>Design e marketing digital</li>
+<li>Consultoria</li>
+<li>Arrumação de escritórios</li>
+<li>Arrumação de stocks</li>
+<li>Acabamentos civil</li>
+<li>Personalização de cozinhas</li>
+<li>Montagem de ar condicionado</li>
+<li>Montagem de câmeras de vigilância</li>
+<li>Confeiteiros por trabalho</li>
+<li>Baba, lavadeira, arrumadeira</li>
+<li>Fabricação de móveis planejados</li>
+<li>Outros serviços sob pedido</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section" id="solicitar" style="display:none">
+
+<div class="card">
+
+<h2>Solicitar Serviço</h2>
+
+<form>
+
+<label>Nome</label>
+<input type="text">
+
+<label>Telefone</label>
+<input type="text">
+
+<label>Serviço</label>
+<input type="text">
+
+<label>Data início</label>
+<input type="date">
+
+<label>Data fim</label>
+<input type="date">
+
+<label>Descrição</label>
+<textarea></textarea>
+
+<button class="btn" type="button" onclick="enviar()">Enviar Solicitação</button>
+
+</form>
+
+</div>
+
+</div>
+
+<div class="section" id="mapaSection" style="display:none">
+
+<div class="card">
+
+<h2>📍 Encontrar técnico próximo</h2>
+
+<div id="mapa"></div>
+
+<br>
+
+<button class="btn" onclick="obterLocalizacaoMapa()">
+📍 Mostrar minha localização
+</button>
+
+<button class="btn" onclick="pedirServicoMapa()">
+🚀 Pedir técnico agora
+</button>
+
+</div>
+
+</div>
+
+<div class="section" id="contacto" style="display:none">
+
+<div class="card">
+
+<h2>Contactos</h2>
+
+<p>📞 951945715 / 946761722</p>
+
+<p>📧 oj761722@gmail.com</p>
+
+<div class="social">
+
+<a href="https://www.facebook.com/profile.php?id=61571471985536">
+<i class="fab fa-facebook"></i>
+</a>
+
+<a href="https://www.instagram.com/omard780">
+<i class="fab fa-instagram"></i>
+</a>
+
+<a href="https://tiktok.com/@omarj856">
+<i class="fab fa-tiktok"></i>
+</a>
+
+<a href="https://wa.me/244951945715">
+<i class="fab fa-whatsapp"></i>
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+
+ODJIM Solution © 2026
+
+</footer>
+
+<script>
+
 let mapa
 let marcadorCliente
 
@@ -372,9 +610,9 @@ function criarTecnicos(){
 
 let tecnicos = [
 
-{-8.8400,13.2300},
-{-8.8350,13.2400},
-{-8.8300,13.2350}
+[-8.8400,13.2300],
+[-8.8350,13.2400],
+[-8.8300,13.2350]
 
 ]
 
@@ -393,6 +631,35 @@ alert("Solicitação enviada! Um técnico irá contactar.")
 
 }
 
-</body>
+function mostrar(secao){
 
+document.getElementById("inicio").style.display="none";
+document.getElementById("servicos").style.display="none";
+document.getElementById("solicitar").style.display="none";
+document.getElementById("contacto").style.display="none";
+document.getElementById("mapaSection").style.display="none";
+
+document.getElementById(secao).style.display="block";
+
+if(secao === "mapaSection"){
+
+setTimeout(function(){
+mapa.invalidateSize()
+},200)
+
+}
+
+}
+
+function enviar(){
+
+alert("Solicitação enviada com sucesso!")
+
+}
+
+window.onload = iniciarMapa
+
+</script>
+
+</body>
 </html>
