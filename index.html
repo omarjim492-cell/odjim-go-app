@@ -62,6 +62,54 @@ implica<!DOCTYPE html>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
+.menu-btn{
+position:fixed;
+top:15px;
+left:15px;
+font-size:25px;
+background:#0b3d91;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+z-index:1000;
+}
+
+.menu-lateral{
+
+position:fixed;
+top:0;
+left:-250px;
+width:250px;
+height:100%;
+background:#1e88e5;
+padding:20px;
+transition:0.3s;
+z-index:999;
+color:white;
+
+}
+
+.menu-lateral h2{
+
+margin-top:20px;
+
+}
+
+.menu-lateral button{
+
+display:block;
+width:100%;
+margin:15px 0;
+padding:10px;
+border:none;
+background:white;
+color:#1e88e5;
+font-size:16px;
+border-radius:8px;
+cursor:pointer;
+
+}
 
 body{
 font-family:Arial;
