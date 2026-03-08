@@ -16,6 +16,19 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
+
+.whatsapp-btn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:white;
+font-size:28px;
+padding:15px;
+border-radius:50%;
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+z-index:999;
+}
   
 #splash{
 position:fixed;
@@ -232,6 +245,12 @@ padding:15px;
 </style>
 
 </head>
+
+<a href="https://wa.me/244951945715" class="whatsapp-btn">
+
+<i class="fab fa-whatsapp"></i>
+
+</a>
 
 <body>
   
@@ -503,7 +522,30 @@ document.getElementById("menuLateral").style.left="0"
 
 }
 
-function fecharMenu(){
+function iniciarMapa(){
+
+mapa = L.map('mapa').setView([-8.8383,13.2344],13)
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(mapa)
+
+let tecnicos = [
+
+[-8.8400,13.2300],
+[-8.8350,13.2400],
+[-8.8300,13.2350]
+
+]
+
+tecnicos.forEach(function(pos){
+
+L.marker(pos).addTo(mapa)
+.bindPopup("🔧 Técnico disponível")
+
+})
+
+}
 
 document.getElementById("menuLateral").style.left="-250px"
 
@@ -512,6 +554,12 @@ document.getElementById("menuLateral").style.left="-250px"
 window.onload=iniciarMapa
 
 </script>
+
+setTimeout(function(){
+
+document.getElementById("splash").style.display="none"
+
+},3000)
 
 </body>
 </html>
