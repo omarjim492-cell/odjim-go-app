@@ -136,24 +136,26 @@
 <form>
 
 <label>Nome</label>
-<input type="text">
+<input type="text" id="nome">
 
 <label>Telefone</label>
-<input type="text">
+<input type="text" id="telefone">
 
 <label>Serviço</label>
-<input type="text">
+<input type="text" id="servico">
 
 <label>Data início</label>
-<input type="date">
+<input type="date" id="dataInicio">
 
 <label>Data fim</label>
-<input type="date">
+<input type="date" id="dataFim">
 
 <label>Descrição</label>
-<textarea></textarea>
+<textarea id="descricao"></textarea>
 
-<button class="btn" type="button" onclick="enviar()">Enviar Solicitação</button>
+<button class="btn" type="button" onclick="enviarPedido()">
+Enviar Solicitação
+</button>
 
 </form>
 
@@ -203,6 +205,32 @@ ODJIM Solution © 2026
 </footer>
 
 <script>
+
+function enviarPedido(){
+
+let nome = document.getElementById("nome").value
+let telefone = document.getElementById("telefone").value
+let servico = document.getElementById("servico").value
+let dataInicio = document.getElementById("dataInicio").value
+let dataFim = document.getElementById("dataFim").value
+let descricao = document.getElementById("descricao").value
+
+let mensagem =
+"📋 NOVO PEDIDO ODJIM SOLUTION %0A%0A"+
+"👤 Nome: "+nome+"%0A"+
+"📞 Telefone: "+telefone+"%0A"+
+"🛠 Serviço: "+servico+"%0A"+
+"📅 Início: "+dataInicio+"%0A"+
+"📅 Fim: "+dataFim+"%0A"+
+"📝 Descrição: "+descricao
+
+let numero = "244951945715"
+
+let url = "https://wa.me/"+numero+"?text="+mensagem
+
+window.open(url,"_blank")
+
+  }
 
 let mapa
 
