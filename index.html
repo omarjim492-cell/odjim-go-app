@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+<img src="logo_odjim1.png" class="logo-app">
+  
+<img src="logo_odjim2.png" class="logo-icon">
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,9 +18,73 @@
 <style>
 
 body{
-font-family:Arial;
+font-family:Arial, sans-serif;
 margin:0;
-background:#f4f4f4;
+background:linear-gradient(135deg,#0b3d91,#1e88e5);
+min-height:100vh;
+color:#333;
+}
+
+.logo-topo{
+width:120px;
+display:block;
+margin:auto;
+margin-bottom:10px;
+}
+
+.logo-app{
+width:90%;
+max-width:350px;
+display:block;
+margin:auto;
+margin-top:15px;
+}
+
+.logo-icon{
+width:120px;
+display:block;
+margin:auto;
+margin-top:10px;
+}
+
+.btn{
+background:linear-gradient(45deg,#ff9800,#ff5722);
+color:white;
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+width:100%;
+margin-top:10px;
+transition:0.3s;
+}
+
+.btn:hover{
+transform:scale(1.05);
+}
+
+.botoes-mapa{
+display:flex;
+flex-direction:column;
+gap:10px;
+margin-top:15px;
+}
+
+.card{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:15px;
+box-shadow:0 6px 15px rgba(0,0,0,0.2);
+}
+
+.menu{
+display:flex;
+justify-content:space-around;
+background:linear-gradient(90deg,#1565c0,#1e88e5);
+padding:10px;
+flex-wrap:wrap;
 }
 
 header{
@@ -188,6 +255,17 @@ padding:15px;
 <p>Aplicativo profissional de prestação de serviços em Luanda.</p>
 
 <img class="imagem-servico" src="https://images.unsplash.com/photo-1581091215367-59ab6b6f7b6d">
+
+</div>
+<div class="botoes-mapa">
+
+<button class="btn" onclick="obterLocalizacaoMapa()">
+📍 Mostrar minha localização
+</button>
+
+<button class="btn" onclick="pedirServicoMapa()">
+🚀 Pedir técnico agora
+</button>
 
 </div>
 
