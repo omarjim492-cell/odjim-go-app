@@ -208,12 +208,19 @@ ODJIM Solution © 2026
 
 function enviarPedido(){
 
+navigator.geolocation.getCurrentPosition(function(pos){
+
+let lat = pos.coords.latitude
+let lon = pos.coords.longitude
+
 let nome = document.getElementById("nome").value
 let telefone = document.getElementById("telefone").value
 let servico = document.getElementById("servico").value
 let dataInicio = document.getElementById("dataInicio").value
 let dataFim = document.getElementById("dataFim").value
 let descricao = document.getElementById("descricao").value
+
+let mapa = "https://maps.google.com/?q="+lat+","+lon
 
 let mensagem =
 "📋 NOVO PEDIDO ODJIM SOLUTION %0A%0A"+
@@ -222,13 +229,16 @@ let mensagem =
 "🛠 Serviço: "+servico+"%0A"+
 "📅 Início: "+dataInicio+"%0A"+
 "📅 Fim: "+dataFim+"%0A"+
-"📝 Descrição: "+descricao
+"📝 Descrição: "+descricao+"%0A%0A"+
+"📍 Localização do cliente:%0A"+mapa
 
 let numero = "244951945715"
 
 let url = "https://wa.me/"+numero+"?text="+mensagem
 
 window.open(url,"_blank")
+
+})
 
   }
 
