@@ -9,111 +9,207 @@
 <title>ODJIM Solution</title>
 
 <meta name="theme-color" content="#0b3d91">
-
 <link rel="manifest" href="manifest.json">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
 
-/* TODO O TEU CSS PERMANECE AQUI */
-
-</style>
-
-</head>
-  
-<body{
+body{
 font-family:Arial, sans-serif;
 margin:0;
 background:linear-gradient(135deg,#0b3d91,#1e88e5);
 min-height:100vh;
-color:#333;
 }
 
-<!-- BOTÃO WHATSAPP -->
+header{
+text-align:center;
+color:white;
+padding:20px;
+}
 
-<a href="https://wa.me/244951945715" class="whatsapp-btn">
-<i class="fab fa-whatsapp"></i>
-</a>
-<btn{
+.logo-topo{
+width:120px;
+}
+
+.menu-btn{
+position:fixed;
+top:15px;
+left:15px;
+font-size:25px;
+background:#0b3d91;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+z-index:1000;
+}
+
+.menu-lateral{
+position:fixed;
+top:0;
+left:-250px;
+width:250px;
+height:100%;
+background:#1e88e5;
+padding:20px;
+transition:0.3s;
+z-index:999;
+color:white;
+}
+
+.menu-lateral button{
+display:block;
+width:100%;
+margin:10px 0;
+padding:10px;
+border:none;
+background:white;
+color:#1e88e5;
+border-radius:8px;
+}
+
+.section{
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 6px 15px rgba(0,0,0,0.2);
+}
+
+.btn{
 background:linear-gradient(45deg,#ff9800,#ff5722);
 color:white;
 padding:14px;
 border:none;
-border-radius:12px;
-cursor:pointer;
+border-radius:10px;
 font-weight:bold;
 width:100%;
 margin-top:10px;
-font-size:16px;
-box-shadow:0 4px 10px rgba(0,0,0,0.3);
-transition:0.3s;
+cursor:pointer;
 }
 
 .btn:hover{
 transform:scale(1.05);
 }
-  
-<!-- SPLASH SCREEN -->
+
+input, textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:10px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+#mapa{
+height:350px;
+border-radius:10px;
+}
+
+.whatsapp-btn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:white;
+font-size:28px;
+padding:15px;
+border-radius:50%;
+}
+
+#splash{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0b3d91;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+color:white;
+z-index:9999;
+}
+
+.splash-logo{
+width:150px;
+margin-bottom:20px;
+}
+
+footer{
+background:#333;
+color:white;
+text-align:center;
+padding:15px;
+margin-top:30px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<a href="https://wa.me/244951945715" class="whatsapp-btn">
+<i class="fab fa-whatsapp"></i>
+</a>
 
 <div id="splash">
-
-<img src="logo_odjim1-192png.jpeg" class="splash-logo">
-
+<img src="logo_odjim1.png" class="splash-logo">
 <h2>ODJIM Solution</h2>
-
 <p>Carregando serviços...</p>
-
 </div>
-
-<!-- MENU -->
 
 <button class="menu-btn" onclick="abrirMenu()">☰</button>
 
 <div id="menuLateral" class="menu-lateral">
-  
-<h1>ODJIM Solution</h1>
 
-<p>Serviços rápidos, soluções brilhantes!</p>
-  
+<h2>ODJIM Solution</h2>
+
 <button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
 <button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
 <button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar</button>
-<button onclick="mostrar('mapaSection'); fecharMenu()">📍 Encontrar técnico</button>
+<button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
 <button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
 
 </div>
 
 <header>
 
-<img src="logo_odjim1-192png.jpeg" class="logo-topo">
+<img src="logo_odjim1.png" class="logo-topo">
+
+<h1>ODJIM Solution</h1>
+<p>Serviços rápidos, soluções brilhantes</p>
 
 </header>
-
-</div>
-
-<!-- INÍCIO -->
 
 <div class="section" id="inicio">
 
 <div class="card">
 
-<h2>Bem-vindo ao ODJIM Solution</h2>
+<h2>Peça um serviço em segundos</h2>
 
-<p> Contacta-nos com apenas um click. (Aplicativo profissional de prestação de serviços em Luanda).</p>
+<p>Encontre técnicos próximos e solicite assistência em Luanda.</p>
 
-<img src="logo_odjim1.png" class="logo-app">
-<img src="logo_odjim2.png" class="logo-icon">
+<button class="btn" onclick="mostrar('solicitar')">
+🚀 Pedir Serviço
+</button>
+
+<button class="btn" onclick="mostrar('mapaSection')">
+📍 Ver técnicos próximos
+</button>
 
 </div>
 
 </div>
-
-<!-- SERVIÇOS -->
 
 <div class="section" id="servicos" style="display:none">
 
@@ -124,31 +220,23 @@ transform:scale(1.05);
 <ul>
 <li>Informática e tecnologia</li>
 <li>Instalação de software</li>
-<li>Design e marketing digital</li>
+<li>Marketing digital</li>
 <li>Consultoria</li>
-<li>Arrumação de escritórios</li>
 <li>Acabamentos civil</li>
 <li>Montagem de ar condicionado</li>
-<li>Montagem de câmeras de vigilância</li>
-<li>Fabricação de móveis planejados</li>
-<li>Outros serviços sob pedido</li>
+<li>Câmeras de vigilância</li>
+<li>Fabricação de móveis</li>
 </ul>
 
-<img class="imagem-servico" src="https://images.unsplash.com/photo-1581092335397-9583eb92d232">
-
 </div>
 
 </div>
-
-<!-- SOLICITAR -->
 
 <div class="section" id="solicitar" style="display:none">
 
 <div class="card">
 
 <h2>Solicitar Serviço</h2>
-
-<form>
 
 <label>Nome</label>
 <input type="text" id="nome">
@@ -159,46 +247,36 @@ transform:scale(1.05);
 <label>Serviço</label>
 <input type="text" id="servico">
 
-<label>Data início</label>
-<input type="date" id="dataInicio">
-
-<label>Data fim</label>
-<input type="date" id="dataFim">
-
 <label>Descrição</label>
 <textarea id="descricao"></textarea>
 
-<button class="btn" type="button" onclick="enviarPedido()">
+<button class="btn" onclick="enviarPedido()">
 Enviar Solicitação
 </button>
 
-</form>
-
 </div>
 
 </div>
-
-<!-- MAPA -->
 
 <div class="section" id="mapaSection" style="display:none">
 
 <div class="card">
 
-<h2>📍 Encontrar técnico próximo</h2>
+<h2>📍 Técnicos próximos</h2>
 
 <div id="mapa"></div>
 
-<br>
+<button class="btn" onclick="obterLocalizacaoMapa()">
+📍 Mostrar minha localização
+</button>
 
-<button class="btn" onclick="obterLocalizacaoMapa()">📍 Mostrar minha localização</button>
-
-<button class="btn" onclick="pedirServicoMapa()">🚀 Pedir técnico agora</button>
+<button class="btn" onclick="pedirServicoMapa()">
+🚀 Solicitar técnico
+</button>
 
 </div>
 
 </div>
-
-<!-- CONTACTO -->
 
 <div class="section" id="contacto" style="display:none">
 
@@ -206,7 +284,7 @@ Enviar Solicitação
 
 <h2>Contactos</h2>
 
-<p>📞 951945715 / 946761722</p>
+<p>📞 951945715</p>
 <p>📧 oj761722@gmail.com</p>
 
 </div>
@@ -221,42 +299,6 @@ ODJIM Solution © 2026
 
 <script>
 
-function enviarPedido(){
-
-navigator.geolocation.getCurrentPosition(function(pos){
-
-let lat = pos.coords.latitude
-let lon = pos.coords.longitude
-
-let nome = document.getElementById("nome").value
-let telefone = document.getElementById("telefone").value
-let servico = document.getElementById("servico").value
-let dataInicio = document.getElementById("dataInicio").value
-let dataFim = document.getElementById("dataFim").value
-let descricao = document.getElementById("descricao").value
-
-let mapa = "https://maps.google.com/?q="+lat+","+lon
-
-let mensagem =
-"📋 NOVO PEDIDO ODJIM SOLUTION %0A%0A"+
-"👤 Nome: "+nome+"%0A"+
-"📞 Telefone: "+telefone+"%0A"+
-"🛠 Serviço: "+servico+"%0A"+
-"📅 Início: "+dataInicio+"%0A"+
-"📅 Fim: "+dataFim+"%0A"+
-"📝 Descrição: "+descricao+"%0A%0A"+
-"📍 Localização do cliente:%0A"+mapa
-
-let numero = "244951945715"
-
-let url = "https://wa.me/"+numero+"?text="+mensagem
-
-window.open(url,"_blank")
-
-})
-
-  }
-
 let mapa
 
 function iniciarMapa(){
@@ -268,11 +310,9 @@ maxZoom:19
 }).addTo(mapa)
 
 let tecnicos = [
-
 [-8.8400,13.2300],
 [-8.8350,13.2400],
 [-8.8300,13.2350]
-
 ]
 
 tecnicos.forEach(function(pos){
@@ -301,10 +341,38 @@ L.marker([lat,lon]).addTo(mapa)
 
 }
 
+function enviarPedido(){
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+let lat = pos.coords.latitude
+let lon = pos.coords.longitude
+
+let nome=document.getElementById("nome").value
+let telefone=document.getElementById("telefone").value
+let servico=document.getElementById("servico").value
+let descricao=document.getElementById("descricao").value
+
+let mapaLink="https://maps.google.com/?q="+lat+","+lon
+
+let mensagem=
+"📋 NOVO PEDIDO ODJIM SOLUTION %0A%0A"+
+"👤 Nome: "+nome+"%0A"+
+"📞 Telefone: "+telefone+"%0A"+
+"🛠 Serviço: "+servico+"%0A"+
+"📝 Descrição: "+descricao+"%0A%0A"+
+"📍 Localização:%0A"+mapaLink
+
+let url="https://wa.me/244951945715?text="+mensagem
+
+window.open(url,"_blank")
+
+})
+
+}
+
 function pedirServicoMapa(){
-
 alert("Solicitação enviada! Um técnico irá contactar.")
-
 }
 
 function mostrar(secao){
@@ -312,9 +380,7 @@ function mostrar(secao){
 let secoes=["inicio","servicos","solicitar","mapaSection","contacto"]
 
 secoes.forEach(function(s){
-
 document.getElementById(s).style.display="none"
-
 })
 
 document.getElementById(secao).style.display="block"
@@ -322,39 +388,20 @@ document.getElementById(secao).style.display="block"
 }
 
 function abrirMenu(){
-
 document.getElementById("menuLateral").style.left="0"
-
 }
 
 function fecharMenu(){
-
 document.getElementById("menuLateral").style.left="-250px"
-
-}
-
-function enviar(){
-
-alert("Solicitação enviada com sucesso!")
-
 }
 
 window.onload=iniciarMapa
 
 setTimeout(function(){
-
 document.getElementById("splash").style.display="none"
-
-},3000)
+},2500)
 
 </script>
 
-<body{
-font-family:Arial, sans-serif;
-margin:0;
-background:linear-gradient(135deg,#0b3d91,#1e88e5);
-min-height:100vh;
-color:#333;
-}
-
+</body>
 </html>
