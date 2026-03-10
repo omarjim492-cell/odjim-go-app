@@ -445,7 +445,44 @@ function fecharInquerito(){document.getElementById("inqueritoBox").style.display
 
 function enviarInquerito(){
 alert("Obrigado pela sua avaliação ⭐")
-fecharInquerito()
+fecharInquerito() 
+}
+  
+let tecnicoOnline = false
+let marcadorTecnico = null
+
+function ficarOnline(){
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+let lat = pos.coords.latitude
+let lon = pos.coords.longitude
+let nome = document.getElementById("nomeTecnico").value
+
+if(nome==""){
+alert("Digite o nome do técnico")
+return
+}
+
+tecnicoOnline = true
+
+document.getElementById("estadoTecnico").innerHTML="Estado: Online 🟢"
+
+marcadorTecnico = L.marker([lat,lon]).addTo(mapa)
+.bindPopup("🔧 Técnico: "+nome)
+
+})
+
+}
+
+function ficarOffline(){
+
+tecnicoOnline=false
+
+document.getElementById("estadoTecnico").innerHTML="Estado: Offline 🔴"
+
+if(marcadorTecnico){
+mapa.removeLayer(marcadorTecnico)
 }
 
 window.onload=iniciarMapa
