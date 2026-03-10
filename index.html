@@ -372,7 +372,13 @@ L.marker([lat,lon]).addTo(mapa)
 
 }
 
-function enviarPedido(){
+function enviarPedido(guardarHistorico({
+nome:nome,
+telefone:telefone,
+servico:servico,
+descricao:descricao,
+data:new Date().toLocaleString()
+})){
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
@@ -453,6 +459,16 @@ window.onload=iniciarMapa
 setTimeout(function(){
 document.getElementById("splash").style.display="none"
 },2500)
+  
+function guardarHistorico(servico){
+
+let historico = JSON.parse(localStorage.getItem("historico")) || []
+
+historico.push(servico)
+
+localStorage.setItem("historico",JSON.stringify(historico))
+
+}
 
 </script>
 
