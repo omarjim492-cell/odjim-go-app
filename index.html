@@ -341,15 +341,15 @@ maxZoom:19
 }).addTo(mapa)
 
 let tecnicos = [
-[-8.8400,13.2300],
-[-8.8350,13.2400],
-[-8.8300,13.2350]
+{nome:"Carlos – Electricista",lat:-8.8400,lon:13.2300},
+{nome:"Juaril Kassombe – Informática",lat:-8.8350,lon:13.2400},
+{nome:"Paulo – Ar Condicionado",lat:-8.8300,lon:13.2350}
 ]
 
-tecnicos.forEach(function(pos){
+tecnicos.forEach(function(t){
 
-L.marker(pos).addTo(mapa)
-.bindPopup("🔧 Técnico disponível")
+L.marker([t.lat,t.lon]).addTo(mapa)
+.bindPopup("🔧 "+t.nome)
 
 })
 
