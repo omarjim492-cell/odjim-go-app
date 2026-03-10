@@ -95,10 +95,6 @@ margin-top:10px;
 cursor:pointer;
 }
 
-.btn:hover{
-transform:scale(1.05);
-}
-
 input, textarea{
 width:100%;
 padding:10px;
@@ -179,10 +175,9 @@ margin-top:30px;
 <button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar</button>
 <button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
 <button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
+<button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
 
-<button class="btn" onclick="abrirInquerito()">
-⭐ Inquérito de Satisfação
-</button>
+<button class="btn" onclick="abrirInquerito()">⭐ Inquérito de Satisfação</button>
 
 </div>
 
@@ -203,13 +198,8 @@ margin-top:30px;
 
 <p>Encontre técnicos próximos e solicite assistência em Luanda.</p>
 
-<button class="btn" onclick="mostrar('solicitar')">
-🚀 Pedir Serviço
-</button>
-
-<button class="btn" onclick="mostrar('mapaSection')">
-📍 Ver técnicos próximos
-</button>
+<button class="btn" onclick="mostrar('solicitar')">🚀 Pedir Serviço</button>
+<button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos próximos</button>
 
 </div>
 
@@ -254,9 +244,7 @@ margin-top:30px;
 <label>Descrição</label>
 <textarea id="descricao"></textarea>
 
-<button class="btn" onclick="enviarPedido()">
-Enviar Solicitação
-</button>
+<button class="btn" onclick="enviarPedido()">Enviar Solicitação</button>
 
 </div>
 
@@ -270,13 +258,22 @@ Enviar Solicitação
 
 <div id="mapa"></div>
 
-<button class="btn" onclick="obterLocalizacaoMapa()">
-📍 Mostrar minha localização
-</button>
+<button class="btn" onclick="obterLocalizacaoMapa()">📍 Mostrar minha localização</button>
+<button class="btn" onclick="pedirServicoMapa()">🚀 Solicitar técnico</button>
 
-<button class="btn" onclick="pedirServicoMapa()">
-🚀 Solicitar técnico
-</button>
+</div>
+
+</div>
+
+<div class="section" id="historico" style="display:none">
+
+<div class="card">
+
+<h2>📜 Histórico de Serviços</h2>
+
+<div id="listaHistorico"></div>
+
+<button class="btn" onclick="carregarHistorico()">Atualizar</button>
 
 </div>
 
@@ -288,7 +285,7 @@ Enviar Solicitação
 
 <h2>Contactos</h2>
 
-<p>📞 951945715/946761722</p>
+<p>📞 951945715 / 946761722</p>
 <p>📧 oj761722@gmail.com</p>
 
 </div>
@@ -296,18 +293,12 @@ Enviar Solicitação
 </div>
 
 <footer>
-
 ODJIM Solution © 2026
-
 </footer>
 
-<!-- INQUÉRITO DE SATISFAÇÃO -->
+<div id="inqueritoBox" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:white; padding:20px; box-shadow:0 -2px 10px rgba(0,0,0,0.2);">
 
-<div id="inqueritoBox" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:white; padding:20px; box-shadow:0 -2px 10px rgba(0,0,0,0.2); z-index:9999;">
-
-<h3>⭐ Avalie o Serviço ODJIM Solution</h3>
-
-<p>Como foi a sua experiência?</p>
+<h3>⭐ Avalie o Serviço</h3>
 
 <select id="avaliacao">
 <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
@@ -317,11 +308,7 @@ ODJIM Solution © 2026
 <option value="1">⭐ Ruim</option>
 </select>
 
-<br><br>
-
-<textarea id="comentario" placeholder="Deixe um comentário..." style="width:100%; height:80px;"></textarea>
-
-<br><br>
+<textarea id="comentario" placeholder="Comentário"></textarea>
 
 <button onclick="enviarInquerito()">Enviar</button>
 <button onclick="fecharInquerito()">Fechar</button>
@@ -336,21 +323,16 @@ function iniciarMapa(){
 
 mapa = L.map('mapa').setView([-8.8383,13.2344],13)
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-maxZoom:19
-}).addTo(mapa)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa)
 
-let tecnicos = [
+let tecnicos=[
 {nome:"Carlos – Electricista",lat:-8.8400,lon:13.2300},
 {nome:"Juaril Kassombe – Informática",lat:-8.8350,lon:13.2400},
 {nome:"Paulo – Ar Condicionado",lat:-8.8300,lon:13.2350}
 ]
 
 tecnicos.forEach(function(t){
-
-L.marker([t.lat,t.lon]).addTo(mapa)
-.bindPopup("🔧 "+t.nome)
-
+L.marker([t.lat,t.lon]).addTo(mapa).bindPopup("🔧 "+t.nome)
 })
 
 }
@@ -359,99 +341,89 @@ function obterLocalizacaoMapa(){
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
-let lat = pos.coords.latitude
-let lon = pos.coords.longitude
+let lat=pos.coords.latitude
+let lon=pos.coords.longitude
 
 mapa.setView([lat,lon],16)
 
-L.marker([lat,lon]).addTo(mapa)
-.bindPopup("📍 Você está aqui")
-.openPopup()
+L.marker([lat,lon]).addTo(mapa).bindPopup("📍 Você está aqui").openPopup()
 
 })
 
 }
 
-function enviarPedido(guardarHistorico({
-nome:nome,
-telefone:telefone,
-servico:servico,
-descricao:descricao,
-data:new Date().toLocaleString()
-})){
-
-navigator.geolocation.getCurrentPosition(function(pos){
-
-let lat = pos.coords.latitude
-let lon = pos.coords.longitude
+function enviarPedido(){
 
 let nome=document.getElementById("nome").value
 let telefone=document.getElementById("telefone").value
 let servico=document.getElementById("servico").value
 let descricao=document.getElementById("descricao").value
 
+guardarHistorico({nome,telefone,servico,descricao,data:new Date().toLocaleString()})
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+let lat=pos.coords.latitude
+let lon=pos.coords.longitude
+
 let mapaLink="https://maps.google.com/?q="+lat+","+lon
 
-let mensagem=
-"📋 NOVO PEDIDO ODJIM SOLUTION %0A%0A"+
-"👤 Nome: "+nome+"%0A"+
-"📞 Telefone: "+telefone+"%0A"+
-"🛠 Serviço: "+servico+"%0A"+
-"📝 Descrição: "+descricao+"%0A%0A"+
-"📍 Localização:%0A"+mapaLink
+let mensagem="📋 NOVO PEDIDO ODJIM SOLUTION %0A%0A"+
+"👤 Nome:"+nome+"%0A"+
+"📞 Telefone:"+telefone+"%0A"+
+"🛠 Serviço:"+servico+"%0A"+
+"📝 Descrição:"+descricao+"%0A"+
+"📍 Localização:"+mapaLink
 
-let url="https://wa.me/244951945715?text="+mensagem
-
-window.open(url,"_blank")
+window.open("https://wa.me/244951945715?text="+mensagem,"_blank")
 
 })
 
 }
 
-function pedirServicoMapa(){
-alert("Solicitação enviada! Um técnico irá contactar.")
+function guardarHistorico(servico){
+
+let historico=JSON.parse(localStorage.getItem("historico"))||[]
+historico.push(servico)
+localStorage.setItem("historico",JSON.stringify(historico))
+
+}
+
+function carregarHistorico(){
+
+let historico=JSON.parse(localStorage.getItem("historico"))||[]
+
+let html=""
+
+historico.forEach(function(h){
+
+html+=`<p><b>${h.servico}</b><br>${h.nome}<br>${h.data}</p><hr>`
+
+})
+
+document.getElementById("listaHistorico").innerHTML=html
+
 }
 
 function mostrar(secao){
 
-let secoes=["inicio","servicos","solicitar","mapaSection","contacto"]
+let secoes=["inicio","servicos","solicitar","mapaSection","contacto","historico"]
 
-secoes.forEach(function(s){
-document.getElementById(s).style.display="none"
-})
+secoes.forEach(s=>document.getElementById(s).style.display="none")
 
 document.getElementById(secao).style.display="block"
 
 }
 
-function abrirMenu(){
-document.getElementById("menuLateral").style.left="0"
-}
+function abrirMenu(){document.getElementById("menuLateral").style.left="0"}
+function fecharMenu(){document.getElementById("menuLateral").style.left="-250px"}
 
-function fecharMenu(){
-document.getElementById("menuLateral").style.left="-250px"
-}
-
-function abrirInquerito(){
-document.getElementById("inqueritoBox").style.display="block";
-}
-
-function fecharInquerito(){
-document.getElementById("inqueritoBox").style.display="none";
-}
+function abrirInquerito(){document.getElementById("inqueritoBox").style.display="block"}
+function fecharInquerito(){document.getElementById("inqueritoBox").style.display="none"}
 
 function enviarInquerito(){
-
-let nota = document.getElementById("avaliacao").value;
-let comentario = document.getElementById("comentario").value;
-
-alert("Obrigado pela sua avaliação ⭐");
-
-console.log("Avaliação:", nota);
-console.log("Comentário:", comentario);
-
-document.getElementById("inqueritoBox").style.display="none";
-
+alert("Obrigado pela sua avaliação ⭐")
+fecharInquerito()
 }
 
 window.onload=iniciarMapa
@@ -459,23 +431,8 @@ window.onload=iniciarMapa
 setTimeout(function(){
 document.getElementById("splash").style.display="none"
 },2500)
-  
-function guardarHistorico(servico){
-
-let historico = JSON.parse(localStorage.getItem("historico")) || []
-
-historico.push(servico)
-
-localStorage.setItem("historico",JSON.stringify(historico))
-
-}
 
 </script>
 
 </body>
-  
-<button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
-
 </html>
-
-
