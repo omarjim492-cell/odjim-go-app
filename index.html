@@ -15,10 +15,6 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
 <style>
 
 body{
@@ -98,15 +94,6 @@ margin-top:10px;
 cursor:pointer;
 }
 
-input, textarea{
-width:100%;
-padding:10px;
-margin-top:5px;
-margin-bottom:10px;
-border-radius:5px;
-border:1px solid #ccc;
-}
-
 #mapa{
 height:350px;
 border-radius:10px;
@@ -157,6 +144,7 @@ margin-top:30px;
 </a>
 
 <div id="splash">
+<img src="logo_odjim2-512png.jpeg" width="150">
 <h2>ODJIM Solution</h2>
 <p>Carregando serviços...</p>
 </div>
@@ -168,12 +156,8 @@ margin-top:30px;
 <h2>ODJIM Solution</h2>
 
 <button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
-<button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
-<button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar</button>
 <button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
-<button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
 <button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Área do Técnico</button>
-<button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
 
 </div>
 
@@ -192,8 +176,9 @@ margin-top:30px;
 
 <h2>Peça um serviço em segundos</h2>
 
-<button class="btn" onclick="mostrar('solicitar')">🚀 Pedir Serviço</button>
-<button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos próximos</button>
+<button class="btn" onclick="mostrar('mapaSection')">
+📍 Ver técnicos próximos
+</button>
 
 </div>
 
@@ -207,7 +192,9 @@ margin-top:30px;
 
 <div id="mapa"></div>
 
-<button class="btn" onclick="obterLocalizacaoMapa()">📍 Mostrar minha localização</button>
+<button class="btn" onclick="obterLocalizacaoMapa()">
+📍 Mostrar minha localização
+</button>
 
 </div>
 
@@ -221,9 +208,13 @@ margin-top:30px;
 
 <input type="text" id="nomeTecnico" placeholder="Nome do técnico">
 
-<button class="btn" onclick="ficarOnline()">🟢 Ficar Online</button>
+<button class="btn" onclick="ficarOnline()">
+🟢 Ficar Online
+</button>
 
-<button class="btn" onclick="ficarOffline()">🔴 Ficar Offline</button>
+<button class="btn" onclick="ficarOffline()">
+🔴 Ficar Offline
+</button>
 
 <p id="estadoTecnico">Estado: Offline</p>
 
@@ -232,95 +223,30 @@ margin-top:30px;
 </div>
 
 <footer>
-
 ODJIM Solution © 2026
-
 </footer>
 
 <script>
 
-const firebaseConfig={
-apiKey:"SUA_CHAVE",
-databaseURL:"SUA_DATABASE_URL"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const db=firebase.database();
-
-let mapa
+let mapa=null
 let marcadoresTecnicos={}
 
 function iniciarMapa(){
 
+if(mapa!==null)return
+
 mapa=L.map('mapa').setView([-8.8383,13.2344],13)
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa)
-
-ouvirTecnicos()
-
-}
-
-function ouvirTecnicos(){
-
-db.ref("tecnicos").on("value",snapshot=>{
-
-snapshot.forEach(child=>{
-
-let t=child.val()
-
-if(!marcadoresTecnicos[t.nome]){
-
-marcadoresTecnicos[t.nome]=L.marker([t.lat,t.lon]).addTo(mapa)
-.bindPopup("🔧 "+t.nome)
-
-}else{
-
-marcadoresTecnicos[t.nome].setLatLng([t.lat,t.lon])
-
-}
-
-})
-
-})
-
-}
-
-function ficarOnline(){
-
-let nome=document.getElementById("nomeTecnico").value
-
-navigator.geolocation.watchPosition(pos=>{
-
-let lat=pos.coords.latitude
-let lon=pos.coords.longitude
-
-db.ref("tecnicos/"+nome).set({
-
-nome:nome,
-lat:lat,
-lon:lon,
-online:true
-
-})
-
-})
-
-document.getElementById("estadoTecnico").innerHTML="Online 🟢"
-
-}
-
-function ficarOffline(){
-
-let nome=document.getElementById("nomeTecnico").value
-
-db.ref("tecnicos/"+nome).remove()
-
-document.getElementById("estadoTecnico").innerHTML="Offline 🔴"
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{maxZoom:19}
+).addTo(mapa)
 
 }
 
 function obterLocalizacaoMapa(){
+
+if(!mapa) iniciarMapa()
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
@@ -330,8 +256,59 @@ let lon=pos.coords.longitude
 mapa.setView([lat,lon],16)
 
 L.marker([lat,lon]).addTo(mapa)
+.bindPopup("Você está aqui")
+.openPopup()
 
 })
+
+}
+
+function ficarOnline(){
+
+let nome=document.getElementById("nomeTecnico").value
+
+if(nome===""){
+alert("Digite o nome do técnico")
+return
+}
+
+document.getElementById("estadoTecnico").innerHTML="Online 🟢"
+
+navigator.geolocation.watchPosition(function(pos){
+
+let lat=pos.coords.latitude
+let lon=pos.coords.longitude
+
+if(!mapa) iniciarMapa()
+
+if(!marcadoresTecnicos[nome]){
+
+marcadoresTecnicos[nome]=L.marker([lat,lon])
+.addTo(mapa)
+.bindPopup("🔧 "+nome)
+
+}else{
+
+marcadoresTecnicos[nome].setLatLng([lat,lon])
+
+}
+
+})
+
+}
+
+function ficarOffline(){
+
+let nome=document.getElementById("nomeTecnico").value
+
+document.getElementById("estadoTecnico").innerHTML="Offline 🔴"
+
+if(marcadoresTecnicos[nome]){
+
+mapa.removeLayer(marcadoresTecnicos[nome])
+delete marcadoresTecnicos[nome]
+
+}
 
 }
 
@@ -339,14 +316,26 @@ function mostrar(secao){
 
 let secoes=["inicio","mapaSection","tecnico"]
 
-secoes.forEach(s=>{
+secoes.forEach(function(s){
 
 let el=document.getElementById(s)
-if(el)el.style.display="none"
+
+if(el) el.style.display="none"
 
 })
 
 document.getElementById(secao).style.display="block"
+
+if(secao==="mapaSection"){
+
+setTimeout(function(){
+
+if(!mapa) iniciarMapa()
+mapa.invalidateSize()
+
+},300)
+
+}
 
 }
 
@@ -359,8 +348,6 @@ document.getElementById("menuLateral").style.left="-250px"
 }
 
 window.onload=function(){
-
-iniciarMapa()
 
 setTimeout(function(){
 
