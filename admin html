@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Painel Administrador - ODJIM</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#0b3d91;
+color:white;
+}
+
+header{
+background:#072d6b;
+padding:15px;
+text-align:center;
+}
+
+.container{
+padding:20px;
+}
+
+.card{
+
+background:white;
+color:black;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+
+}
+
+#mapaAdmin{
+
+height:400px;
+border-radius:10px;
+
+}
+
+.btn{
+
+background:#ff5722;
+color:white;
+border:none;
+padding:10px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h2>Painel Administrador</h2>
+<p>ODJIM Solution</p>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h3>Mapa de Técnicos</h3>
+
+<div id="mapaAdmin"></div>
+
+</div>
+
+<div class="card">
+
+<h3>Técnicos Online</h3>
+
+<div id="listaTecnicos"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const firebaseConfig={
+apiKey:"SUA_CHAVE",
+databaseURL:"SUA_DATABASE_URL"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db=firebase.database();
+
+let mapaAdmin
+let marcadores={}
+
+function iniciarMapa(){
+
+mapaAdmin=L.map('mapaAdmin').setView([-8.8383,13.2344],13)
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{maxZoom:19}
+).addTo(mapaAdmin)
+
+}
+
+function ouvirTecnicos(){
+
+db.ref("tecnicos").on("value",snapshot=>{
+
+let listaHTML=""
+
+snapshot.forEach(child=>{
+
+let t=child.val()
+
+listaHTML+=`
+
+<p>
+🔧 ${t.nome}
+<button class="btn" onclick="removerTecnico('${t.nome}')">
+Remover
+</button>
+</p>
+
+`
+
+if(!marcadores[t.nome]){
+
+marcadores[t.nome]=L.marker([t.lat,t.lon])
+.addTo(mapaAdmin)
+.bindPopup("🔧 "+t.nome)
+
+}else{
+
+marcadores[t.nome].setLatLng([t.lat,t.lon])
+
+}
+
+})
+
+document.getElementById("listaTecnicos").innerHTML=listaHTML
+
+})
+
+}
+
+function removerTecnico(nome){
+
+db.ref("tecnicos/"+nome).remove()
+
+alert("Técnico removido")
+
+}
+
+window.onload=function(){
+
+iniciarMapa()
+
+ouvirTecnicos()
+
+}
+
+</script>
+
+</body>
+
+</html>
