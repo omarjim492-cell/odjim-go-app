@@ -18,7 +18,7 @@
 <style>
 
 body{
-font-family:Arial, sans-serif;
+font-family:Arial;
 margin:0;
 background:linear-gradient(135deg,#0b3d91,#1e88e5);
 min-height:100vh;
@@ -43,32 +43,34 @@ background:#0b3d91;
 color:white;
 border:none;
 padding:10px 15px;
-border-radius:8px;
+border-radius:10px;
 z-index:1000;
 }
 
 .menu-lateral{
 position:fixed;
 top:0;
-left:-250px;
-width:250px;
+left:-260px;
+width:260px;
 height:100%;
 background:#1e88e5;
 padding:20px;
-transition:0.3s;
+transition:0.4s;
 z-index:999;
 color:white;
+overflow:auto;
 }
 
 .menu-lateral button{
 display:block;
 width:100%;
 margin:10px 0;
-padding:10px;
+padding:12px;
 border:none;
 background:white;
 color:#1e88e5;
-border-radius:8px;
+border-radius:10px;
+font-weight:bold;
 }
 
 .section{
@@ -80,6 +82,7 @@ background:white;
 padding:20px;
 border-radius:15px;
 box-shadow:0 6px 15px rgba(0,0,0,0.2);
+margin-bottom:20px;
 }
 
 .btn{
@@ -91,7 +94,14 @@ border-radius:10px;
 font-weight:bold;
 width:100%;
 margin-top:10px;
-cursor:pointer;
+}
+
+input,textarea,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
 #mapa{
@@ -134,7 +144,6 @@ margin-top:30px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -146,7 +155,7 @@ margin-top:30px;
 <div id="splash">
 <img src="logo_odjim2-512png.jpeg" width="150">
 <h2>ODJIM Solution</h2>
-<p>Carregando serviços...</p>
+<p>Carregando sistema...</p>
 </div>
 
 <button class="menu-btn" onclick="abrirMenu()">☰</button>
@@ -156,8 +165,20 @@ margin-top:30px;
 <h2>ODJIM Solution</h2>
 
 <button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
+
+<button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
+
+<button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar serviço</button>
+
 <button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
+
+<button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
+
 <button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Área do Técnico</button>
+
+<button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
+
+<button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar serviço</button>
 
 </div>
 
@@ -176,8 +197,61 @@ margin-top:30px;
 
 <h2>Peça um serviço em segundos</h2>
 
+<button class="btn" onclick="mostrar('solicitar')">
+🚀 Solicitar serviço
+</button>
+
 <button class="btn" onclick="mostrar('mapaSection')">
 📍 Ver técnicos próximos
+</button>
+
+</div>
+
+</div>
+
+<div class="section" id="servicos" style="display:none">
+
+<div class="card">
+
+<h2>Serviços disponíveis</h2>
+
+<ul>
+
+<li>💻 Informática</li>
+<li>📶 Redes</li>
+<li>📹 CCTV</li>
+<li>❄️ Ar condicionado</li>
+<li>🔌 Electricidade</li>
+<li>🪑 Fabricação de móveis</li>
+
+</ul>
+
+</div>
+</div>
+
+<div class="section" id="solicitar" style="display:none">
+
+<div class="card">
+
+<h2>Solicitar serviço</h2>
+
+<input id="nomeCliente" placeholder="Seu nome">
+
+<input id="telefoneCliente" placeholder="Telefone">
+
+<select id="tipoServico">
+
+<option>Informática</option>
+<option>Rede</option>
+<option>CCTV</option>
+<option>Ar condicionado</option>
+
+</select>
+
+<textarea id="descricaoServico" placeholder="Descreva o problema"></textarea>
+
+<button class="btn" onclick="pedirServico()">
+Enviar pedido
 </button>
 
 </div>
@@ -188,13 +262,25 @@ margin-top:30px;
 
 <div class="card">
 
-<h2>📍 Técnicos próximos</h2>
+<h2>Técnicos próximos</h2>
 
 <div id="mapa"></div>
 
 <button class="btn" onclick="obterLocalizacaoMapa()">
-📍 Mostrar minha localização
+Mostrar minha localização
 </button>
+
+</div>
+
+</div>
+
+<div class="section" id="historico" style="display:none">
+
+<div class="card">
+
+<h2>Histórico de pedidos</h2>
+
+<div id="listaHistorico"></div>
 
 </div>
 
@@ -204,21 +290,50 @@ margin-top:30px;
 
 <div class="card">
 
-<h2>👨‍🔧 Painel do Técnico</h2>
+<h2>Painel do Técnico</h2>
 
-<input type="text" id="nomeTecnico" placeholder="Nome do técnico">
+<input id="nomeTecnico" placeholder="Nome do técnico">
 
-<button class="btn" onclick="ficarOnline()">
-🟢 Ficar Online
-</button>
+<button class="btn" onclick="ficarOnline()">Ficar Online</button>
 
-<button class="btn" onclick="ficarOffline()">
-🔴 Ficar Offline
-</button>
+<button class="btn" onclick="ficarOffline()">Ficar Offline</button>
 
 <p id="estadoTecnico">Estado: Offline</p>
 
 </div>
+
+</div>
+
+<div class="section" id="contacto" style="display:none">
+
+<div class="card">
+
+<h2>Contactos</h2>
+
+<p>📞 951945715</p>
+<p>📧 oj761722@gmail.com</p>
+
+</div>
+
+</div>
+
+<div id="inqueritoBox" style="display:none;position:fixed;bottom:0;width:100%;background:white;padding:20px">
+
+<h3>Avalie o serviço</h3>
+
+<select id="avaliacao">
+
+<option>⭐⭐⭐⭐⭐ Excelente</option>
+<option>⭐⭐⭐⭐ Muito bom</option>
+<option>⭐⭐⭐ Bom</option>
+
+</select>
+
+<textarea placeholder="Comentário"></textarea>
+
+<button onclick="enviarInquerito()">Enviar</button>
+
+<button onclick="fecharInquerito()">Fechar</button>
 
 </div>
 
@@ -230,6 +345,7 @@ ODJIM Solution © 2026
 
 let mapa=null
 let marcadoresTecnicos={}
+let historico=[]
 
 function iniciarMapa(){
 
@@ -237,10 +353,7 @@ if(mapa!==null)return
 
 mapa=L.map('mapa').setView([-8.8383,13.2344],13)
 
-L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{maxZoom:19}
-).addTo(mapa)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa)
 
 }
 
@@ -255,9 +368,7 @@ let lon=pos.coords.longitude
 
 mapa.setView([lat,lon],16)
 
-L.marker([lat,lon]).addTo(mapa)
-.bindPopup("Você está aqui")
-.openPopup()
+L.marker([lat,lon]).addTo(mapa).bindPopup("Você está aqui").openPopup()
 
 })
 
@@ -266,11 +377,6 @@ L.marker([lat,lon]).addTo(mapa)
 function ficarOnline(){
 
 let nome=document.getElementById("nomeTecnico").value
-
-if(nome===""){
-alert("Digite o nome do técnico")
-return
-}
 
 document.getElementById("estadoTecnico").innerHTML="Online 🟢"
 
@@ -283,9 +389,7 @@ if(!mapa) iniciarMapa()
 
 if(!marcadoresTecnicos[nome]){
 
-marcadoresTecnicos[nome]=L.marker([lat,lon])
-.addTo(mapa)
-.bindPopup("🔧 "+nome)
+marcadoresTecnicos[nome]=L.marker([lat,lon]).addTo(mapa).bindPopup(nome)
 
 }else{
 
@@ -306,15 +410,42 @@ document.getElementById("estadoTecnico").innerHTML="Offline 🔴"
 if(marcadoresTecnicos[nome]){
 
 mapa.removeLayer(marcadoresTecnicos[nome])
-delete marcadoresTecnicos[nome]
 
 }
+
+}
+
+function pedirServico(){
+
+let nome=document.getElementById("nomeCliente").value
+
+let servico=document.getElementById("tipoServico").value
+
+historico.push(nome+" pediu "+servico)
+
+atualizarHistorico()
+
+alert("Pedido enviado!")
+
+}
+
+function atualizarHistorico(){
+
+let lista=document.getElementById("listaHistorico")
+
+lista.innerHTML=""
+
+historico.forEach(function(item){
+
+lista.innerHTML+="<p>"+item+"</p>"
+
+})
 
 }
 
 function mostrar(secao){
 
-let secoes=["inicio","mapaSection","tecnico"]
+let secoes=["inicio","servicos","solicitar","mapaSection","historico","tecnico","contacto"]
 
 secoes.forEach(function(s){
 
@@ -331,6 +462,7 @@ if(secao==="mapaSection"){
 setTimeout(function(){
 
 if(!mapa) iniciarMapa()
+
 mapa.invalidateSize()
 
 },300)
@@ -344,7 +476,20 @@ document.getElementById("menuLateral").style.left="0"
 }
 
 function fecharMenu(){
-document.getElementById("menuLateral").style.left="-250px"
+document.getElementById("menuLateral").style.left="-260px"
+}
+
+function abrirInquerito(){
+document.getElementById("inqueritoBox").style.display="block"
+}
+
+function fecharInquerito(){
+document.getElementById("inqueritoBox").style.display="none"
+}
+
+function enviarInquerito(){
+alert("Obrigado pela avaliação!")
+fecharInquerito()
 }
 
 window.onload=function(){
