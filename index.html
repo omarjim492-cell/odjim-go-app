@@ -1,17 +1,22 @@
-<!DOCTYPE html><html lang="pt">
-<head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><meta name="theme-color" content="#0b3d91">
-<link rel="manifest" href="manifest.json"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><style>
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><meta name="theme-color" content="#0b3d91"><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"><link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><style>
+
+/* ===== BASE ===== */
 
 body{
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 margin:0;
+padding:0;
 background:linear-gradient(135deg,#0b3d91,#1e88e5);
 min-height:100vh;
-display:flex;
-flex-direction:column;
-align-items:center;
+overflow-x:hidden;
+}
+
+/* CONTAINER CENTRAL */
+
+.app{
+max-width:480px;
+margin:auto;
 }
 
 /* HEADER */
@@ -19,15 +24,13 @@ align-items:center;
 header{
 text-align:center;
 color:white;
-padding:30px 20px;
-width:100%;
-max-width:600px;
+padding:25px 10px;
 }
 
 .logo-topo{
-width:120px;
-margin-bottom:10px;
+width:110px;
 border-radius:10px;
+margin-bottom:10px;
 }
 
 /* MENU */
@@ -36,11 +39,11 @@ border-radius:10px;
 position:fixed;
 top:15px;
 left:15px;
-font-size:25px;
+font-size:24px;
 background:#0b3d91;
 color:white;
 border:none;
-padding:10px 15px;
+padding:10px 14px;
 border-radius:10px;
 z-index:1000;
 }
@@ -49,7 +52,7 @@ z-index:1000;
 position:fixed;
 top:0;
 left:-280px;
-width:260px;
+width:250px;
 height:100%;
 background:linear-gradient(180deg,#0b3d91,#1e88e5);
 padding:20px;
@@ -69,16 +72,12 @@ background:white;
 color:#1e88e5;
 border-radius:12px;
 font-weight:bold;
-font-size:16px;
 }
 
 /* SEÇÕES */
 
 .section{
-padding:20px;
-width:100%;
-max-width:500px;
-margin:auto;
+padding:15px;
 }
 
 /* CARDS */
@@ -88,10 +87,10 @@ background:white;
 padding:20px;
 border-radius:18px;
 box-shadow:0 10px 25px rgba(0,0,0,0.15);
-margin:20px auto;
+margin:15px auto;
 width:100%;
+box-sizing:border-box;
 text-align:center;
-animation:fadeUp 0.5s ease;
 }
 
 /* BOTÕES */
@@ -99,7 +98,7 @@ animation:fadeUp 0.5s ease;
 .btn{
 background:linear-gradient(45deg,#ff9800,#ff5722);
 color:white;
-padding:16px;
+padding:15px;
 border:none;
 border-radius:12px;
 font-weight:bold;
@@ -117,12 +116,14 @@ margin-top:10px;
 border-radius:10px;
 border:1px solid #ccc;
 font-size:15px;
+box-sizing:border-box;
 }
 
 /* MAPA */
 
 #mapa{
-height:350px;
+height:320px;
+width:100%;
 border-radius:12px;
 }
 
@@ -134,7 +135,7 @@ bottom:20px;
 right:20px;
 background:#25D366;
 color:white;
-font-size:28px;
+font-size:26px;
 padding:15px;
 border-radius:50%;
 box-shadow:0 5px 20px rgba(0,0,0,0.3);
@@ -157,6 +158,16 @@ color:white;
 z-index:9999;
 }
 
+/* PEDIDOS */
+
+.pedido{
+background:#f5f5f5;
+padding:12px;
+border-radius:10px;
+margin-top:10px;
+text-align:left;
+}
+
 /* FOOTER */
 
 footer{
@@ -165,7 +176,6 @@ color:white;
 text-align:center;
 padding:15px;
 margin-top:30px;
-width:100%;
 }
 
 /* ANIMAÇÃO */
@@ -177,81 +187,68 @@ width:100%;
 
 </style></head><body><a href="https://wa.me/244951945715" class="whatsapp-btn">
 <i class="fab fa-whatsapp"></i>
-</a><div id="splash">
-<img src="logo_odjim2-512png.jpeg" width="150">
-<h2>ODJIM Solution</h2>
-<p>Carregando sistema...</p>
-</div><button class="menu-btn" onclick="abrirMenu()">☰</button>
+</a><div id="splash"><img src="logo_odjim2-512png.jpeg" width="150"><h2>ODJIM Solution</h2><p>Carregando sistema...</p></div><button class="menu-btn" onclick="abrirMenu()">☰</button>
 
-<div id="menuLateral" class="menu-lateral"><h2>ODJIM Solution</h2><button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
+<div id="menuLateral" class="menu-lateral"><h2>ODJIM</h2><button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
 <button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
 <button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar serviço</button>
 <button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
+<button onclick="mostrar('pedidos'); fecharMenu()">📢 Pedidos em tempo real</button>
 <button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
 <button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Área do Técnico</button>
 <button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
 <button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar serviço</button>
 
-</div><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1>
-<p>Serviços rápidos, soluções brilhantes</p></header><div class="section" id="inicio"><div class="card"><h2>Peça um serviço em segundos</h2><button class="btn" onclick="mostrar('solicitar')">
-🚀 Solicitar serviço
-</button><button class="btn" onclick="mostrar('mapaSection')">
-📍 Ver técnicos próximos
-</button></div></div><div class="section" id="servicos" style="display:none"><div class="card"><h2>Serviços disponíveis</h2><ul style="text-align:left"><li>💻 Informática</li>
+</div><div class="app"><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1><p>Serviços rápidos, soluções brilhantes</p></header><!-- INICIO --><div class="section" id="inicio"><div class="card"><h2>Peça um serviço</h2><button class="btn" onclick="mostrar('solicitar')">🚀 Solicitar serviço</button>
+
+<button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos</button>
+
+</div></div><!-- SERVIÇOS --><div class="section" id="servicos" style="display:none"><div class="card"><h2>Serviços disponíveis</h2><ul style="text-align:left"><li>💻 Informática</li>
 <li>📶 Redes</li>
 <li>📹 CCTV</li>
 <li>❄️ Ar condicionado</li>
 <li>🔌 Electricidade</li>
-<li>🪑 Fabricação de móveis</li>
-<li>Instalação de móveis planejados</li>
+<li>🪑 Móveis</li>
 <li>Babá</li>
 <li>Diarista</li>
-<li>Lavadeiras</li>
-<li>Arrumação de escritórios</li>
-<li>Acabamento Civil</li>
 <li>Pintura</li>
 <li>Ladrilho</li>
-<li>Outros</li></ul></div>
-</div><div class="section" id="solicitar" style="display:none"><div class="card"><h2>Solicitar serviço</h2><input id="nomeCliente" placeholder="Seu nome">
-<input id="telefoneCliente" placeholder="Telefone"><select id="tipoServico"><option>Informática</option>
+<li>Outros</li></ul></div></div><!-- SOLICITAR --><div class="section" id="solicitar" style="display:none"><div class="card"><h2>Novo pedido</h2><input id="nomeCliente" placeholder="Seu nome"><input id="telefoneCliente" placeholder="Telefone"><select id="tipoServico"><option>Informática</option>
 <option>Rede</option>
 <option>CCTV</option>
 <option>Ar condicionado</option>
 <option>Diarista</option>
-<option>Baba</option>
-<option>Fabricação de móveis planejados</option>
-<option>Aplicação de móveis planejados</option>
 <option>Acabamento Civil</option>
 <option>Outros</option></select><textarea id="descricaoServico" placeholder="Descreva o problema"></textarea><button class="btn" onclick="pedirServico()">Enviar pedido</button>
 
-</div></div><div class="section" id="mapaSection" style="display:none"><div class="card"><h2>Técnicos próximos</h2><div id="mapa"></div><button class="btn" onclick="obterLocalizacaoMapa()">Mostrar minha localização</button>
+</div></div><!-- PEDIDOS EM TEMPO REAL --><div class="section" id="pedidos" style="display:none"><div class="card"><h2>Pedidos em tempo real</h2><div id="listaPedidos"></div></div></div><!-- MAPA --><div class="section" id="mapaSection" style="display:none"><div class="card"><h2>Técnicos próximos</h2><div id="mapa"></div><button class="btn" onclick="obterLocalizacaoMapa()">Mostrar minha localização</button>
 
-</div></div><div class="section" id="historico" style="display:none"><div class="card"><h2>Histórico de pedidos</h2><div id="listaHistorico"></div></div></div><div class="section" id="tecnico" style="display:none"><div class="card"><h2>Painel do Técnico</h2><input id="nomeTecnico" placeholder="Nome do técnico"><button class="btn" onclick="ficarOnline()">Ficar Online</button>
+</div></div><!-- HISTORICO --><div class="section" id="historico" style="display:none"><div class="card"><h2>Histórico</h2><div id="listaHistorico"></div></div></div><!-- TECNICO --><div class="section" id="tecnico" style="display:none"><div class="card"><h2>Painel do Técnico</h2><input id="nomeTecnico" placeholder="Nome do técnico"><button class="btn" onclick="ficarOnline()">Ficar Online</button>
+
 <button class="btn" onclick="ficarOffline()">Ficar Offline</button>
 
-<p id="estadoTecnico">Estado: Offline</p></div></div><div class="section" id="contacto" style="display:none"><div class="card"><h2>Contactos</h2><p>📞 951945715 / 946761722</p>
-<p>📧 oj761722@gmail.com</p></div></div><div id="inqueritoBox" style="display:none;position:fixed;bottom:0;width:100%;background:white;padding:20px"><h3>Avalie o serviço</h3><select id="avaliacao"><option>⭐⭐⭐⭐⭐ Excelente</option>
-<option>⭐⭐⭐⭐ Muito bom</option>
-<option>⭐⭐⭐ Bom</option></select><textarea placeholder="Comentário"></textarea><button onclick="enviarInquerito()">Enviar</button>
-<button onclick="fecharInquerito()">Fechar</button>
+<p id="estadoTecnico">Estado: Offline</p></div></div><!-- CONTACTOS --><div class="section" id="contacto" style="display:none"><div class="card"><h2>Contactos</h2><p>📞 951945715</p><p>📧 oj761722@gmail.com</p></div></div></div><footer>ODJIM Solution © 2026
 
-</div><footer>
-ODJIM Solution © 2026
 </footer><script>
 
 let mapa=null
-let marcadoresTecnicos={}
+let pedidos=[]
 let historico=[]
+let marcadoresTecnicos={}
+
+/* MAPA */
 
 function iniciarMapa(){
 
-if(mapa!==null)return
+if(mapa) return
 
 mapa=L.map('mapa').setView([-8.8383,13.2344],13)
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa)
 
 }
+
+/* LOCALIZAÇÃO */
 
 function obterLocalizacaoMapa(){
 
@@ -270,59 +267,59 @@ L.marker([lat,lon]).addTo(mapa).bindPopup("Você está aqui").openPopup()
 
 }
 
-function ficarOnline(){
-
-let nome=document.getElementById("nomeTecnico").value
-
-document.getElementById("estadoTecnico").innerHTML="Online 🟢"
-
-navigator.geolocation.watchPosition(function(pos){
-
-let lat=pos.coords.latitude
-let lon=pos.coords.longitude
-
-if(!mapa) iniciarMapa()
-
-if(!marcadoresTecnicos[nome]){
-
-marcadoresTecnicos[nome]=L.marker([lat,lon]).addTo(mapa).bindPopup(nome)
-
-}else{
-
-marcadoresTecnicos[nome].setLatLng([lat,lon])
-
-}
-
-})
-
-}
-
-function ficarOffline(){
-
-let nome=document.getElementById("nomeTecnico").value
-
-document.getElementById("estadoTecnico").innerHTML="Offline 🔴"
-
-if(marcadoresTecnicos[nome]){
-
-mapa.removeLayer(marcadoresTecnicos[nome])
-
-}
-
-}
+/* PEDIDOS */
 
 function pedirServico(){
 
 let nome=document.getElementById("nomeCliente").value
 let servico=document.getElementById("tipoServico").value
 
+let pedido={
+
+cliente:nome,
+servico:servico,
+estado:"Aguardando técnico"
+
+}
+
+pedidos.push(pedido)
+
 historico.push(nome+" pediu "+servico)
 
+atualizarPedidos()
 atualizarHistorico()
 
 alert("Pedido enviado!")
 
 }
+
+function atualizarPedidos(){
+
+let lista=document.getElementById("listaPedidos")
+
+lista.innerHTML=""
+
+pedidos.forEach(function(p){
+
+lista.innerHTML+=`
+
+<div class="pedido">
+
+<b>${p.cliente}</b><br>
+
+Serviço: ${p.servico}<br>
+
+Estado: ${p.estado}
+
+</div>
+
+`
+
+})
+
+}
+
+/* HISTORICO */
 
 function atualizarHistorico(){
 
@@ -338,9 +335,11 @@ lista.innerHTML+="<p>"+item+"</p>"
 
 }
 
+/* MENU */
+
 function mostrar(secao){
 
-let secoes=["inicio","servicos","solicitar","mapaSection","historico","tecnico","contacto"]
+let secoes=["inicio","servicos","solicitar","mapaSection","historico","tecnico","contacto","pedidos"]
 
 secoes.forEach(function(s){
 
@@ -367,33 +366,27 @@ mapa.invalidateSize()
 }
 
 function abrirMenu(){
+
 document.getElementById("menuLateral").style.left="0"
+
 }
 
 function fecharMenu(){
+
 document.getElementById("menuLateral").style.left="-280px"
+
 }
 
-function abrirInquerito(){
-document.getElementById("inqueritoBox").style.display="block"
-}
-
-function fecharInquerito(){
-document.getElementById("inqueritoBox").style.display="none"
-}
-
-function enviarInquerito(){
-alert("Obrigado pela avaliação!")
-fecharInquerito()
-}
+/* SPLASH */
 
 window.onload=function(){
 
 setTimeout(function(){
+
 document.getElementById("splash").style.display="none"
+
 },2000)
 
 }
 
-</script></body>
-  </html>
+</script></body></html>
