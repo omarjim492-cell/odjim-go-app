@@ -1,38 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ODJIM Solution</title>
-
-<meta name="theme-color" content="#0b3d91">
-<link rel="manifest" href="manifest.json">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<style>
+<!DOCTYPE html><html lang="pt">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><meta name="theme-color" content="#0b3d91">
+<link rel="manifest" href="manifest.json"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><style>
 
 body{
-font-family:Arial;
+font-family:Arial, sans-serif;
 margin:0;
 background:linear-gradient(135deg,#0b3d91,#1e88e5);
 min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
 }
+
+/* HEADER */
 
 header{
 text-align:center;
 color:white;
-padding:20px;
+padding:30px 20px;
+width:100%;
+max-width:600px;
 }
 
 .logo-topo{
 width:120px;
+margin-bottom:10px;
+border-radius:10px;
 }
+
+/* MENU */
 
 .menu-btn{
 position:fixed;
@@ -50,67 +48,85 @@ z-index:1000;
 .menu-lateral{
 position:fixed;
 top:0;
-left:-260px;
+left:-280px;
 width:260px;
 height:100%;
-background:#1e88e5;
+background:linear-gradient(180deg,#0b3d91,#1e88e5);
 padding:20px;
 transition:0.4s;
 z-index:999;
 color:white;
-overflow:auto;
+overflow-y:auto;
 }
 
 .menu-lateral button{
 display:block;
 width:100%;
 margin:10px 0;
-padding:12px;
+padding:14px;
 border:none;
 background:white;
 color:#1e88e5;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
+font-size:16px;
 }
+
+/* SEÇÕES */
 
 .section{
 padding:20px;
+width:100%;
+max-width:500px;
+margin:auto;
 }
+
+/* CARDS */
 
 .card{
 background:white;
 padding:20px;
 border-radius:18px;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
 margin:20px auto;
 width:100%;
-max-width:450px;
 text-align:center;
+animation:fadeUp 0.5s ease;
 }
+
+/* BOTÕES */
 
 .btn{
 background:linear-gradient(45deg,#ff9800,#ff5722);
 color:white;
-padding:14px;
+padding:16px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
 width:100%;
-margin-top:10px;
+margin-top:12px;
+font-size:16px;
 }
+
+/* INPUTS */
 
 input,textarea,select{
 width:100%;
-padding:10px;
+padding:12px;
 margin-top:10px;
-border-radius:8px;
+border-radius:10px;
 border:1px solid #ccc;
+font-size:15px;
 }
+
+/* MAPA */
 
 #mapa{
 height:350px;
-border-radius:10px;
+border-radius:12px;
 }
+
+/* WHATSAPP */
 
 .whatsapp-btn{
 position:fixed;
@@ -121,7 +137,10 @@ color:white;
 font-size:28px;
 padding:15px;
 border-radius:50%;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
 }
+
+/* SPLASH */
 
 #splash{
 position:fixed;
@@ -138,234 +157,87 @@ color:white;
 z-index:9999;
 }
 
+/* FOOTER */
+
 footer{
 background:#333;
 color:white;
 text-align:center;
 padding:15px;
 margin-top:30px;
+width:100%;
 }
 
-</style>
-</head>
+/* ANIMAÇÃO */
 
-<body>
+@keyframes fadeUp{
+0%{opacity:0; transform:translateY(20px);}
+100%{opacity:1; transform:translateY(0);}
+}
 
-<a href="https://wa.me/244951945715" class="whatsapp-btn">
+</style></head><body><a href="https://wa.me/244951945715" class="whatsapp-btn">
 <i class="fab fa-whatsapp"></i>
-</a>
-
-<div id="splash">
+</a><div id="splash">
 <img src="logo_odjim2-512png.jpeg" width="150">
 <h2>ODJIM Solution</h2>
 <p>Carregando sistema...</p>
-</div>
+</div><button class="menu-btn" onclick="abrirMenu()">☰</button>
 
-<button class="menu-btn" onclick="abrirMenu()">☰</button>
-
-<div id="menuLateral" class="menu-lateral">
-
-<h2>ODJIM Solution</h2>
-
-<button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
-
+<div id="menuLateral" class="menu-lateral"><h2>ODJIM Solution</h2><button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
 <button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
-
 <button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar serviço</button>
-
 <button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
-
 <button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
-
 <button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Área do Técnico</button>
-
 <button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
-
 <button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar serviço</button>
 
-</div>
-
-<header>
-
-<img src="logo_odjim1-512png.jpeg" class="logo-topo">
-
-<h1>ODJIM Solution</h1>
-<p>Serviços rápidos, soluções brilhantes</p>
-
-</header>
-
-<div class="section" id="inicio">
-
-<div class="card">
-
-<h2>Peça um serviço em segundos</h2>
-
-<button class="btn" onclick="mostrar('solicitar')">
+</div><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1>
+<p>Serviços rápidos, soluções brilhantes</p></header><div class="section" id="inicio"><div class="card"><h2>Peça um serviço em segundos</h2><button class="btn" onclick="mostrar('solicitar')">
 🚀 Solicitar serviço
-</button>
-
-<button class="btn" onclick="mostrar('mapaSection')">
+</button><button class="btn" onclick="mostrar('mapaSection')">
 📍 Ver técnicos próximos
-</button>
-
-</div>
-
-</div>
-
-<div class="section" id="servicos" style="display:none">
-
-<div class="card">
-
-<h2>Serviços disponíveis</h2>
-
-<ul>
-
-<li>💻 Informática</li>
+</button></div></div><div class="section" id="servicos" style="display:none"><div class="card"><h2>Serviços disponíveis</h2><ul style="text-align:left"><li>💻 Informática</li>
 <li>📶 Redes</li>
 <li>📹 CCTV</li>
 <li>❄️ Ar condicionado</li>
 <li>🔌 Electricidade</li>
 <li>🪑 Fabricação de móveis</li>
-<li>   Instalação de móveis planejados</li>
-<li>🪑 Babá</li>
-<li>🪑 Diarista</li>
-<li>🪑 Lavadeiras</li>
-<li>🪑 Arrumação de escritórios</li>
-<li>🪑 Acabamento Civil</li>
-<li>🪑 Pintura</li>
-<li>🪑 Ladrilho</li>
-<li>🪑 Outros</li>
-  
-</ul>
-
-</div>
-</div>
-
-<div class="section" id="solicitar" style="display:none">
-
-<div class="card">
-
-<h2>Solicitar serviço</h2>
-
-<input id="nomeCliente" placeholder="Seu nome">
-
-<input id="telefoneCliente" placeholder="Telefone">
-
-<select id="tipoServico">
-
-<option>Informática</option>
+<li>Instalação de móveis planejados</li>
+<li>Babá</li>
+<li>Diarista</li>
+<li>Lavadeiras</li>
+<li>Arrumação de escritórios</li>
+<li>Acabamento Civil</li>
+<li>Pintura</li>
+<li>Ladrilho</li>
+<li>Outros</li></ul></div>
+</div><div class="section" id="solicitar" style="display:none"><div class="card"><h2>Solicitar serviço</h2><input id="nomeCliente" placeholder="Seu nome">
+<input id="telefoneCliente" placeholder="Telefone"><select id="tipoServico"><option>Informática</option>
 <option>Rede</option>
 <option>CCTV</option>
 <option>Ar condicionado</option>
 <option>Diarista</option>
 <option>Baba</option>
-<option>Fabricação de Moves planejados</option>
+<option>Fabricação de móveis planejados</option>
 <option>Aplicação de móveis planejados</option>
 <option>Acabamento Civil</option>
-<option>Outros</option>
+<option>Outros</option></select><textarea id="descricaoServico" placeholder="Descreva o problema"></textarea><button class="btn" onclick="pedirServico()">Enviar pedido</button>
 
-<section>{
-padding:20px;
-max-width:500px;
-margin:auto;
-}
+</div></div><div class="section" id="mapaSection" style="display:none"><div class="card"><h2>Técnicos próximos</h2><div id="mapa"></div><button class="btn" onclick="obterLocalizacaoMapa()">Mostrar minha localização</button>
 
-<section/>
-
-<textarea id="descricaoServico" placeholder="Descreva o problema"></textarea>
-
-<button class="btn" onclick="pedirServico()">
-Enviar pedido
-</button>
-
-</div>
-
-</div>
-
-<div class="section" id="mapaSection" style="display:none">
-
-<div class="card">
-
-<h2>Técnicos próximos</h2>
-
-<div id="mapa"></div>
-
-<button class="btn" onclick="obterLocalizacaoMapa()">
-Mostrar minha localização
-</button>
-
-</div>
-
-</div>
-
-<div class="section" id="historico" style="display:none">
-
-<div class="card">
-
-<h2>Histórico de pedidos</h2>
-
-<div id="listaHistorico"></div>
-
-</div>
-
-</div>
-
-<div class="section" id="tecnico" style="display:none">
-
-<div class="card">
-
-<h2>Painel do Técnico</h2>
-
-<input id="nomeTecnico" placeholder="Nome do técnico">
-
-<button class="btn" onclick="ficarOnline()">Ficar Online</button>
-
+</div></div><div class="section" id="historico" style="display:none"><div class="card"><h2>Histórico de pedidos</h2><div id="listaHistorico"></div></div></div><div class="section" id="tecnico" style="display:none"><div class="card"><h2>Painel do Técnico</h2><input id="nomeTecnico" placeholder="Nome do técnico"><button class="btn" onclick="ficarOnline()">Ficar Online</button>
 <button class="btn" onclick="ficarOffline()">Ficar Offline</button>
 
-<p id="estadoTecnico">Estado: Offline</p>
-
-</div>
-
-</div>
-
-<div class="section" id="contacto" style="display:none">
-
-<div class="card">
-
-<h2>Contactos</h2>
-
-<p>📞 951945715/946761722</p>
-<p>📧 oj761722@gmail.com</p>
-
-</div>
-
-</div>
-
-<div id="inqueritoBox" style="display:none;position:fixed;bottom:0;width:100%;background:white;padding:20px">
-
-<h3>Avalie o serviço</h3>
-
-<select id="avaliacao">
-
-<option>⭐⭐⭐⭐⭐ Excelente</option>
+<p id="estadoTecnico">Estado: Offline</p></div></div><div class="section" id="contacto" style="display:none"><div class="card"><h2>Contactos</h2><p>📞 951945715 / 946761722</p>
+<p>📧 oj761722@gmail.com</p></div></div><div id="inqueritoBox" style="display:none;position:fixed;bottom:0;width:100%;background:white;padding:20px"><h3>Avalie o serviço</h3><select id="avaliacao"><option>⭐⭐⭐⭐⭐ Excelente</option>
 <option>⭐⭐⭐⭐ Muito bom</option>
-<option>⭐⭐⭐ Bom</option>
-
-</select>
-
-<textarea placeholder="Comentário"></textarea>
-
-<button onclick="enviarInquerito()">Enviar</button>
-
+<option>⭐⭐⭐ Bom</option></select><textarea placeholder="Comentário"></textarea><button onclick="enviarInquerito()">Enviar</button>
 <button onclick="fecharInquerito()">Fechar</button>
 
-</div>
-
-<footer>
+</div><footer>
 ODJIM Solution © 2026
-</footer>
-
-<script>
+</footer><script>
 
 let mapa=null
 let marcadoresTecnicos={}
@@ -442,7 +314,6 @@ mapa.removeLayer(marcadoresTecnicos[nome])
 function pedirServico(){
 
 let nome=document.getElementById("nomeCliente").value
-
 let servico=document.getElementById("tipoServico").value
 
 historico.push(nome+" pediu "+servico)
@@ -500,7 +371,7 @@ document.getElementById("menuLateral").style.left="0"
 }
 
 function fecharMenu(){
-document.getElementById("menuLateral").style.left="-260px"
+document.getElementById("menuLateral").style.left="-280px"
 }
 
 function abrirInquerito(){
@@ -519,14 +390,10 @@ fecharInquerito()
 window.onload=function(){
 
 setTimeout(function(){
-
 document.getElementById("splash").style.display="none"
-
 },2000)
 
 }
 
-</script>
-
-</body>
-</html>
+</script></body>
+  </html>
