@@ -1,18 +1,16 @@
 <!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><meta name="theme-color" content="#0b3d91"><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"><link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><style>
 
-/* ===== BASE ===== */
+/* BASE */
 
 body{
 font-family:Arial,sans-serif;
 margin:0;
-padding:0;
 background:linear-gradient(135deg,#0b3d91,#1e88e5);
 min-height:100vh;
-overflow-x:hidden;
 }
 
-/* CONTAINER CENTRAL */
+/* APP */
 
 .app{
 max-width:480px;
@@ -30,7 +28,6 @@ padding:25px 10px;
 .logo-topo{
 width:110px;
 border-radius:10px;
-margin-bottom:10px;
 }
 
 /* MENU */
@@ -80,16 +77,12 @@ font-weight:bold;
 padding:15px;
 }
 
-/* CARDS */
-
 .card{
 background:white;
 padding:20px;
 border-radius:18px;
 box-shadow:0 10px 25px rgba(0,0,0,0.15);
 margin:15px auto;
-width:100%;
-box-sizing:border-box;
 text-align:center;
 }
 
@@ -98,16 +91,15 @@ text-align:center;
 .btn{
 background:linear-gradient(45deg,#ff9800,#ff5722);
 color:white;
-padding:15px;
+padding:14px;
 border:none;
 border-radius:12px;
-font-weight:bold;
 width:100%;
-margin-top:12px;
-font-size:16px;
+margin-top:10px;
+font-weight:bold;
 }
 
-/* INPUTS */
+/* INPUT */
 
 input,textarea,select{
 width:100%;
@@ -115,16 +107,23 @@ padding:12px;
 margin-top:10px;
 border-radius:10px;
 border:1px solid #ccc;
-font-size:15px;
-box-sizing:border-box;
 }
 
 /* MAPA */
 
 #mapa{
 height:320px;
-width:100%;
 border-radius:12px;
+}
+
+/* PEDIDOS */
+
+.pedido{
+background:#f5f5f5;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+text-align:left;
 }
 
 /* WHATSAPP */
@@ -138,7 +137,6 @@ color:white;
 font-size:26px;
 padding:15px;
 border-radius:50%;
-box-shadow:0 5px 20px rgba(0,0,0,0.3);
 }
 
 /* SPLASH */
@@ -158,18 +156,6 @@ color:white;
 z-index:9999;
 }
 
-/* PEDIDOS */
-
-.pedido{
-background:#f5f5f5;
-padding:12px;
-border-radius:10px;
-margin-top:10px;
-text-align:left;
-}
-
-/* FOOTER */
-
 footer{
 background:#333;
 color:white;
@@ -178,44 +164,27 @@ padding:15px;
 margin-top:30px;
 }
 
-/* ANIMAÇÃO */
-
-@keyframes fadeUp{
-0%{opacity:0; transform:translateY(20px);}
-100%{opacity:1; transform:translateY(0);}
-}
-
 </style></head><body><a href="https://wa.me/244951945715" class="whatsapp-btn">
 <i class="fab fa-whatsapp"></i>
-</a><div id="splash"><img src="logo_odjim2-512png.jpeg" width="150"><h2>ODJIM Solution</h2><p>Carregando sistema...</p></div><button class="menu-btn" onclick="abrirMenu()">☰</button>
+</a><div id="splash">
+<img src="logo_odjim2-512png.jpeg" width="150">
+<h2>ODJIM Solution</h2>
+<p>Carregando sistema...</p>
+</div><button class="menu-btn" onclick="abrirMenu()">☰</button>
 
 <div id="menuLateral" class="menu-lateral"><h2>ODJIM</h2><button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
 <button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
 <button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar serviço</button>
 <button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
-<button onclick="mostrar('pedidos'); fecharMenu()">📢 Pedidos em tempo real</button>
+<button onclick="mostrar('pedidos'); fecharMenu()">📢 Pedidos</button>
 <button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
-<button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Área do Técnico</button>
+<button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Técnico</button>
+<button onclick="mostrar('login'); fecharMenu()">🔐 Login</button>
+<button onclick="mostrar('admin'); fecharMenu()">⚙ Admin</button>
 <button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
-<button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar serviço</button>
+<button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar</button>
 
-</div><div class="app"><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1><p>Serviços rápidos, soluções brilhantes</p></header><!-- INICIO --><div class="section" id="inicio"><div class="card"><h2>Peça um serviço</h2><button class="btn" onclick="mostrar('solicitar')">🚀 Solicitar serviço</button>
-
-<div id="inqueritoBox" style="display:none">
-
-<h3>Avaliar serviço</h3>
-
-<select id="avaliacao">
-<option>⭐⭐⭐⭐⭐ Excelente</option>
-<option>⭐⭐⭐⭐ Muito bom</option>
-<option>⭐⭐⭐ Bom</option>
-</select>
-
-<button onclick="enviarInquerito()">Enviar</button>
-
-<button onclick="fecharInquerito()">Fechar</button>
-
-</div>
+</div><div class="app"><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1><p>Serviços rápidos, soluções brilhantes</p></header><!-- INICIO --><div class="section" id="inicio"><div class="card"><h2>Peça um serviço</h2><button class="btn" onclick="mostrar('solicitar')">🚀 Solicitar</button>
 
 <button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos</button>
 
@@ -224,28 +193,30 @@ margin-top:30px;
 <li>📹 CCTV</li>
 <li>❄️ Ar condicionado</li>
 <li>🔌 Electricidade</li>
-<li>🪑 Móveis</li>
 <li>Babá</li>
 <li>Diarista</li>
-<li>Pintura</li>
-<li>Ladrilho</li>
-<li>Outros</li></ul></div></div><!-- SOLICITAR --><div class="section" id="solicitar" style="display:none"><div class="card"><h2>Novo pedido</h2><input id="nomeCliente" placeholder="Seu nome"><input id="telefoneCliente" placeholder="Telefone"><select id="tipoServico"><option>Informática</option>
+<li>Pintura</li></ul></div></div><!-- SOLICITAR --><div class="section" id="solicitar" style="display:none"><div class="card"><h2>Novo pedido</h2><input id="nomeCliente" placeholder="Seu nome"><input id="telefoneCliente" placeholder="Telefone"><select id="tipoServico"><option>Informática</option>
 <option>Rede</option>
 <option>CCTV</option>
 <option>Ar condicionado</option>
 <option>Diarista</option>
-<option>Acabamento Civil</option>
 <option>Outros</option></select><textarea id="descricaoServico" placeholder="Descreva o problema"></textarea><button class="btn" onclick="pedirServico()">Enviar pedido</button>
 
-</div></div><!-- PEDIDOS EM TEMPO REAL --><div class="section" id="pedidos" style="display:none"><div class="card"><h2>Pedidos em tempo real</h2><div id="listaPedidos"></div></div></div><!-- MAPA --><div class="section" id="mapaSection" style="display:none"><div class="card"><h2>Técnicos próximos</h2><div id="mapa"></div><button class="btn" onclick="obterLocalizacaoMapa()">Mostrar minha localização</button>
+</div></div><!-- PEDIDOS --><div class="section" id="pedidos" style="display:none"><div class="card"><h2>Pedidos em tempo real</h2><div id="listaPedidos"></div></div></div><!-- MAPA --><div class="section" id="mapaSection" style="display:none"><div class="card"><h2>Técnicos próximos</h2><div id="mapa"></div><button class="btn" onclick="obterLocalizacaoMapa()">Mostrar localização</button>
 
-</div></div><!-- HISTORICO --><div class="section" id="historico" style="display:none"><div class="card"><h2>Histórico</h2><div id="listaHistorico"></div></div></div><!-- TECNICO --><div class="section" id="tecnico" style="display:none"><div class="card"><h2>Painel do Técnico</h2><input id="nomeTecnico" placeholder="Nome do técnico"><button class="btn" onclick="ficarOnline()">Ficar Online</button>
+</div></div><!-- HISTORICO --><div class="section" id="historico" style="display:none"><div class="card"><h2>Histórico</h2><div id="listaHistorico"></div></div></div><!-- TECNICO --><div class="section" id="tecnico" style="display:none"><div class="card"><h2>Painel Técnico</h2><input id="nomeTecnico" placeholder="Nome do técnico"><button class="btn" onclick="ficarOnline()">Online</button>
 
-<button class="btn" onclick="ficarOffline()">Ficar Offline</button>
+<button class="btn" onclick="ficarOffline()">Offline</button>
 
-<p id="estadoTecnico">Estado: Offline</p></div></div><!-- CONTACTOS --><div class="section" id="contacto" style="display:none"><div class="card"><h2>Contactos</h2><p>📞 951945715</p><p>📧 oj761722@gmail.com</p></div></div></div><footer>ODJIM Solution © 2026
+<p id="estadoTecnico">Estado: Offline</p></div></div><!-- LOGIN --><div class="section" id="login" style="display:none"><div class="card"><h2>Login</h2><select id="tipoLogin"><option value="cliente">Cliente</option>
+<option value="tecnico">Técnico</option>
+<option value="admin">Administrador</option></select><input id="usuarioLogin" placeholder="Usuário"><input id="senhaLogin" type="password" placeholder="Senha"><button class="btn" onclick="fazerLogin()">Entrar</button>
+
+<p id="statusLogin"></p></div></div><!-- ADMIN --><div class="section" id="admin" style="display:none"><div class="card"><h2>Painel Administrativo</h2><p>Total de pedidos:</p><div id="totalPedidos"></div></div></div><!-- CONTACTO --><div class="section" id="contacto" style="display:none"><div class="card"><h2>Contactos</h2><p>📞 951945715</p><p>📧 oj761722@gmail.com</p></div></div></div><footer>ODJIM Solution © 2026
 
 </footer><script>
+
+/* VARIÁVEIS */
 
 let mapa=null
 let pedidos=[]
@@ -277,13 +248,13 @@ let lon=pos.coords.longitude
 
 mapa.setView([lat,lon],16)
 
-L.marker([lat,lon]).addTo(mapa).bindPopup("Você está aqui").openPopup()
+L.marker([lat,lon]).addTo(mapa)
 
 })
 
 }
 
-/* PEDIDOS */
+/* PEDIR SERVIÇO */
 
 function pedirServico(){
 
@@ -305,9 +276,11 @@ historico.push(nome+" pediu "+servico)
 atualizarPedidos()
 atualizarHistorico()
 
-alert("Pedido enviado!")
+alert("Pedido enviado")
 
 }
+
+/* ATUALIZAR PEDIDOS */
 
 function atualizarPedidos(){
 
@@ -315,7 +288,7 @@ let lista=document.getElementById("listaPedidos")
 
 lista.innerHTML=""
 
-pedidos.forEach(function(p){
+pedidos.forEach(function(p,i){
 
 lista.innerHTML+=`
 
@@ -325,7 +298,11 @@ lista.innerHTML+=`
 
 Serviço: ${p.servico}<br>
 
-Estado: ${p.estado}
+Estado: ${p.estado}<br>
+
+<button onclick="aceitarPedido(${i})">Aceitar</button>
+
+<button onclick="concluirPedido(${i})">Concluir</button>
 
 </div>
 
@@ -335,7 +312,27 @@ Estado: ${p.estado}
 
 }
 
-/* HISTORICO */
+/* ACEITAR */
+
+function aceitarPedido(i){
+
+pedidos[i].estado="Técnico a caminho"
+
+atualizarPedidos()
+
+}
+
+/* CONCLUIR */
+
+function concluirPedido(i){
+
+pedidos[i].estado="Concluído"
+
+atualizarPedidos()
+
+}
+
+/* HISTÓRICO */
 
 function atualizarHistorico(){
 
@@ -355,7 +352,7 @@ lista.innerHTML+="<p>"+item+"</p>"
 
 function mostrar(secao){
 
-let secoes=["inicio","servicos","solicitar","mapaSection","historico","tecnico","contacto","pedidos"]
+let secoes=["inicio","servicos","solicitar","mapaSection","historico","tecnico","contacto","pedidos","login","admin"]
 
 secoes.forEach(function(s){
 
@@ -367,47 +364,27 @@ if(el) el.style.display="none"
 
 document.getElementById(secao).style.display="block"
 
-if(secao==="mapaSection"){
-
-setTimeout(function(){
-
-if(!mapa) iniciarMapa()
-
-mapa.invalidateSize()
-
-},300)
-
 }
 
-}
+/* MENU */
 
 function abrirMenu(){
-
 document.getElementById("menuLateral").style.left="0"
-
 }
 
 function fecharMenu(){
-
 document.getElementById("menuLateral").style.left="-280px"
-
-function abrirInquerito(){
-document.getElementById("inqueritoBox").style.display="block"
 }
 
-function fecharInquerito(){
-document.getElementById("inqueritoBox").style.display="none"
-}
+/* LOGIN */
 
-function enviarInquerito(){
+function fazerLogin(){
 
-let avaliacao=document.getElementById("avaliacao").value
+let tipo=document.getElementById("tipoLogin").value
 
-alert("Obrigado pela sua avaliação: " + avaliacao)
-
-fecharInquerito()
-
-}
+if(tipo==="admin") mostrar("admin")
+else if(tipo==="tecnico") mostrar("tecnico")
+else mostrar("inicio")
 
 }
 
@@ -423,4 +400,5 @@ document.getElementById("splash").style.display="none"
 
 }
 
-</script></body></html>
+</script></body>
+</html>
