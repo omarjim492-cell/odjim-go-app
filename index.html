@@ -375,6 +375,24 @@ function fecharMenu(){
 
 document.getElementById("menuLateral").style.left="-280px"
 
+function abrirInquerito(){
+document.getElementById("inqueritoBox").style.display="block"
+}
+
+function fecharInquerito(){
+document.getElementById("inqueritoBox").style.display="none"
+}
+
+function enviarInquerito(){
+
+let avaliacao=document.getElementById("avaliacao").value
+
+alert("Obrigado pela sua avaliação: " + avaliacao)
+
+fecharInquerito()
+
+}
+
 }
 
 /* SPLASH */
