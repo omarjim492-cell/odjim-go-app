@@ -201,6 +201,22 @@ margin-top:30px;
 
 </div><div class="app"><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1><p>Serviços rápidos, soluções brilhantes</p></header><!-- INICIO --><div class="section" id="inicio"><div class="card"><h2>Peça um serviço</h2><button class="btn" onclick="mostrar('solicitar')">🚀 Solicitar serviço</button>
 
+<div id="inqueritoBox" style="display:none">
+
+<h3>Avaliar serviço</h3>
+
+<select id="avaliacao">
+<option>⭐⭐⭐⭐⭐ Excelente</option>
+<option>⭐⭐⭐⭐ Muito bom</option>
+<option>⭐⭐⭐ Bom</option>
+</select>
+
+<button onclick="enviarInquerito()">Enviar</button>
+
+<button onclick="fecharInquerito()">Fechar</button>
+
+</div>
+
 <button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos</button>
 
 </div></div><!-- SERVIÇOS --><div class="section" id="servicos" style="display:none"><div class="card"><h2>Serviços disponíveis</h2><ul style="text-align:left"><li>💻 Informática</li>
