@@ -1,5 +1,23 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><meta name="theme-color" content="#0b3d91"><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"><link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><style>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ODJIM Solution</title>
+
+<meta name="theme-color" content="#0b3d91">
+
+<link rel="manifest" href="manifest.json">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
 
 /* BASE */
 
@@ -156,28 +174,260 @@ color:white;
 z-index:9999;
 }
 
-<!-- INQUÉRITO DE AVALIAÇÃO -->
+/* FOOTER */
 
-<div id="inqueritoBox" style="display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-z-index:2000;
-align-items:center;
-justify-content:center;">
+footer{
+background:#333;
+color:white;
+text-align:center;
+padding:15px;
+margin-top:30px;
+}
 
-<div style="
-background:white;
-padding:25px;
-border-radius:15px;
-width:85%;
-max-width:400px;
-margin:auto;
-margin-top:120px;
-text-align:center;">
+</style>
+</head>
+
+<body>
+
+<a href="https://wa.me/244951945715" class="whatsapp-btn">
+<i class="fab fa-whatsapp"></i>
+</a>
+
+<div id="splash">
+<img src="logo_odjim2-512png.jpeg" width="150">
+<h2>ODJIM Solution</h2>
+<p>Carregando sistema...</p>
+</div>
+
+<button class="menu-btn" onclick="abrirMenu()">☰</button>
+
+<div id="menuLateral" class="menu-lateral">
+
+<h2>ODJIM</h2>
+
+<button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
+<button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
+<button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar serviço</button>
+<button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
+<button onclick="mostrar('pedidos'); fecharMenu()">📢 Pedidos</button>
+<button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
+<button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Técnico</button>
+<button onclick="mostrar('login'); fecharMenu()">🔐 Login</button>
+<button onclick="mostrar('admin'); fecharMenu()">⚙ Admin</button>
+<button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
+<button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar</button>
+
+</div>
+
+<div class="app">
+
+<header>
+<img src="logo_odjim1-512png.jpeg" class="logo-topo">
+<h1>ODJIM Solution</h1>
+<p>Serviços rápidos, soluções brilhantes</p>
+</header>
+
+<!-- INICIO -->
+
+<div class="section" id="inicio">
+
+<div class="card">
+
+<h2>Peça um serviço</h2>
+
+<button class="btn" onclick="mostrar('solicitar')">🚀 Solicitar</button>
+
+<button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos</button>
+
+</div>
+
+</div>
+
+<!-- SERVIÇOS -->
+
+<div class="section" id="servicos" style="display:none">
+
+<div class="card">
+
+<h2>Serviços disponíveis</h2>
+
+<ul style="text-align:left">
+
+<li>💻 Informática</li>
+<li>📶 Redes</li>
+<li>📹 CCTV</li>
+<li>❄️ Ar condicionado</li>
+<li>🔌 Electricidade</li>
+<li>Babá</li>
+<li>Diarista</li>
+<li>Pintura</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<!-- SOLICITAR -->
+
+<div class="section" id="solicitar" style="display:none">
+
+<div class="card">
+
+<h2>Novo pedido</h2>
+
+<input id="nomeCliente" placeholder="Seu nome">
+
+<input id="telefoneCliente" placeholder="Telefone">
+
+<select id="tipoServico">
+
+<option>Informática</option>
+<option>Rede</option>
+<option>CCTV</option>
+<option>Ar condicionado</option>
+<option>Diarista</option>
+<option>Outros</option>
+
+</select>
+
+<textarea id="descricaoServico" placeholder="Descreva o problema"></textarea>
+
+<button class="btn" onclick="pedirServico()">Enviar pedido</button>
+
+</div>
+
+</div>
+
+<!-- PEDIDOS -->
+
+<div class="section" id="pedidos" style="display:none">
+
+<div class="card">
+
+<h2>Pedidos em tempo real</h2>
+
+<div id="listaPedidos"></div>
+
+</div>
+
+</div>
+
+<!-- MAPA -->
+
+<div class="section" id="mapaSection" style="display:none">
+
+<div class="card">
+
+<h2>Técnicos próximos</h2>
+
+<div id="mapa"></div>
+
+<button class="btn" onclick="obterLocalizacaoMapa()">Mostrar localização</button>
+
+</div>
+
+</div>
+
+<!-- HISTORICO -->
+
+<div class="section" id="historico" style="display:none">
+
+<div class="card">
+
+<h2>Histórico</h2>
+
+<div id="listaHistorico"></div>
+
+</div>
+
+</div>
+
+<!-- TECNICO -->
+
+<div class="section" id="tecnico" style="display:none">
+
+<div class="card">
+
+<h2>Painel Técnico</h2>
+
+<input id="nomeTecnico" placeholder="Nome do técnico">
+
+<button class="btn" onclick="ficarOnline()">Online</button>
+
+<button class="btn" onclick="ficarOffline()">Offline</button>
+
+<p id="estadoTecnico">Estado: Offline</p>
+
+</div>
+
+</div>
+
+<!-- LOGIN -->
+
+<div class="section" id="login" style="display:none">
+
+<div class="card">
+
+<h2>Login</h2>
+
+<select id="tipoLogin">
+
+<option value="cliente">Cliente</option>
+<option value="tecnico">Técnico</option>
+<option value="admin">Administrador</option>
+
+</select>
+
+<input id="usuarioLogin" placeholder="Usuário">
+
+<input id="senhaLogin" type="password" placeholder="Senha">
+
+<button class="btn" onclick="fazerLogin()">Entrar</button>
+
+</div>
+
+</div>
+
+<!-- ADMIN -->
+
+<div class="section" id="admin" style="display:none">
+
+<div class="card">
+
+<h2>Painel Administrativo</h2>
+
+<p>Total de pedidos:</p>
+
+<div id="totalPedidos"></div>
+
+</div>
+
+</div>
+
+<!-- CONTACTO -->
+
+<div class="section" id="contacto" style="display:none">
+
+<div class="card">
+
+<h2>Contactos</h2>
+
+<p>📞 951945715</p>
+
+<p>📧 oj761722@gmail.com</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- INQUÉRITO -->
+
+<div id="inqueritoBox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000;">
+
+<div style="background:white; padding:25px; border-radius:15px; width:85%; max-width:400px; margin:auto; margin-top:120px; text-align:center;">
 
 <h2>Avaliar Serviço</h2>
 
@@ -191,258 +441,43 @@ text-align:center;">
 
 </select>
 
-<textarea id="comentario" placeholder="Comentário (opcional)"></textarea>
+<textarea id="comentario" placeholder="Comentário"></textarea>
 
-<button class="btn" onclick="enviarInquerito()">Enviar Avaliação</button>
+<button class="btn" onclick="enviarInquerito()">Enviar</button>
 
 <button class="btn" onclick="fecharInquerito()">Fechar</button>
 
 </div>
-</div>
-
-footer{
-background:#333;
-color:white;
-text-align:center;
-padding:15px;
-margin-top:30px;
-}
-
-</style></head><body><a href="https://wa.me/244951945715" class="whatsapp-btn">
-<i class="fab fa-whatsapp"></i>
-</a><div id="splash">
-<img src="logo_odjim2-512png.jpeg" width="150">
-<h2>ODJIM Solution</h2>
-<p>Carregando sistema...</p>
-</div><button class="menu-btn" onclick="abrirMenu()">☰</button>
-
-<div id="menuLateral" class="menu-lateral"><h2>ODJIM</h2><button onclick="mostrar('inicio'); fecharMenu()">🏠 Início</button>
-<button onclick="mostrar('servicos'); fecharMenu()">🛠 Serviços</button>
-<button onclick="mostrar('solicitar'); fecharMenu()">📋 Solicitar serviço</button>
-<button onclick="mostrar('mapaSection'); fecharMenu()">📍 Técnicos próximos</button>
-<button onclick="mostrar('pedidos'); fecharMenu()">📢 Pedidos</button>
-<button onclick="mostrar('historico'); fecharMenu()">📜 Histórico</button>
-<button onclick="mostrar('tecnico'); fecharMenu()">👨‍🔧 Técnico</button>
-<button onclick="mostrar('login'); fecharMenu()">🔐 Login</button>
-<button onclick="mostrar('admin'); fecharMenu()">⚙ Admin</button>
-<button onclick="mostrar('contacto'); fecharMenu()">📞 Contactos</button>
-<button onclick="abrirInquerito(); fecharMenu()">⭐ Avaliar</button>
-
-</div><div class="app"><header><img src="logo_odjim1-512png.jpeg" class="logo-topo"><h1>ODJIM Solution</h1><p>Serviços rápidos, soluções brilhantes</p></header><!-- INICIO --><div class="section" id="inicio"><div class="card"><h2>Peça um serviço</h2><button class="btn" onclick="mostrar('solicitar')">🚀 Solicitar</button>
-
-<button class="btn" onclick="mostrar('mapaSection')">📍 Ver técnicos</button>
-
-</div></div><!-- SERVIÇOS --><div class="section" id="servicos" style="display:none"><div class="card"><h2>Serviços disponíveis</h2><ul style="text-align:left"><li>💻 Informática</li>
-<li>📶 Redes</li>
-<li>📹 CCTV</li>
-<li>❄️ Ar condicionado</li>
-<li>🔌 Electricidade</li>
-<li>Babá</li>
-<li>Diarista</li>
-<li>Pintura</li></ul></div></div><!-- SOLICITAR --><div class="section" id="solicitar" style="display:none"><div class="card"><h2>Novo pedido</h2><input id="nomeCliente" placeholder="Seu nome"><input id="telefoneCliente" placeholder="Telefone"><select id="tipoServico"><option>Informática</option>
-<option>Rede</option>
-<option>CCTV</option>
-<option>Ar condicionado</option>
-<option>Diarista</option>
-<option>Outros</option></select><textarea id="descricaoServico" placeholder="Descreva o problema"></textarea><button class="btn" onclick="pedirServico()">Enviar pedido</button>
-
-</div></div><!-- PEDIDOS --><div class="section" id="pedidos" style="display:none"><div class="card"><h2>Pedidos em tempo real</h2><div id="listaPedidos"></div></div></div><!-- MAPA --><div class="section" id="mapaSection" style="display:none"><div class="card"><h2>Técnicos próximos</h2><div id="mapa"></div><button class="btn" onclick="obterLocalizacaoMapa()">Mostrar localização</button>
-
-</div></div><!-- HISTORICO --><div class="section" id="historico" style="display:none"><div class="card"><h2>Histórico</h2><div id="listaHistorico"></div></div></div><!-- TECNICO --><div class="section" id="tecnico" style="display:none"><div class="card"><h2>Painel Técnico</h2><input id="nomeTecnico" placeholder="Nome do técnico"><button class="btn" onclick="ficarOnline()">Online</button>
-
-<button class="btn" onclick="ficarOffline()">Offline</button>
-
-<p id="estadoTecnico">Estado: Offline</p></div></div><!-- LOGIN --><div class="section" id="login" style="display:none"><div class="card"><h2>Login</h2><select id="tipoLogin"><option value="cliente">Cliente</option>
-<option value="tecnico">Técnico</option>
-<option value="admin">Administrador</option></select><input id="usuarioLogin" placeholder="Usuário"><input id="senhaLogin" type="password" placeholder="Senha"><button class="btn" onclick="fazerLogin()">Entrar</button>
-
-<p id="statusLogin"></p></div></div><!-- ADMIN --><div class="section" id="admin" style="display:none"><div class="card"><h2>Painel Administrativo</h2><p>Total de pedidos:</p><div id="totalPedidos"></div></div></div><!-- CONTACTO --><div class="section" id="contacto" style="display:none"><div class="card"><h2>Contactos</h2><p>📞 951945715</p><p>📧 oj761722@gmail.com</p></div></div></div><footer>ODJIM Solution © 2026
-
-</footer><script>
-
-/* VARIÁVEIS */
-
-let mapa=null
-let pedidos=[]
-let historico=[]
-let marcadoresTecnicos={}
-
-/* MAPA */
-
-function iniciarMapa(){
-
-if(mapa) return
-
-mapa=L.map('mapa').setView([-8.8383,13.2344],13)
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa)
-
-}
-
-/* LOCALIZAÇÃO */
-
-function obterLocalizacaoMapa(){
-
-if(!mapa) iniciarMapa()
-
-navigator.geolocation.getCurrentPosition(function(pos){
-
-let lat=pos.coords.latitude
-let lon=pos.coords.longitude
-
-mapa.setView([lat,lon],16)
-
-L.marker([lat,lon]).addTo(mapa)
-
-})
-
-}
-
-/* PEDIR SERVIÇO */
-
-function pedirServico(){
-
-let nome=document.getElementById("nomeCliente").value
-let servico=document.getElementById("tipoServico").value
-
-let pedido={
-
-cliente:nome,
-servico:servico,
-estado:"Aguardando técnico"
-
-}
-
-pedidos.push(pedido)
-
-historico.push(nome+" pediu "+servico)
-
-atualizarPedidos()
-atualizarHistorico()
-
-alert("Pedido enviado")
-
-}
-
-/* ATUALIZAR PEDIDOS */
-
-function atualizarPedidos(){
-
-let lista=document.getElementById("listaPedidos")
-
-lista.innerHTML=""
-
-pedidos.forEach(function(p,i){
-
-lista.innerHTML+=`
-
-<div class="pedido">
-
-<b>${p.cliente}</b><br>
-
-Serviço: ${p.servico}<br>
-
-Estado: ${p.estado}<br>
-
-<button onclick="aceitarPedido(${i})">Aceitar</button>
-
-<button onclick="concluirPedido(${i})">Concluir</button>
 
 </div>
 
-`
+<footer>
 
-})
+ODJIM Solution © 2026
+
+</footer>
+
+<script>
+
+/* AVALIAÇÃO */
+
+function abrirInquerito(){
+document.getElementById("inqueritoBox").style.display="block"
+}
+
+function fecharInquerito(){
+document.getElementById("inqueritoBox").style.display="none"
+}
+
+function enviarInquerito(){
+
+alert("Obrigado pela sua avaliação ⭐")
+
+fecharInquerito()
 
 }
 
-/* ACEITAR */
+</script>
 
-function aceitarPedido(i){
-
-pedidos[i].estado="Técnico a caminho"
-
-atualizarPedidos()
-
-}
-
-/* CONCLUIR */
-
-function concluirPedido(i){
-
-pedidos[i].estado="Concluído"
-
-atualizarPedidos()
-
-}
-
-/* HISTÓRICO */
-
-function atualizarHistorico(){
-
-let lista=document.getElementById("listaHistorico")
-
-lista.innerHTML=""
-
-historico.forEach(function(item){
-
-lista.innerHTML+="<p>"+item+"</p>"
-
-})
-
-}
-
-/* MENU */
-
-function mostrar(secao){
-
-let secoes=["inicio","servicos","solicitar","mapaSection","historico","tecnico","contacto","pedidos","login","admin"]
-
-secoes.forEach(function(s){
-
-let el=document.getElementById(s)
-
-if(el) el.style.display="none"
-
-})
-
-document.getElementById(secao).style.display="block"
-
-}
-
-/* MENU */
-
-function abrirMenu(){
-document.getElementById("menuLateral").style.left="0"
-}
-
-function fecharMenu(){
-document.getElementById("menuLateral").style.left="-280px"
-}
-
-/* LOGIN */
-
-function fazerLogin(){
-
-let tipo=document.getElementById("tipoLogin").value
-
-if(tipo==="admin") mostrar("admin")
-else if(tipo==="tecnico") mostrar("tecnico")
-else mostrar("inicio")
-
-}
-
-/* SPLASH */
-
-window.onload=function(){
-
-setTimeout(function(){
-
-document.getElementById("splash").style.display="none"
-
-},2000)
-
-}
-
-</script></body>
+</body>
 </html>
