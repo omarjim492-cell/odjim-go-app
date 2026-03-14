@@ -156,6 +156,50 @@ color:white;
 z-index:9999;
 }
 
+<!-- INQUÉRITO DE AVALIAÇÃO -->
+
+<div id="inqueritoBox" style="display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+z-index:2000;
+align-items:center;
+justify-content:center;">
+
+<div style="
+background:white;
+padding:25px;
+border-radius:15px;
+width:85%;
+max-width:400px;
+margin:auto;
+margin-top:120px;
+text-align:center;">
+
+<h2>Avaliar Serviço</h2>
+
+<select id="avaliacao">
+
+<option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+<option value="4">⭐⭐⭐⭐ Muito bom</option>
+<option value="3">⭐⭐⭐ Bom</option>
+<option value="2">⭐⭐ Regular</option>
+<option value="1">⭐ Mau</option>
+
+</select>
+
+<textarea id="comentario" placeholder="Comentário (opcional)"></textarea>
+
+<button class="btn" onclick="enviarInquerito()">Enviar Avaliação</button>
+
+<button class="btn" onclick="fecharInquerito()">Fechar</button>
+
+</div>
+</div>
+
 footer{
 background:#333;
 color:white;
