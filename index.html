@@ -3,17 +3,17 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>ODJIM Solution</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="manifest" href="manifest.json">
 
 <style>
 
 body{
-font-family:Arial;
 margin:0;
+font-family:Arial;
 background:linear-gradient(135deg,#0b3d91,#1e88e5);
 color:white;
 }
@@ -21,30 +21,48 @@ color:white;
 header{
 text-align:center;
 padding:20px;
+font-size:30px;
+font-weight:bold;
+}
+
+.menu{
+padding:20px;
+}
+
+.btn{
+background:#ff9800;
+border:none;
+padding:18px;
+margin:10px 0;
+width:100%;
+font-size:18px;
+color:white;
+border-radius:10px;
 }
 
 .card{
 background:white;
 color:black;
+margin:20px;
 padding:20px;
-margin:15px;
-border-radius:12px;
+border-radius:15px;
 }
 
 input,select,textarea{
 width:100%;
-padding:10px;
+padding:12px;
 margin-top:10px;
 }
 
 button{
 background:#ff9800;
-color:white;
 border:none;
-padding:12px;
-margin-top:10px;
+padding:15px;
+margin-top:15px;
 width:100%;
-border-radius:8px;
+color:white;
+font-size:16px;
+border-radius:10px;
 }
 
 .section{
@@ -59,13 +77,17 @@ display:none;
 
 <header>
 
-<h1>ODJIM Solution</h1>
-
-<button onclick="mostrar('cliente')">Cliente</button>
-<button onclick="mostrar('tecnico')">Técnico</button>
-<button onclick="mostrar('admin')">Admin</button>
+ODJIM Solution
 
 </header>
+
+<div class="menu">
+
+<button class="btn" onclick="abrir('cliente')">Cliente</button>
+<button class="btn" onclick="abrir('tecnico')">Técnico</button>
+<button class="btn" onclick="abrir('admin')">Admin</button>
+
+</div>
 
 <!-- CLIENTE -->
 
@@ -92,48 +114,22 @@ display:none;
 <option>Pintura</option>
 <option>Limpeza</option>
 <option>Babá</option>
-<option>Jardinagem</option>
-<option>Eletrodomésticos</option>
+<option>Design gráfico</option>
+<option>Aplicação de móveis planejados</option>
+<option>Acabamentos Civil</option>
+<option>Arrumação de escritórios</option>
 
 </select>
 
 <textarea id="descricao" placeholder="Descreva o problema"></textarea>
 
 <label>Data início</label>
-<input type="date" id="dataInicio">
+<input type="date" id="inicio">
 
 <label>Data fim</label>
-<input type="date" id="dataFim">
+<input type="date" id="fim">
 
-<button onclick="solicitar()">Enviar pedido</button>
-
-</div>
-
-<div class="card">
-
-<h2>Histórico</h2>
-
-<div id="historico"></div>
-
-</div>
-
-<div class="card">
-
-<h2>Avaliar Serviço</h2>
-
-<select id="avaliacao">
-
-<option value="5">Excelente ⭐⭐⭐⭐⭐</option>
-<option value="4">Muito bom ⭐⭐⭐⭐</option>
-<option value="3">Bom ⭐⭐⭐</option>
-<option value="2">Regular ⭐⭐</option>
-<option value="1">Mau ⭐</option>
-
-</select>
-
-<textarea id="comentario"></textarea>
-
-<button onclick="avaliar()">Enviar avaliação</button>
+<button onclick="enviarPedido()">Enviar pedido</button>
 
 </div>
 
@@ -145,9 +141,9 @@ display:none;
 
 <div class="card">
 
-<h2>Pedidos disponíveis</h2>
+<h2>Painel Técnico</h2>
 
-<div id="pedidosTecnico"></div>
+<div id="listaPedidos"></div>
 
 </div>
 
@@ -159,19 +155,20 @@ display:none;
 
 <div class="card">
 
-<h2>Painel Admin</h2>
+<h2>Login Admin</h2>
 
-<p>Total pedidos:</p>
+<input id="adminUser" placeholder="Usuário">
+<input id="adminPass" type="password" placeholder="Senha">
 
-<div id="totalPedidos"></div>
+<button onclick="loginAdmin()">Entrar</button>
 
 </div>
 
-<div class="card">
+<div id="painelAdmin" style="display:none" class="card">
 
-<h2>Avaliações</h2>
+<h2>Gestão de Pedidos</h2>
 
-<div id="listaAvaliacoes"></div>
+<div id="adminPedidos"></div>
 
 </div>
 
@@ -179,100 +176,56 @@ display:none;
 
 <script>
 
-let pedidos=JSON.parse(localStorage.getItem("pedidos"))||[]
-let avaliacoes=JSON.parse(localStorage.getItem("avaliacoes"))||[]
+let pedidos=[]
 
-function mostrar(id){
+function abrir(sec){
 
 document.querySelectorAll(".section").forEach(s=>s.style.display="none")
 
-document.getElementById(id).style.display="block"
+document.getElementById(sec).style.display="block"
 
-if(id==="tecnico") atualizarPedidosTecnico()
-
-if(id==="cliente") atualizarHistorico()
-
-if(id==="admin") atualizarAdmin()
+mostrarPedidos()
 
 }
 
-function solicitar(){
+function enviarPedido(){
 
 let pedido={
 
-nome:document.getElementById("nome").value,
-
-telefone:document.getElementById("telefone").value,
-
-local:document.getElementById("localizacao").value,
-
-servico:document.getElementById("servico").value,
-
-descricao:document.getElementById("descricao").value,
-
-inicio:document.getElementById("dataInicio").value,
-
-fim:document.getElementById("dataFim").value,
-
-estado:"Aguardando"
+nome:nome.value,
+telefone:telefone.value,
+local:localizacao.value,
+servico:servico.value,
+descricao:descricao.value,
+inicio:inicio.value,
+fim:fim.value,
+estado:"Aguardando técnico"
 
 }
 
 pedidos.push(pedido)
 
-localStorage.setItem("pedidos",JSON.stringify(pedidos))
+alert("Pedido enviado!")
 
-alert("🔔 Novo pedido enviado!")
-
-atualizarHistorico()
+mostrarPedidos()
 
 }
 
-function atualizarHistorico(){
+function mostrarPedidos(){
 
-let h=document.getElementById("historico")
-
-h.innerHTML=""
-
-pedidos.forEach(p=>{
-
-h.innerHTML+=`
-
-<p>
-
-<b>${p.servico}</b><br>
-
-${p.local}<br>
-
-${p.estado}
-
-</p>
-
-`
-
-})
-
-}
-
-function atualizarPedidosTecnico(){
-
-let lista=document.getElementById("pedidosTecnico")
-
-lista.innerHTML=""
+let html=""
 
 pedidos.forEach((p,i)=>{
 
-lista.innerHTML+=`
+html+=`
 
-<div>
+<div style="border-bottom:1px solid #ccc;padding:10px">
 
-<b>${p.servico}</b>
-
-<p>${p.local}</p>
+<b>${p.servico}</b><br>
+${p.local}<br>
+Estado: ${p.estado}
 
 <button onclick="aceitar(${i})">Aceitar</button>
-
-<button onclick="concluir(${i})">Concluir</button>
 
 </div>
 
@@ -280,75 +233,40 @@ lista.innerHTML+=`
 
 })
 
+listaPedidos.innerHTML=html
+adminPedidos.innerHTML=html
+
 }
 
 function aceitar(i){
 
 pedidos[i].estado="Técnico a caminho"
 
-localStorage.setItem("pedidos",JSON.stringify(pedidos))
-
-atualizarPedidosTecnico()
+mostrarPedidos()
 
 }
 
-function concluir(i){
+function loginAdmin(){
 
-pedidos[i].estado="Concluído"
+if(adminUser.value=="admin" && adminPass.value=="odjim2026"){
 
-localStorage.setItem("pedidos",JSON.stringify(pedidos))
+painelAdmin.style.display="block"
 
-atualizarPedidosTecnico()
+alert("Bem-vindo Administrador")
 
-}
+}else{
 
-function avaliar(){
-
-let a={
-
-nota:document.getElementById("avaliacao").value,
-
-comentario:document.getElementById("comentario").value
+alert("Login inválido")
 
 }
 
-avaliacoes.push(a)
-
-localStorage.setItem("avaliacoes",JSON.stringify(avaliacoes))
-
-alert("Obrigado pela avaliação ⭐")
-
 }
 
-function atualizarAdmin(){
+if('serviceWorker' in navigator){
 
-document.getElementById("totalPedidos").innerText=pedidos.length
-
-let lista=document.getElementById("listaAvaliacoes")
-
-lista.innerHTML=""
-
-avaliacoes.forEach(a=>{
-
-lista.innerHTML+=`
-
-<p>
-
-Nota: ${a.nota} ⭐
-
-<br>
-
-${a.comentario}
-
-</p>
-
-`
-
-})
+navigator.serviceWorker.register('service-worker.js')
 
 }
-
-mostrar("cliente")
 
 </script>
 
