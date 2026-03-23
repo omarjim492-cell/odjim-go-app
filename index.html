@@ -9,6 +9,9 @@
 
 <link rel="manifest" href="manifest.json">
 
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
 <style>
 
 body{
@@ -18,27 +21,42 @@ background:linear-gradient(135deg,#0b3d91,#1e88e5);
 color:white;
 }
 
+/* HEADER */
+
 header{
 text-align:center;
 padding:20px;
 font-size:30px;
 font-weight:bold;
+animation:fade 2s;
 }
+
+/* MENU */
 
 .menu{
 padding:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
 }
 
 .btn{
 background:#ff9800;
 border:none;
 padding:18px;
-margin:10px 0;
 width:100%;
 font-size:18px;
 color:white;
 border-radius:10px;
+transition:0.3s;
 }
+
+.btn:hover{
+transform:scale(1.05);
+background:#ff7700;
+}
+
+/* CARD */
 
 .card{
 background:white;
@@ -46,12 +64,17 @@ color:black;
 margin:20px;
 padding:20px;
 border-radius:15px;
+animation:fade 0.6s;
 }
+
+/* INPUT */
 
 input,select,textarea{
 width:100%;
 padding:12px;
 margin-top:10px;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
 button{
@@ -69,6 +92,21 @@ border-radius:10px;
 display:none;
 }
 
+/* MAPA */
+
+#mapa{
+height:250px;
+margin-top:10px;
+border-radius:10px;
+}
+
+/* ANIMAÇÃO */
+
+@keyframes fade{
+from{opacity:0; transform:translateY(20px)}
+to{opacity:1; transform:translateY(0)}
+}
+
 </style>
 
 </head>
@@ -80,6 +118,8 @@ display:none;
 ODJIM Solution
 
 </header>
+
+<!-- MENU PRINCIPAL -->
 
 <div class="menu">
 
@@ -129,6 +169,8 @@ ODJIM Solution
 <label>Data fim</label>
 <input type="date" id="fim">
 
+<div id="mapa"></div>
+
 <button onclick="enviarPedido()">Enviar pedido</button>
 
 </div>
@@ -176,7 +218,24 @@ ODJIM Solution
 
 <script>
 
-let pedidos=[]
+/* FIREBASE */
+
+const firebaseConfig = {
+
+apiKey: "COLE_AQUI",
+authDomain: "COLE_AQUI",
+projectId: "COLE_AQUI",
+storageBucket: "COLE_AQUI",
+messagingSenderId: "COLE_AQUI",
+appId: "COLE_AQUI"
+
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+/* MENU */
 
 function abrir(sec){
 
@@ -184,9 +243,9 @@ document.querySelectorAll(".section").forEach(s=>s.style.display="none")
 
 document.getElementById(sec).style.display="block"
 
-mostrarPedidos()
-
 }
+
+/* ENVIAR PEDIDO */
 
 function enviarPedido(){
 
@@ -203,29 +262,31 @@ estado:"Aguardando técnico"
 
 }
 
-pedidos.push(pedido)
+db.collection("pedidos").add(pedido)
 
 alert("Pedido enviado!")
 
-mostrarPedidos()
-
 }
 
-function mostrarPedidos(){
+/* RECEBER PEDIDOS EM TEMPO REAL */
+
+db.collection("pedidos").onSnapshot((snapshot)=>{
 
 let html=""
 
-pedidos.forEach((p,i)=>{
+snapshot.forEach(doc=>{
+
+let p=doc.data()
 
 html+=`
 
 <div style="border-bottom:1px solid #ccc;padding:10px">
 
 <b>${p.servico}</b><br>
-${p.local}<br>
+Local: ${p.local}<br>
 Estado: ${p.estado}
 
-<button onclick="aceitar(${i})">Aceitar</button>
+<button onclick="aceitar('${doc.id}')">Aceitar</button>
 
 </div>
 
@@ -236,15 +297,21 @@ Estado: ${p.estado}
 listaPedidos.innerHTML=html
 adminPedidos.innerHTML=html
 
+})
+
+/* ACEITAR PEDIDO */
+
+function aceitar(id){
+
+db.collection("pedidos").doc(id).update({
+
+estado:"Técnico a caminho"
+
+})
+
 }
 
-function aceitar(i){
-
-pedidos[i].estado="Técnico a caminho"
-
-mostrarPedidos()
-
-}
+/* LOGIN ADMIN */
 
 function loginAdmin(){
 
@@ -262,12 +329,32 @@ alert("Login inválido")
 
 }
 
+/* GOOGLE MAPS */
+
+function initMap(){
+
+let mapa = new google.maps.Map(document.getElementById("mapa"),{
+
+center:{lat:-8.8383,lng:13.2344},
+
+zoom:13
+
+})
+
+}
+
+/* SERVICE WORKER */
+
 if('serviceWorker' in navigator){
 
 navigator.serviceWorker.register('service-worker.js')
 
 }
 
+</script>
+
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_GOOGLE_MAPS&callback=initMap">
 </script>
 
 </body>
