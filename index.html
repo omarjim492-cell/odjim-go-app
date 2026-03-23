@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>ODJIM Solution</title>
 
 <link rel="manifest" href="manifest.json">
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
 <style>
 
@@ -26,9 +24,8 @@ color:white;
 header{
 text-align:center;
 padding:20px;
-font-size:30px;
+font-size:28px;
 font-weight:bold;
-animation:fade 2s;
 }
 
 /* MENU */
@@ -43,20 +40,11 @@ gap:10px;
 .btn{
 background:#ff9800;
 border:none;
-padding:18px;
-width:100%;
+padding:16px;
 font-size:18px;
 color:white;
 border-radius:10px;
-transition:0.3s;
 }
-
-.btn:hover{
-transform:scale(1.05);
-background:#ff7700;
-}
-
-/* CARD */
 
 .card{
 background:white;
@@ -64,10 +52,7 @@ color:black;
 margin:20px;
 padding:20px;
 border-radius:15px;
-animation:fade 0.6s;
 }
-
-/* INPUT */
 
 input,select,textarea{
 width:100%;
@@ -80,7 +65,7 @@ border:1px solid #ccc;
 button{
 background:#ff9800;
 border:none;
-padding:15px;
+padding:14px;
 margin-top:15px;
 width:100%;
 color:white;
@@ -92,19 +77,11 @@ border-radius:10px;
 display:none;
 }
 
-/* MAPA */
-
 #mapa{
-height:250px;
+height:200px;
 margin-top:10px;
 border-radius:10px;
-}
-
-/* ANIMAÇÃO */
-
-@keyframes fade{
-from{opacity:0; transform:translateY(20px)}
-to{opacity:1; transform:translateY(0)}
+background:#eee;
 }
 
 </style>
@@ -119,7 +96,7 @@ ODJIM Solution
 
 </header>
 
-<!-- MENU PRINCIPAL -->
+<!-- MENU -->
 
 <div class="menu">
 
@@ -169,7 +146,7 @@ ODJIM Solution
 <label>Data fim</label>
 <input type="date" id="fim">
 
-<div id="mapa"></div>
+<div id="mapa">Mapa carregará aqui</div>
 
 <button onclick="enviarPedido()">Enviar pedido</button>
 
@@ -216,9 +193,12 @@ ODJIM Solution
 
 </div>
 
-<script>
+<!-- FIREBASE -->
 
-/* FIREBASE */
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
 
@@ -231,13 +211,12 @@ appId: "COLE_AQUI"
 
 };
 
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 /* MENU */
 
-function abrir(sec){
+window.abrir=function(sec){
 
 document.querySelectorAll(".section").forEach(s=>s.style.display="none")
 
@@ -247,36 +226,36 @@ document.getElementById(sec).style.display="block"
 
 /* ENVIAR PEDIDO */
 
-function enviarPedido(){
+window.enviarPedido=async function(){
 
 let pedido={
 
-nome:nome.value,
-telefone:telefone.value,
-local:localizacao.value,
-servico:servico.value,
-descricao:descricao.value,
-inicio:inicio.value,
-fim:fim.value,
+nome:document.getElementById("nome").value,
+telefone:document.getElementById("telefone").value,
+local:document.getElementById("localizacao").value,
+servico:document.getElementById("servico").value,
+descricao:document.getElementById("descricao").value,
+inicio:document.getElementById("inicio").value,
+fim:document.getElementById("fim").value,
 estado:"Aguardando técnico"
 
 }
 
-db.collection("pedidos").add(pedido)
+await addDoc(collection(db,"pedidos"),pedido)
 
 alert("Pedido enviado!")
 
 }
 
-/* RECEBER PEDIDOS EM TEMPO REAL */
+/* RECEBER PEDIDOS */
 
-db.collection("pedidos").onSnapshot((snapshot)=>{
+onSnapshot(collection(db,"pedidos"),(snapshot)=>{
 
 let html=""
 
-snapshot.forEach(doc=>{
+snapshot.forEach(docSnap=>{
 
-let p=doc.data()
+let p=docSnap.data()
 
 html+=`
 
@@ -286,7 +265,7 @@ html+=`
 Local: ${p.local}<br>
 Estado: ${p.estado}
 
-<button onclick="aceitar('${doc.id}')">Aceitar</button>
+<button onclick="aceitar('${docSnap.id}')">Aceitar</button>
 
 </div>
 
@@ -294,16 +273,16 @@ Estado: ${p.estado}
 
 })
 
-listaPedidos.innerHTML=html
-adminPedidos.innerHTML=html
+document.getElementById("listaPedidos").innerHTML=html
+document.getElementById("adminPedidos").innerHTML=html
 
 })
 
-/* ACEITAR PEDIDO */
+/* ACEITAR */
 
-function aceitar(id){
+window.aceitar=async function(id){
 
-db.collection("pedidos").doc(id).update({
+await updateDoc(doc(db,"pedidos",id),{
 
 estado:"Técnico a caminho"
 
@@ -313,11 +292,11 @@ estado:"Técnico a caminho"
 
 /* LOGIN ADMIN */
 
-function loginAdmin(){
+window.loginAdmin=function(){
 
 if(adminUser.value=="admin" && adminPass.value=="odjim2026"){
 
-painelAdmin.style.display="block"
+document.getElementById("painelAdmin").style.display="block"
 
 alert("Bem-vindo Administrador")
 
@@ -329,33 +308,22 @@ alert("Login inválido")
 
 }
 
-/* GOOGLE MAPS */
+</script>
+
+<!-- GOOGLE MAPS (OPCIONAL) -->
+
+<script>
 
 function initMap(){
 
-let mapa = new google.maps.Map(document.getElementById("mapa"),{
+let mapa=document.getElementById("mapa")
 
-center:{lat:-8.8383,lng:13.2344},
-
-zoom:13
-
-})
+mapa.innerHTML="Mapa disponível quando chave Google Maps for configurada"
 
 }
 
-/* SERVICE WORKER */
-
-if('serviceWorker' in navigator){
-
-navigator.serviceWorker.register('service-worker.js')
-
-}
-
-</script>
-
-<script async
-src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_GOOGLE_MAPS&callback=initMap">
 </script>
 
 </body>
+
 </html>
