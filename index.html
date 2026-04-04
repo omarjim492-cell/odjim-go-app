@@ -327,3 +327,26 @@ mapa.innerHTML="Mapa disponível quando chave Google Maps for configurada"
 </body>
 
 </html>
+
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
+  authDomain: "odjim-solution.firebaseapp.com",
+  projectId: "odjim-solution",
+  storageBucket: "odjim-solution.firebasestorage.app",
+  messagingSenderId: "165673018775",
+  appId: "1:165673018775:web:3a259ed758f5ecac3950d2",
+  measurementId: "G-W8V6VLT5HD"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
