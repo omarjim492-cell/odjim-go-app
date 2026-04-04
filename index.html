@@ -1,125 +1,109 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><link rel="manifest" href="manifest.json"><!-- FIREBASE --><script type="module">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<title>ODJIM Solution</title>
+const firebaseConfig = {
+  apiKey: "COLE_AQUI",
+  authDomain: "COLE_AQUI",
+  projectId: "COLE_AQUI",
+  storageBucket: "COLE_AQUI",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI"
+};
 
-<link rel="manifest" href="manifest.json">
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.onSnapshot = onSnapshot;
+window.doc = doc;
+window.updateDoc = updateDoc;
 
-<style>
+</script><style>
 
 body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#0b3d91,#1e88e5);
-color:white;
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0b3d91,#1e88e5);
+  color:white;
 }
 
 header{
-text-align:center;
-padding:20px;
-font-size:28px;
-font-weight:bold;
+  text-align:center;
+  padding:20px;
+  font-size:30px;
+  font-weight:bold;
 }
 
 .menu{
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:10px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
 .btn{
-background:#ff9800;
-border:none;
-padding:18px;
-width:100%;
-font-size:18px;
-color:white;
-border-radius:10px;
+  background:#ff9800;
+  border:none;
+  padding:18px;
+  width:100%;
+  font-size:18px;
+  color:white;
+  border-radius:10px;
 }
 
 .card{
-background:white;
-color:black;
-margin:20px;
-padding:20px;
-border-radius:15px;
+  background:white;
+  color:black;
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
 }
 
 input,select,textarea{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-border:1px solid #ccc;
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
 
 button{
-background:#ff9800;
-border:none;
-padding:15px;
-margin-top:15px;
-width:100%;
-color:white;
-font-size:16px;
-border-radius:10px;
+  background:#ff9800;
+  border:none;
+  padding:15px;
+  margin-top:15px;
+  width:100%;
+  color:white;
+  font-size:16px;
+  border-radius:10px;
 }
 
 .section{
-display:none;
+  display:none;
 }
 
 #mapa{
-height:250px;
-margin-top:10px;
-border-radius:10px;
+  height:250px;
+  margin-top:10px;
+  border-radius:10px;
+  background:#ddd;
 }
 
 .pedido{
-border-bottom:1px solid #ccc;
-padding:10px;
+  border-bottom:1px solid #ccc;
+  padding:10px;
 }
 
-</style>
-
-</head>
-
-<body>
-
-<header>ODJIM Solution</header>
-
-<div class="menu">
-
-<button class="btn" onclick="abrir('cliente')">Cliente</button>
+</style></head><body><header>ODJIM Solution</header><!-- MENU PRINCIPAL --><div class="menu"><button class="btn" onclick="abrir('cliente')">Cliente</button>
 <button class="btn" onclick="abrir('tecnico')">Técnico</button>
 <button class="btn" onclick="abrir('admin')">Admin</button>
 
-</div>
-
-<!-- CLIENTE -->
-
-<div id="cliente" class="section">
-
-<div class="card">
-
-<h2>Solicitar Serviço</h2>
-
-<input id="nome" placeholder="Seu nome">
-
-<input id="telefone" placeholder="Telefone">
-
-<input id="localizacao" placeholder="Localização">
-
-<select id="servico">
-
-<option>Informática</option>
+</div><!-- CLIENTE --><div id="cliente" class="section"><div class="card"><h2>Solicitar Serviço</h2><input id="nome" placeholder="Seu nome"><input id="telefone" placeholder="Telefone"><input id="localizacao" placeholder="Localização"><select id="servico"><option>Informática</option>
 <option>Redes</option>
 <option>CCTV</option>
 <option>Electricidade</option>
@@ -127,209 +111,101 @@ padding:10px;
 <option>Canalização</option>
 <option>Pintura</option>
 <option>Limpeza</option>
-
-</select>
-
-<textarea id="descricao" placeholder="Descreva o problema"></textarea>
-
-<label>Data início</label>
+<option>Babá</option>
+<option>Design gráfico</option></select><textarea id="descricao" placeholder="Descreva o problema"></textarea><label>Data início</label>
 <input type="date" id="inicio">
 
 <label>Data fim</label>
 <input type="date" id="fim">
 
-<div id="mapa"></div>
+<div id="mapa">Mapa carregará aqui</div><button onclick="enviarPedido()">Enviar pedido</button>
 
-<button onclick="enviarPedido()">Enviar pedido</button>
+</div></div><!-- TECNICO --><div id="tecnico" class="section"><div class="card"><h2>Painel Técnico</h2><div id="listaPedidos"></div></div></div><!-- ADMIN --><div id="admin" class="section"><div class="card"><h2>Login Admin</h2><input id="adminUser" placeholder="Usuário">
+<input id="adminPass" type="password" placeholder="Senha"><button onclick="loginAdmin()">Entrar</button>
 
-</div>
+</div><div id="painelAdmin" style="display:none" class="card"><h2>Gestão de Pedidos</h2><div id="adminPedidos"></div></div></div><script>
 
-</div>
+function abrir(sec){
+  document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+  document.getElementById(sec).style.display = "block";
+}
 
-<!-- TECNICO -->
+async function enviarPedido(){
 
-<div id="tecnico" class="section">
+  const pedido = {
+    nome:document.getElementById("nome").value,
+    telefone:document.getElementById("telefone").value,
+    local:document.getElementById("localizacao").value,
+    servico:document.getElementById("servico").value,
+    descricao:document.getElementById("descricao").value,
+    inicio:document.getElementById("inicio").value,
+    fim:document.getElementById("fim").value,
+    estado:"Aguardando técnico"
+  };
 
-<div class="card">
+  await addDoc(collection(db,"pedidos"),pedido);
 
-<h2>Painel Técnico</h2>
+  alert("Pedido enviado com sucesso!");
+}
 
-<div id="listaPedidos"></div>
+onSnapshot(collection(db,"pedidos"),(snapshot)=>{
 
-</div>
+  let html="";
 
-</div>
+  snapshot.forEach((docSnap)=>{
 
-<!-- ADMIN -->
+    let p = docSnap.data();
 
-<div id="admin" class="section">
+    html += `
+    <div class="pedido">
 
-<div class="card">
+      <b>${p.servico}</b><br>
+      Cliente: ${p.nome}<br>
+      Local: ${p.local}<br>
+      Estado: ${p.estado}
 
-<h2>Login Admin</h2>
+      <button onclick="aceitar('${docSnap.id}')">Aceitar</button>
 
-<input id="adminUser" placeholder="Usuário">
+    </div>
+    `;
+  });
 
-<input id="adminPass" type="password" placeholder="Senha">
+  document.getElementById("listaPedidos").innerHTML = html;
+  document.getElementById("adminPedidos").innerHTML = html;
 
-<button onclick="loginAdmin()">Entrar</button>
+});
 
-</div>
+async function aceitar(id){
 
-<div id="painelAdmin" style="display:none" class="card">
-
-<h2>Gestão de Pedidos</h2>
-
-<div id="adminPedidos"></div>
-
-</div>
-
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-onSnapshot,
-doc,
-updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-
-apiKey: "SUA_API_KEY",
-authDomain: "odjim-solution.firebaseapp.com",
-projectId: "odjim-solution",
-storageBucket: "odjim-solution.appspot.com",
-messagingSenderId: "SENDER_ID",
-appId: "APP_ID"
-
-};
-
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-window.abrir = function(sec){
-
-document.querySelectorAll(".section").forEach(s=>s.style.display="none")
-
-document.getElementById(sec).style.display="block"
+  await updateDoc(doc(db,"pedidos",id),{
+    estado:"Técnico a caminho"
+  });
 
 }
 
-window.enviarPedido = async function(){
+function loginAdmin(){
 
-const pedido = {
+  if(
+    document.getElementById("adminUser").value==="admin" &&
+    document.getElementById("adminPass").value==="odjim2026"
+  ){
 
-nome:document.getElementById("nome").value,
-telefone:document.getElementById("telefone").value,
-local:document.getElementById("localizacao").value,
-servico:document.getElementById("servico").value,
-descricao:document.getElementById("descricao").value,
-inicio:document.getElementById("inicio").value,
-fim:document.getElementById("fim").value,
-estado:"Aguardando técnico"
+    document.getElementById("painelAdmin").style.display="block";
+    alert("Bem-vindo Administrador");
 
-}
+  }else{
 
-await addDoc(collection(db,"pedidos"),pedido)
+    alert("Login inválido");
 
-alert("Pedido enviado com sucesso!")
+  }
 
 }
 
-const pedidosRef = collection(db,"pedidos")
-
-onSnapshot(pedidosRef,(snapshot)=>{
-
-let html=""
-
-snapshot.forEach((docSnap)=>{
-
-const p = docSnap.data()
-
-html+=`
-
-<div class="pedido">
-
-<b>${p.servico}</b><br>
-
-Cliente: ${p.nome}<br>
-
-Local: ${p.local}<br>
-
-Estado: ${p.estado}<br>
-
-<button onclick="aceitar('${docSnap.id}')">Aceitar</button>
-
-</div>
-
-`
-
-})
-
-document.getElementById("listaPedidos").innerHTML=html
-document.getElementById("adminPedidos").innerHTML=html
-
-})
-
-window.aceitar = async function(id){
-
-await updateDoc(doc(db,"pedidos",id),{
-
-estado:"Técnico a caminho"
-
-})
-
-}
-
-window.loginAdmin = function(){
-
-if(
-document.getElementById("adminUser").value==="admin" &&
-document.getElementById("adminPass").value==="odjim2026"
-){
-
-document.getElementById("painelAdmin").style.display="block"
-
-alert("Bem vindo administrador")
-
-}
-
-else{
-
-alert("Login inválido")
-
-}
-
-}
-
-</script>
-
-<script>
-
-let map = L.map('mapa').setView([-8.8383,13.2344],13)
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-
-}).addTo(map)
-
-</script>
-
-<script>
+</script><script>
 
 if('serviceWorker' in navigator){
-
-navigator.serviceWorker.register('service-worker.js')
-
+  navigator.serviceWorker.register('service-worker.js');
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
