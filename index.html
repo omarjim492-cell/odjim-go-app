@@ -1,211 +1,600 @@
-<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ODJIM Solution</title><link rel="manifest" href="manifest.json"><!-- FIREBASE --><script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "COLE_AQUI",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.db = db;
-window.collection = collection;
-window.addDoc = addDoc;
-window.onSnapshot = onSnapshot;
-window.doc = doc;
-window.updateDoc = updateDoc;
-
-</script><style>
-
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#0b3d91,#1e88e5);
-  color:white;
-}
-
-header{
-  text-align:center;
-  padding:20px;
-  font-size:30px;
-  font-weight:bold;
-}
-
-.menu{
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.btn{
-  background:#ff9800;
-  border:none;
-  padding:18px;
-  width:100%;
-  font-size:18px;
-  color:white;
-  border-radius:10px;
-}
-
-.card{
-  background:white;
-  color:black;
-  margin:20px;
-  padding:20px;
-  border-radius:15px;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-button{
-  background:#ff9800;
-  border:none;
-  padding:15px;
-  margin-top:15px;
-  width:100%;
-  color:white;
-  font-size:16px;
-  border-radius:10px;
-}
-
-.section{
-  display:none;
-}
-
-#mapa{
-  height:250px;
-  margin-top:10px;
-  border-radius:10px;
-  background:#ddd;
-}
-
-.pedido{
-  border-bottom:1px solid #ccc;
-  padding:10px;
-}
-
-</style></head><body><header>ODJIM Solution</header><!-- MENU PRINCIPAL --><div class="menu"><button class="btn" onclick="abrir('cliente')">Cliente</button>
-<button class="btn" onclick="abrir('tecnico')">Técnico</button>
-<button class="btn" onclick="abrir('admin')">Admin</button>
-
-</div><!-- CLIENTE --><div id="cliente" class="section"><div class="card"><h2>Solicitar Serviço</h2><input id="nome" placeholder="Seu nome"><input id="telefone" placeholder="Telefone"><input id="localizacao" placeholder="Localização"><select id="servico"><option>Informática</option>
-<option>Redes</option>
-<option>CCTV</option>
-<option>Electricidade</option>
-<option>Ar condicionado</option>
-<option>Canalização</option>
-<option>Pintura</option>
-<option>Limpeza</option>
-<option>Babá</option>
-<option>Design gráfico</option></select><textarea id="descricao" placeholder="Descreva o problema"></textarea><label>Data início</label>
-<input type="date" id="inicio">
-
-<label>Data fim</label>
-<input type="date" id="fim">
-
-<div id="mapa">Mapa carregará aqui</div><button onclick="enviarPedido()">Enviar pedido</button>
-
-</div></div><!-- TECNICO --><div id="tecnico" class="section"><div class="card"><h2>Painel Técnico</h2><div id="listaPedidos"></div></div></div><!-- ADMIN --><div id="admin" class="section"><div class="card"><h2>Login Admin</h2><input id="adminUser" placeholder="Usuário">
-<input id="adminPass" type="password" placeholder="Senha"><button onclick="loginAdmin()">Entrar</button>
-
-</div><div id="painelAdmin" style="display:none" class="card"><h2>Gestão de Pedidos</h2><div id="adminPedidos"></div></div></div><script>
-
-function abrir(sec){
-  document.querySelectorAll(".section").forEach(s => s.style.display = "none");
-  document.getElementById(sec).style.display = "block";
-}
-
-async function enviarPedido(){
-
-  const pedido = {
-    nome:document.getElementById("nome").value,
-    telefone:document.getElementById("telefone").value,
-    local:document.getElementById("localizacao").value,
-    servico:document.getElementById("servico").value,
-    descricao:document.getElementById("descricao").value,
-    inicio:document.getElementById("inicio").value,
-    fim:document.getElementById("fim").value,
-    estado:"Aguardando técnico"
-  };
-
-  await addDoc(collection(db,"pedidos"),pedido);
-
-  alert("Pedido enviado com sucesso!");
-}
-
-onSnapshot(collection(db,"pedidos"),(snapshot)=>{
-
-  let html="";
-
-  snapshot.forEach((docSnap)=>{
-
-    let p = docSnap.data();
-
-    html += `
-    <div class="pedido">
-
-      <b>${p.servico}</b><br>
-      Cliente: ${p.nome}<br>
-      Local: ${p.local}<br>
-      Estado: ${p.estado}
-
-      <button onclick="aceitar('${docSnap.id}')">Aceitar</button>
-
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ODJIM Solution - Mobilidade e Serviços</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  
+  <!-- Fontes Premium -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet para Mapas -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- FIREBASE (v10 Modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI",
+      authDomain: "COLE_AQUI",
+      projectId: "COLE_AQUI",
+      storageBucket: "COLE_AQUI",
+      messagingSenderId: "COLE_AQUI",
+      appId: "COLE_AQUI"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    // Expõe as funções globalmente para compatibilidade com o HTML legível
+    window.db = db;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.onSnapshot = onSnapshot;
+    window.doc = doc;
+    window.updateDoc = updateDoc;
+  </script>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --accent: #ff9800;
+      --accent-hover: #e68900;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --card-radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+    body {
+      background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary));
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    /* Animação de entrada suave */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    header {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      animation: fadeIn 0.8s ease;
+    }
+    header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(to right, #ff9800, #ff5722);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+    header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    /* Container Principal */
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 1s ease;
+    }
+    /* Menu de Acesso */
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+    }
+    .menu-btn {
+      background: transparent;
+      border: none;
+      padding: 12px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .menu-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+      transition: var(--transition);
+    }
+    .menu-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .menu-btn.active {
+      color: var(--bg-primary);
+      background: var(--accent);
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+    }
+    /* Cards Glassmorphic */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      padding: 24px;
+      border-radius: var(--card-radius);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+      border-left: 4px solid var(--accent);
+      padding-left: 10px;
+    }
+    /* Elementos de Formulário */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      padding: 14px;
+      font-size: 15px;
+      color: var(--text-main);
+      border-radius: 12px;
+      outline: none;
+      transition: var(--transition);
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.15);
+      background: rgba(15, 23, 42, 0.8);
+    }
+    input::placeholder, textarea::placeholder {
+      color: #64748b;
+    }
+    textarea {
+      resize: none;
+      height: 90px;
+    }
+    /* Botão Principal */
+    .action-btn {
+      background: linear-gradient(135deg, var(--accent), #ff5722);
+      border: none;
+      padding: 16px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.25);
+      transition: var(--transition);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 152, 0, 0.35);
+    }
+    .action-btn:active {
+      transform: translateY(0);
+    }
+    /* Seções */
+    .section {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+    /* Mapa Leaflet moderno */
+    #mapa {
+      height: 220px;
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      z-index: 1;
+    }
+    .map-helper {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    /* Lista de Pedidos */
+    .lista-pedidos {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .lista-pedidos::-webkit-scrollbar {
+      width: 4px;
+    }
+    .lista-pedidos::-webkit-scrollbar-thumb {
+      background: var(--glass-border);
+      border-radius: 10px;
+    }
+    .pedido-card {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pedido-card:hover {
+      border-color: rgba(255, 152, 0, 0.3);
+      background: rgba(30, 41, 59, 0.7);
+    }
+    .pedido-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pedido-servico {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 16px;
+    }
+    .pedido-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-aguardando {
+      background: rgba(234, 179, 8, 0.15);
+      color: #facc15;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+    .status-caminho {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .pedido-info {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .pedido-info strong {
+      color: var(--text-main);
+    }
+    .btn-aceitar {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 5px;
+      text-align: center;
+    }
+    .btn-aceitar:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+    }
+    /* PWA Prompt */
+    .pwa-banner {
+      display: none;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ODJIM Solution</h1>
+    <p>Tecnologia e Serviços ao seu Alcance 🚀</p>
+  </header>
+  <div class="app-container">
+    
+    <!-- PWA Install Banner -->
+    <div id="pwaBanner" class="pwa-banner">
+      Instale o ODJIM Solution no seu telemóvel para acesso rápido!
     </div>
-    `;
-  });
-
-  document.getElementById("listaPedidos").innerHTML = html;
-  document.getElementById("adminPedidos").innerHTML = html;
-
-});
-
-async function aceitar(id){
-
-  await updateDoc(doc(db,"pedidos",id),{
-    estado:"Técnico a caminho"
-  });
-
-}
-
-function loginAdmin(){
-
-  if(
-    document.getElementById("adminUser").value==="admin" &&
-    document.getElementById("adminPass").value==="odjim2026"
-  ){
-
-    document.getElementById("painelAdmin").style.display="block";
-    alert("Bem-vindo Administrador");
-
-  }else{
-
-    alert("Login inválido");
-
-  }
-
-}
-
-</script><script>
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js');
-}
-
-</script></body>
-</html>
+    <!-- MENU PRINCIPAL -->
+    <nav class="menu">
+      <button class="menu-btn active" id="btn-cliente" onclick="abrir('cliente')">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Cliente
+      </button>
+      <button class="menu-btn" id="btn-tecnico" onclick="abrir('tecnico')">
+        <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.3C.5 6.7.9 9.8 2.9 11.8c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.6z"/></svg>
+        Técnico
+      </button>
+      <button class="menu-btn" id="btn-admin" onclick="abrir('admin')">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        Admin
+      </button>
+    </nav>
+    <!-- CLIENTE -->
+    <div id="cliente" class="section" style="display: block;">
+      <div class="card">
+        <h2>Solicitar Serviço</h2>
+        
+        <div class="form-group">
+          <label for="nome">Nome Completo</label>
+          <input id="nome" placeholder="Digite seu nome">
+        </div>
+        
+        <div class="form-group">
+          <label for="telefone">Telefone / WhatsApp</label>
+          <input id="telefone" placeholder="Ex: 923 000 000">
+        </div>
+        <div class="form-group">
+          <label for="servico">Tipo de Serviço</label>
+          <select id="servico">
+            <option>Informática</option>
+            <option>Redes</option>
+            <option>CCTV</option>
+            <option>Electricidade</option>
+            <option>Ar condicionado</option>
+            <option>Canalização</option>
+            <option>Pintura</option>
+            <option>Limpeza</option>
+            <option>Babá</option>
+            <option>Design gráfico</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="descricao">Descrição do Problema</label>
+          <textarea id="descricao" placeholder="Descreva os detalhes do serviço..."></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label for="inicio">Data Início</label>
+            <input type="date" id="inicio">
+          </div>
+          <div class="form-group">
+            <label for="fim">Data Fim</label>
+            <input type="date" id="fim">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="localizacao">Localização (Endereço)</label>
+          <input id="localizacao" placeholder="Clique no mapa ou digite o endereço">
+          <div id="mapa"></div>
+          <div class="map-helper">
+            <svg style="width:12px; height:12px; fill:currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Clique no mapa para marcar sua localização precisa.
+          </div>
+        </div>
+        <button class="action-btn" onclick="enviarPedido()">
+          Enviar Solicitação
+        </button>
+      </div>
+    </div>
+    <!-- TECNICO -->
+    <div id="tecnico" class="section">
+      <div class="card">
+        <h2>Painel Técnico</h2>
+        <div class="lista-pedidos" id="listaPedidos">
+          <!-- Inserido dinamicamente -->
+          <div style="text-align: center; color: var(--text-muted); padding: 20px;">Carregando pedidos ativos...</div>
+        </div>
+      </div>
+    </div>
+    <!-- ADMIN LOGIN -->
+    <div id="admin" class="section">
+      <div class="card" id="painelLoginAdmin">
+        <h2>Login Admin</h2>
+        
+        <div class="form-group">
+          <label for="adminUser">Usuário</label>
+          <input id="adminUser" placeholder="admin">
+        </div>
+        
+        <div class="form-group">
+          <label for="adminPass">Senha</label>
+          <input id="adminPass" type="password" placeholder="••••••••">
+        </div>
+        <button class="action-btn" onclick="loginAdmin()">
+          Entrar no Painel
+        </button>
+      </div>
+      <!-- PAINEL ADMIN (APÓS LOGIN) -->
+      <div id="painelAdmin" style="display:none" class="card">
+        <h2>Gestão de Pedidos (Admin)</h2>
+        <div style="margin-bottom: 15px; display: flex; gap: 8px;">
+          <a href="admin.html" class="action-btn" style="text-decoration: none; font-size: 14px; padding: 12px; background: #072d6b;">
+            Ver Mapa de Técnicos
+          </a>
+        </div>
+        <div class="lista-pedidos" id="adminPedidos">
+          <!-- Inserido dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Gerenciador de Abas/Seções
+    function abrir(sec) {
+      document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+      document.getElementById(sec).style.display = "block";
+      
+      document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById("btn-" + sec).classList.add("active");
+      // Força o redimensionamento do mapa para evitar bugs visuais de renderização da Leaflet
+      if (sec === 'cliente' && map) {
+        setTimeout(() => { map.invalidateSize(); }, 200);
+      }
+    }
+    // Inicialização do Mapa do Cliente
+    let map;
+    let marker;
+    function initClientMap() {
+      // Ponto padrão: Luanda (-8.8383, 13.2344)
+      const defaultCoord = [-8.8383, 13.2344];
+      map = L.map('mapa').setView(defaultCoord, 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      // Listener para cliques no mapa
+      map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        
+        if (marker) {
+          marker.setLatLng(e.latlng);
+        } else {
+          marker = L.marker(e.latlng).addTo(map);
+        }
+        // Atualiza o input de localização com as coordenadas
+        document.getElementById("localizacao").value = `Lat: ${lat}, Lon: ${lng}`;
+      });
+    }
+    // Enviar Pedido
+    async function enviarPedido() {
+      const nome = document.getElementById("nome").value;
+      const telefone = document.getElementById("telefone").value;
+      const local = document.getElementById("localizacao").value;
+      const servico = document.getElementById("servico").value;
+      const descricao = document.getElementById("descricao").value;
+      const inicio = document.getElementById("inicio").value;
+      const fim = document.getElementById("fim").value;
+      if (!nome || !telefone || !local) {
+        alert("Por favor, preencha o seu Nome, Telefone e Localização.");
+        return;
+      }
+      const pedido = {
+        nome,
+        telefone,
+        local,
+        servico,
+        descricao,
+        inicio: inicio || "",
+        fim: fim || "",
+        estado: "Aguardando técnico",
+        dataCriacao: new Date().toISOString()
+      };
+      try {
+        await addDoc(collection(db, "pedidos"), pedido);
+        alert("Pedido de serviço enviado com sucesso!");
+        // Limpar formulário
+        document.getElementById("nome").value = "";
+        document.getElementById("telefone").value = "";
+        document.getElementById("localizacao").value = "";
+        document.getElementById("descricao").value = "";
+        document.getElementById("inicio").value = "";
+        document.getElementById("fim").value = "";
+        if (marker) {
+          map.removeLayer(marker);
+          marker = null;
+        }
+      } catch (error) {
+        console.error("Erro ao enviar pedido: ", error);
+        alert("Ocorreu um erro ao enviar o pedido. Verifique as credenciais do Firebase.");
+      }
+    }
+    // Monitorar pedidos do banco de dados (Real-time)
+    let snapshotLoaded = false;
+    
+    function monitorarPedidos() {
+      if (!window.db) {
+        setTimeout(monitorarPedidos, 500); // Aguarda o carregamento do Firebase
+        return;
+      }
+      onSnapshot(collection(db, "pedidos"), (snapshot) => {
+        let html = "";
+        
+        if (snapshot.empty) {
+          html = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum serviço solicitado no momento.</div>`;
+        } else {
+          snapshot.forEach((docSnap) => {
+            const p = docSnap.data();
+            const statusClass = p.estado === "Aguardando técnico" ? "status-aguardando" : "status-caminho";
+            
+            // Botão "Aceitar" só aparece se estiver aguardando técnico
+            const actionBtn = p.estado === "Aguardando técnico" 
+              ? `<button class="btn-aceitar" onclick="aceitar('${docSnap.id}')">Aceitar Serviço</button>` 
+              : ``;
+            html += `
+              <div class="pedido-card">
+                <div class="pedido-header">
+                  <span class="pedido-servico">${p.servico}</span>
+                  <span class="pedido-status ${statusClass}">${p.estado}</span>
+                </div>
+                <div class="pedido-info">
+                  <p><strong>Cliente:</strong> ${p.nome}</p>
+                  <p><strong>Telefone:</strong> ${p.telefone}</p>
+                  <p><strong>Local:</strong> ${p.local}</p>
+                  ${p.descricao ? `<p><strong>Descrição:</strong> ${p.descricao}</p>` : ''}
+                  ${p.inicio ? `<p><strong>Período:</strong> ${p.inicio} até ${p.fim}</p>` : ''}
+                </div>
+                ${actionBtn}
+              </div>
+            `;
+          });
+        }
+        document.getElementById("listaPedidos").innerHTML = html;
+        document.getElementById("adminPedidos").innerHTML = html;
+      }, (error) => {
+        console.error(
