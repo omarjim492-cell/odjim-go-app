@@ -16,28 +16,41 @@
   <!-- Leaflet para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
   <!-- FIREBASE (v10 Modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
     const firebaseConfig = {
-      apiKey: "Admin@007",
-      authDomain: "COLE_AQUI",
-      projectId: "COLE_AQUI",
-      storageBucket: "COLE_AQUI",
-      messagingSenderId: "COLE_AQUI",
-      appId: "COLE_AQUI"
+      apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
+      authDomain: "odjim-solution.firebaseapp.com",
+      projectId: "odjim-solution",
+      storageBucket: "odjim-solution.firebasestorage.app",
+      messagingSenderId: "165673018775",
+      appId: "1:165673018775:web:c8b4cc6345b854763950d2",
+      measurementId: "G-8ED4Y2EG5Y"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+
     // Expõe as funções globalmente para compatibilidade com o HTML legível
     window.db = db;
+    window.auth = auth;
     window.collection = collection;
     window.addDoc = addDoc;
     window.onSnapshot = onSnapshot;
     window.doc = doc;
     window.updateDoc = updateDoc;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.sendPasswordResetEmail = sendPasswordResetEmail;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
   </script>
+
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -51,12 +64,14 @@
       --card-radius: 16px;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: 'Outfit', sans-serif;
     }
+
     body {
       background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary));
       color: var(--text-main);
@@ -67,11 +82,13 @@
       padding: 20px;
       overflow-x: hidden;
     }
+
     /* Animação de entrada suave */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
     header {
       width: 100%;
       max-width: 480px;
@@ -80,6 +97,7 @@
       margin-bottom: 25px;
       animation: fadeIn 0.8s ease;
     }
+
     header h1 {
       font-size: 32px;
       font-weight: 800;
@@ -89,11 +107,13 @@
       -webkit-text-fill-color: transparent;
       margin-bottom: 5px;
     }
+
     header p {
       font-size: 14px;
       color: var(--text-muted);
       font-weight: 400;
     }
+
     /* Container Principal */
     .app-container {
       width: 100%;
@@ -103,6 +123,7 @@
       gap: 20px;
       animation: fadeIn 1s ease;
     }
+
     /* Menu de Acesso */
     .menu {
       display: grid;
@@ -115,6 +136,7 @@
       border-radius: 20px;
       border: 1px solid var(--glass-border);
     }
+
     .menu-btn {
       background: transparent;
       border: none;
@@ -130,21 +152,25 @@
       gap: 6px;
       transition: var(--transition);
     }
+
     .menu-btn svg {
       width: 20px;
       height: 20px;
       fill: currentColor;
       transition: var(--transition);
     }
+
     .menu-btn:hover {
       color: var(--text-main);
       background: rgba(255, 255, 255, 0.03);
     }
+
     .menu-btn.active {
       color: var(--bg-primary);
       background: var(--accent);
       box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
     }
+
     /* Cards Glassmorphic */
     .card {
       background: var(--glass-bg);
@@ -155,6 +181,7 @@
       border-radius: var(--card-radius);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
+
     .card h2 {
       font-size: 20px;
       font-weight: 700;
@@ -166,10 +193,12 @@
       border-left: 4px solid var(--accent);
       padding-left: 10px;
     }
+
     /* Elementos de Formulário */
     .form-group {
       margin-bottom: 16px;
     }
+
     .form-group label {
       display: block;
       font-size: 12px;
@@ -179,6 +208,7 @@
       color: var(--text-muted);
       margin-bottom: 6px;
     }
+
     input, select, textarea {
       width: 100%;
       background: rgba(15, 23, 42, 0.6);
@@ -190,18 +220,22 @@
       outline: none;
       transition: var(--transition);
     }
+
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.15);
       background: rgba(15, 23, 42, 0.8);
     }
+
     input::placeholder, textarea::placeholder {
       color: #64748b;
     }
+
     textarea {
       resize: none;
       height: 90px;
     }
+
     /* Botão Principal */
     .action-btn {
       background: linear-gradient(135deg, var(--accent), #ff5722);
@@ -220,18 +254,22 @@
       align-items: center;
       gap: 8px;
     }
+
     .action-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(255, 152, 0, 0.35);
     }
+
     .action-btn:active {
       transform: translateY(0);
     }
+
     /* Seções */
     .section {
       display: none;
       animation: fadeIn 0.4s ease-out;
     }
+
     /* Mapa Leaflet moderno */
     #mapa {
       height: 220px;
@@ -241,6 +279,7 @@
       border: 1px solid var(--glass-border);
       z-index: 1;
     }
+
     .map-helper {
       font-size: 11px;
       color: var(--text-muted);
@@ -249,6 +288,7 @@
       align-items: center;
       gap: 4px;
     }
+
     /* Lista de Pedidos */
     .lista-pedidos {
       display: flex;
@@ -258,6 +298,7 @@
       overflow-y: auto;
       padding-right: 4px;
     }
+
     .lista-pedidos::-webkit-scrollbar {
       width: 4px;
     }
@@ -265,6 +306,7 @@
       background: var(--glass-border);
       border-radius: 10px;
     }
+
     .pedido-card {
       background: rgba(30, 41, 59, 0.5);
       border: 1px solid var(--glass-border);
@@ -275,20 +317,24 @@
       flex-direction: column;
       gap: 8px;
     }
+
     .pedido-card:hover {
       border-color: rgba(255, 152, 0, 0.3);
       background: rgba(30, 41, 59, 0.7);
     }
+
     .pedido-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     .pedido-servico {
       font-weight: 700;
       color: var(--accent);
       font-size: 16px;
     }
+
     .pedido-status {
       font-size: 11px;
       font-weight: 600;
@@ -297,24 +343,29 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
     .status-aguardando {
       background: rgba(234, 179, 8, 0.15);
       color: #facc15;
       border: 1px solid rgba(234, 179, 8, 0.3);
     }
+
     .status-caminho {
       background: rgba(59, 130, 246, 0.15);
       color: #60a5fa;
       border: 1px solid rgba(59, 130, 246, 0.3);
     }
+
     .pedido-info {
       font-size: 13px;
       color: var(--text-muted);
       line-height: 1.4;
     }
+
     .pedido-info strong {
       color: var(--text-main);
     }
+
     .btn-aceitar {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--glass-border);
@@ -328,12 +379,14 @@
       margin-top: 5px;
       text-align: center;
     }
+
     .btn-aceitar:hover {
       background: var(--accent);
       color: var(--bg-primary);
       border-color: var(--accent);
       box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
     }
+
     /* PWA Prompt */
     .pwa-banner {
       display: none;
@@ -349,16 +402,19 @@
   </style>
 </head>
 <body>
+
   <header>
     <h1>ODJIM Solution</h1>
     <p>Tecnologia e Serviços ao seu Alcance 🚀</p>
   </header>
+
   <div class="app-container">
     
     <!-- PWA Install Banner -->
     <div id="pwaBanner" class="pwa-banner">
       Instale o ODJIM Solution no seu telemóvel para acesso rápido!
     </div>
+
     <!-- MENU PRINCIPAL -->
     <nav class="menu">
       <button class="menu-btn active" id="btn-cliente" onclick="abrir('cliente')">
@@ -374,6 +430,7 @@
         Admin
       </button>
     </nav>
+
     <!-- CLIENTE -->
     <div id="cliente" class="section" style="display: block;">
       <div class="card">
@@ -388,6 +445,7 @@
           <label for="telefone">Telefone / WhatsApp</label>
           <input id="telefone" placeholder="Ex: 923 000 000">
         </div>
+
         <div class="form-group">
           <label for="servico">Tipo de Serviço</label>
           <select id="servico">
@@ -403,10 +461,12 @@
             <option>Design gráfico</option>
           </select>
         </div>
+
         <div class="form-group">
           <label for="descricao">Descrição do Problema</label>
           <textarea id="descricao" placeholder="Descreva os detalhes do serviço..."></textarea>
         </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
           <div class="form-group">
             <label for="inicio">Data Início</label>
@@ -417,6 +477,7 @@
             <input type="date" id="fim">
           </div>
         </div>
+
         <div class="form-group">
           <label for="localizacao">Localização (Endereço)</label>
           <input id="localizacao" placeholder="Clique no mapa ou digite o endereço">
@@ -426,11 +487,13 @@
             Clique no mapa para marcar sua localização precisa.
           </div>
         </div>
+
         <button class="action-btn" onclick="enviarPedido()">
           Enviar Solicitação
         </button>
       </div>
     </div>
+
     <!-- TECNICO -->
     <div id="tecnico" class="section">
       <div class="card">
@@ -441,27 +504,37 @@
         </div>
       </div>
     </div>
+
     <!-- ADMIN LOGIN -->
     <div id="admin" class="section">
       <div class="card" id="painelLoginAdmin">
         <h2>Login Admin</h2>
         
         <div class="form-group">
-          <label for="adminUser">Usuário</label>
-          <input id="adminUser" placeholder="admin">
+          <label for="adminEmail">E-mail</label>
+          <input id="adminEmail" type="email" placeholder="admin@exemplo.com">
         </div>
         
         <div class="form-group">
           <label for="adminPass">Senha</label>
-          <input id="adminPass" type="password" placeholder="Odjim007">
+          <input id="adminPass" type="password" placeholder="••••••••">
         </div>
+
         <button class="action-btn" onclick="loginAdmin()">
           Entrar no Painel
         </button>
+
+        <div style="text-align: center; margin-top: 15px;">
+          <a href="#" onclick="recuperarSenha()" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">Esqueceu a senha?</a>
+        </div>
       </div>
+
       <!-- PAINEL ADMIN (APÓS LOGIN) -->
       <div id="painelAdmin" style="display:none" class="card">
-        <h2>Gestão de Pedidos (Admin)</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin-bottom: 0; font-size: 18px;">Gestão de Pedidos</h2>
+          <button onclick="logoutAdmin()" style="background: transparent; border: 1px solid var(--glass-border); color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.3s;">Sair</button>
+        </div>
         <div style="margin-bottom: 15px; display: flex; gap: 8px;">
           <a href="admin.html" class="action-btn" style="text-decoration: none; font-size: 14px; padding: 12px; background: #072d6b;">
             Ver Mapa de Técnicos
@@ -472,7 +545,9 @@
         </div>
       </div>
     </div>
+
   </div>
+
   <script>
     // Gerenciador de Abas/Seções
     function abrir(sec) {
@@ -481,22 +556,27 @@
       
       document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
       document.getElementById("btn-" + sec).classList.add("active");
+
       // Força o redimensionamento do mapa para evitar bugs visuais de renderização da Leaflet
       if (sec === 'cliente' && map) {
         setTimeout(() => { map.invalidateSize(); }, 200);
       }
     }
+
     // Inicialização do Mapa do Cliente
     let map;
     let marker;
+
     function initClientMap() {
       // Ponto padrão: Luanda (-8.8383, 13.2344)
       const defaultCoord = [-8.8383, 13.2344];
       map = L.map('mapa').setView(defaultCoord, 13);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
+
       // Listener para cliques no mapa
       map.on('click', function(e) {
         const lat = e.latlng.lat.toFixed(6);
@@ -507,10 +587,12 @@
         } else {
           marker = L.marker(e.latlng).addTo(map);
         }
+
         // Atualiza o input de localização com as coordenadas
         document.getElementById("localizacao").value = `Lat: ${lat}, Lon: ${lng}`;
       });
     }
+
     // Enviar Pedido
     async function enviarPedido() {
       const nome = document.getElementById("nome").value;
@@ -520,10 +602,12 @@
       const descricao = document.getElementById("descricao").value;
       const inicio = document.getElementById("inicio").value;
       const fim = document.getElementById("fim").value;
+
       if (!nome || !telefone || !local) {
         alert("Por favor, preencha o seu Nome, Telefone e Localização.");
         return;
       }
+
       const pedido = {
         nome,
         telefone,
@@ -535,6 +619,7 @@
         estado: "Aguardando técnico",
         dataCriacao: new Date().toISOString()
       };
+
       try {
         await addDoc(collection(db, "pedidos"), pedido);
         alert("Pedido de serviço enviado com sucesso!");
@@ -554,6 +639,7 @@
         alert("Ocorreu um erro ao enviar o pedido. Verifique as credenciais do Firebase.");
       }
     }
+
     // Monitorar pedidos do banco de dados (Real-time)
     let snapshotLoaded = false;
     
@@ -562,6 +648,7 @@
         setTimeout(monitorarPedidos, 500); // Aguarda o carregamento do Firebase
         return;
       }
+
       onSnapshot(collection(db, "pedidos"), (snapshot) => {
         let html = "";
         
@@ -572,10 +659,14 @@
             const p = docSnap.data();
             const statusClass = p.estado === "Aguardando técnico" ? "status-aguardando" : "status-caminho";
             
-            // Botão "Aceitar" só aparece se estiver aguardando técnico
-            const actionBtn = p.estado === "Aguardando técnico" 
-              ? `<button class="btn-aceitar" onclick="aceitar('${docSnap.id}')">Aceitar Serviço</button>` 
-              : ``;
+            let actionBtn = "";
+            if (p.estado === "Aguardando técnico") {
+              actionBtn = `<button class="btn-aceitar" onclick="aceitar('${docSnap.id}')">Aceitar Serviço</button>`;
+            } else if (p.estado === "Técnico a caminho") {
+              const zapNumber = p.telefone.replace(/[^0-9]/g, '');
+              actionBtn = `<a href="https://wa.me/${zapNumber}?text=Olá! Aceitei o seu pedido de serviço no ODJIM Solution." target="_blank" style="display:block; text-align:center; background: #25D366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 13px; margin-top: 5px;">💬 Chamar no WhatsApp</a>`;
+            }
+
             html += `
               <div class="pedido-card">
                 <div class="pedido-header">
@@ -594,7 +685,98 @@
             `;
           });
         }
+
         document.getElementById("listaPedidos").innerHTML = html;
         document.getElementById("adminPedidos").innerHTML = html;
       }, (error) => {
-        console.error(
+        console.error("Erro no Listener Firestore: ", error);
+      });
+    }
+
+    // Aceitar Serviço
+    async function aceitar(id) {
+      try {
+        await updateDoc(doc(db, "pedidos", id), {
+          estado: "Técnico a caminho"
+        });
+        alert("Você aceitou o serviço! O cliente foi notificado.");
+      } catch (error) {
+        console.error("Erro ao aceitar pedido: ", error);
+        alert("Não foi possível aceitar o serviço. Detalhes no console.");
+      }
+    }
+
+    // Login Admin com Firebase Auth
+    async function loginAdmin() {
+      const email = document.getElementById("adminEmail").value;
+      const pass = document.getElementById("adminPass").value;
+
+      if (!email || !pass) {
+        alert("Preencha o e-mail e a senha.");
+        return;
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        document.getElementById("painelLoginAdmin").style.display = "none";
+        document.getElementById("painelAdmin").style.display = "block";
+        alert("Bem-vindo ao painel!");
+      } catch (error) {
+        console.error("Erro no login:", error);
+        alert("Falha no login. Verifique seu e-mail e senha.");
+      }
+    }
+
+    // Recuperar Senha (Esqueci a Senha)
+    async function recuperarSenha() {
+      const email = document.getElementById("adminEmail").value;
+      if (!email) {
+        alert("Por favor, digite seu e-mail no campo acima e clique em 'Esqueceu a senha?' novamente.");
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Um link de redefinição de senha foi enviado para " + email + ". Verifique sua caixa de entrada.");
+      } catch (error) {
+        console.error("Erro ao resetar senha:", error);
+        alert("Erro ao enviar o e-mail de redefinição. O e-mail está cadastrado?");
+      }
+    }
+
+    // Logout Admin
+    async function logoutAdmin() {
+      try {
+        await signOut(auth);
+        document.getElementById("painelAdmin").style.display = "none";
+        document.getElementById("painelLoginAdmin").style.display = "block";
+        document.getElementById("adminPass").value = "";
+      } catch (error) {
+        console.error("Erro ao sair:", error);
+      }
+    }
+
+    // Monitorar estado de autenticação (Mantém a sessão ativa)
+    function checkAuthStatus() {
+      if (!window.auth) return;
+      onAuthStateChanged(auth, (user) => {
+        if (user && document.getElementById("admin").style.display === "block") {
+          document.getElementById("painelLoginAdmin").style.display = "none";
+          document.getElementById("painelAdmin").style.display = "block";
+        }
+      });
+    }
+
+    // Iniciar tudo ao carregar a página
+    window.onload = function() {
+      initClientMap();
+      monitorarPedidos();
+      checkAuthStatus();
+      
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(err => console.error("SW erro: ", err));
+      }
+    };
+  </script>
+</body>
+</html>
