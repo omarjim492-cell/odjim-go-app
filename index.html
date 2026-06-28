@@ -1,23 +1,18 @@
+cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ODJIM Solution - Mobilidade e Serviços</title>
-  
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
-  
-  <!-- Fontes Premium -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Leaflet para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <!-- FIREBASE (v10 Modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -34,11 +29,10 @@
     };
 
     const app = initializeApp(firebaseConfig);
-window._firebaseApp = app;
+    window._firebaseApp = app;
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Expõe as funções globalmente para compatibilidade com o HTML legível
     window.db = db;
     window.auth = auth;
     window.collection = collection;
@@ -65,14 +59,7 @@ window._firebaseApp = app;
       --card-radius: 16px;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Outfit', sans-serif;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
     body {
       background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary));
       color: var(--text-main);
@@ -83,322 +70,85 @@ window._firebaseApp = app;
       padding: 20px;
       overflow-x: hidden;
     }
-
-    /* Animação de entrada suave */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    header {
-      width: 100%;
-      max-width: 480px;
-      text-align: center;
-      margin-top: 10px;
-      margin-bottom: 25px;
-      animation: fadeIn 0.8s ease;
-    }
-
+    header { width: 100%; max-width: 480px; text-align: center; margin-top: 10px; margin-bottom: 25px; animation: fadeIn 0.8s ease; }
     header h1 {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -1px;
+      font-size: 32px; font-weight: 800; letter-spacing: -1px;
       background: linear-gradient(to right, #ff9800, #ff5722);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 5px;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px;
     }
-
-    header p {
-      font-size: 14px;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    /* Container Principal */
-    .app-container {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      animation: fadeIn 1s ease;
-    }
-
-    /* Menu de Acesso */
+    header p { font-size: 14px; color: var(--text-muted); font-weight: 400; }
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 20px; animation: fadeIn 1s ease; }
     .menu {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 8px;
-      border-radius: 20px;
-      border: 1px solid var(--glass-border);
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      padding: 8px; border-radius: 20px; border: 1px solid var(--glass-border);
     }
-
     .menu-btn {
-      background: transparent;
-      border: none;
-      padding: 12px;
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 14px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      transition: var(--transition);
+      background: transparent; border: none; padding: 12px; color: var(--text-muted);
+      font-size: 13px; font-weight: 600; border-radius: 14px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition);
     }
-
-    .menu-btn svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-      transition: var(--transition);
-    }
-
-    .menu-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .menu-btn.active {
-      color: var(--bg-primary);
-      background: var(--accent);
-      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
-    }
-
-    /* Cards Glassmorphic */
+    .menu-btn svg { width: 20px; height: 20px; fill: currentColor; transition: var(--transition); }
+    .menu-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
+    .menu-btn.active { color: var(--bg-primary); background: var(--accent); box-shadow: 0 4px 15px rgba(255,152,0,0.3); }
     .card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      padding: 24px;
-      border-radius: var(--card-radius);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border); padding: 24px; border-radius: var(--card-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-
     .card h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-main);
-      border-left: 4px solid var(--accent);
-      padding-left: 10px;
+      font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center;
+      gap: 8px; color: var(--text-main); border-left: 4px solid var(--accent); padding-left: 10px;
     }
-
-    /* Elementos de Formulário */
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
     input, select, textarea {
-      width: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--glass-border);
-      padding: 14px;
-      font-size: 15px;
-      color: var(--text-main);
-      border-radius: 12px;
-      outline: none;
-      transition: var(--transition);
+      width: 100%; background: rgba(15,23,42,0.6); border: 1px solid var(--glass-border);
+      padding: 14px; font-size: 15px; color: var(--text-main); border-radius: 12px; outline: none; transition: var(--transition);
     }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.15);
-      background: rgba(15, 23, 42, 0.8);
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: #64748b;
-    }
-
-    textarea {
-      resize: none;
-      height: 90px;
-    }
-
-    /* Botão Principal */
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,152,0,0.15); background: rgba(15,23,42,0.8); }
+    input::placeholder, textarea::placeholder { color: #64748b; }
+    textarea { resize: none; height: 90px; }
     .action-btn {
-      background: linear-gradient(135deg, var(--accent), #ff5722);
-      border: none;
-      padding: 16px;
-      width: 100%;
-      font-size: 16px;
-      font-weight: 700;
-      color: white;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.25);
-      transition: var(--transition);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
+      background: linear-gradient(135deg, var(--accent), #ff5722); border: none; padding: 16px;
+      width: 100%; font-size: 16px; font-weight: 700; color: white; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255,152,0,0.25); transition: var(--transition);
+      display: flex; justify-content: center; align-items: center; gap: 8px;
     }
-
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 152, 0, 0.35);
-    }
-
-    .action-btn:active {
-      transform: translateY(0);
-    }
-
-    /* Seções */
-    .section {
-      display: none;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    /* Mapa Leaflet moderno */
-    #mapa {
-      height: 220px;
-      width: 100%;
-      margin-top: 8px;
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      z-index: 1;
-    }
-
-    .map-helper {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 5px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* Lista de Pedidos */
-    .lista-pedidos {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 400px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .lista-pedidos::-webkit-scrollbar {
-      width: 4px;
-    }
-    .lista-pedidos::-webkit-scrollbar-thumb {
-      background: var(--glass-border);
-      border-radius: 10px;
-    }
-
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,152,0,0.35); }
+    .action-btn:active { transform: translateY(0); }
+    .section { display: none; animation: fadeIn 0.4s ease-out; }
+    #mapa { height: 220px; width: 100%; margin-top: 8px; border-radius: 12px; border: 1px solid var(--glass-border); z-index: 1; }
+    .map-helper { font-size: 11px; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+    .lista-pedidos { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; padding-right: 4px; }
+    .lista-pedidos::-webkit-scrollbar { width: 4px; }
+    .lista-pedidos::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
     .pedido-card {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 16px;
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      background: rgba(30,41,59,0.5); border: 1px solid var(--glass-border); border-radius: 12px;
+      padding: 16px; transition: var(--transition); display: flex; flex-direction: column; gap: 8px;
     }
-
-    .pedido-card:hover {
-      border-color: rgba(255, 152, 0, 0.3);
-      background: rgba(30, 41, 59, 0.7);
-    }
-
-    .pedido-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .pedido-servico {
-      font-weight: 700;
-      color: var(--accent);
-      font-size: 16px;
-    }
-
-    .pedido-status {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .status-aguardando {
-      background: rgba(234, 179, 8, 0.15);
-      color: #facc15;
-      border: 1px solid rgba(234, 179, 8, 0.3);
-    }
-
-    .status-caminho {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .pedido-info {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    .pedido-info strong {
-      color: var(--text-main);
-    }
-
+    .pedido-card:hover { border-color: rgba(255,152,0,0.3); background: rgba(30,41,59,0.7); }
+    .pedido-header { display: flex; justify-content: space-between; align-items: center; }
+    .pedido-servico { font-weight: 700; color: var(--accent); font-size: 16px; }
+    .pedido-status { font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-aguardando { background: rgba(234,179,8,0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+    .status-caminho { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .pedido-info { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+    .pedido-info strong { color: var(--text-main); }
     .btn-aceitar {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--glass-border);
-      padding: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: var(--transition);
-      margin-top: 5px;
-      text-align: center;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 10px;
+      font-size: 13px; font-weight: 600; color: var(--text-main); border-radius: 8px; cursor: pointer;
+      transition: var(--transition); margin-top: 5px; text-align: center;
     }
-
-    .btn-aceitar:hover {
-      background: var(--accent);
-      color: var(--bg-primary);
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
-    }
-
-    /* PWA Prompt */
+    .btn-aceitar:hover { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); box-shadow: 0 4px 12px rgba(255,152,0,0.2); }
     .pwa-banner {
-      display: none;
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 13px;
-      text-align: center;
-      margin-bottom: 15px;
+      display: none; background: rgba(16,185,129,0.15); color: #34d399;
+      border: 1px solid rgba(16,185,129,0.3); padding: 12px; border-radius: 12px;
+      font-size: 13px; text-align: center; margin-bottom: 15px;
     }
   </style>
 </head>
@@ -410,13 +160,11 @@ window._firebaseApp = app;
   </header>
 
   <div class="app-container">
-    
-    <!-- PWA Install Banner -->
+
     <div id="pwaBanner" class="pwa-banner">
       Instale o ODJIM Solution no seu telemóvel para acesso rápido!
     </div>
 
-    <!-- MENU PRINCIPAL -->
     <nav class="menu">
       <button class="menu-btn active" id="btn-cliente" onclick="abrir('cliente')">
         <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -436,17 +184,14 @@ window._firebaseApp = app;
     <div id="cliente" class="section" style="display: block;">
       <div class="card">
         <h2>Solicitar Serviço</h2>
-        
         <div class="form-group">
           <label for="nome">Nome Completo</label>
           <input id="nome" placeholder="Digite seu nome">
         </div>
-        
         <div class="form-group">
           <label for="telefone">Telefone / WhatsApp</label>
           <input id="telefone" placeholder="Ex: 923 000 000">
         </div>
-
         <div class="form-group">
           <label for="servico">Tipo de Serviço</label>
           <select id="servico">
@@ -462,12 +207,10 @@ window._firebaseApp = app;
             <option>Design gráfico</option>
           </select>
         </div>
-
         <div class="form-group">
           <label for="descricao">Descrição do Problema</label>
           <textarea id="descricao" placeholder="Descreva os detalhes do serviço..."></textarea>
         </div>
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
           <div class="form-group">
             <label for="inicio">Data Início</label>
@@ -478,20 +221,16 @@ window._firebaseApp = app;
             <input type="date" id="fim">
           </div>
         </div>
-
         <div class="form-group">
           <label for="localizacao">Localização (Endereço)</label>
           <input id="localizacao" placeholder="Clique no mapa ou digite o endereço">
           <div id="mapa"></div>
           <div class="map-helper">
-            <svg style="width:12px; height:12px; fill:currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <svg style="width:12px;height:12px;fill:currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
             Clique no mapa para marcar sua localização precisa.
           </div>
         </div>
-
-        <button class="action-btn" onclick="enviarPedido()">
-          Enviar Solicitação
-        </button>
+        <button class="action-btn" onclick="enviarPedido()">Enviar Solicitação</button>
       </div>
     </div>
 
@@ -500,101 +239,85 @@ window._firebaseApp = app;
       <div class="card">
         <h2>Painel Técnico</h2>
         <div class="lista-pedidos" id="listaPedidos">
-          <!-- Inserido dinamicamente -->
-          <div style="text-align: center; color: var(--text-muted); padding: 20px;">Carregando pedidos ativos...</div>
+          <div style="text-align:center;color:var(--text-muted);padding:20px;">Carregando pedidos ativos...</div>
         </div>
       </div>
     </div>
 
-    <!-- ADMIN LOGIN -->
+    <!-- ADMIN -->
     <div id="admin" class="section">
       <div class="card" id="painelLoginAdmin">
         <h2>Login Admin</h2>
-        
         <div class="form-group">
           <label for="adminEmail">E-mail</label>
           <input id="adminEmail" type="email" placeholder="admin@exemplo.com">
         </div>
-        
         <div class="form-group">
           <label for="adminPass">Senha</label>
           <input id="adminPass" type="password" placeholder="••••••••">
         </div>
-
-        <button class="action-btn" onclick="loginAdmin()">
-          Entrar no Painel
-        </button>
-
-        <div style="text-align: center; margin-top: 15px;">
-          <a href="#" onclick="recuperarSenha()" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">Esqueceu a senha?</a>
+        <button class="action-btn" onclick="loginAdmin()">Entrar no Painel</button>
+        <div style="text-align:center;margin-top:15px;">
+          <a href="#" onclick="recuperarSenha()" style="color:var(--text-muted);font-size:13px;text-decoration:none;">Esqueceu a senha?</a>
         </div>
       </div>
 
-      <!-- PAINEL ADMIN (APÓS LOGIN) -->
       <div id="painelAdmin" style="display:none" class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h2 style="margin-bottom: 0; font-size: 18px;">Gestão de Pedidos</h2>
-          <button onclick="logoutAdmin()" style="background: transparent; border: 1px solid var(--glass-border); color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.3s;">Sair</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 style="margin-bottom:0;font-size:18px;">Gestão de Pedidos</h2>
+          <button onclick="logoutAdmin()" style="background:transparent;border:1px solid var(--glass-border);color:#ef4444;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.3s;">Sair</button>
         </div>
-        <div style="margin-bottom: 15px; display: flex; gap: 8px;">
-          <a href="admin.html" class="action-btn" style="text-decoration: none; font-size: 14px; padding: 12px; background: #072d6b;">
+        <div style="margin-bottom:15px;display:flex;gap:8px;">
+          <a href="admin.html" class="action-btn" style="text-decoration:none;font-size:14px;padding:12px;background:#072d6b;">
             Ver Mapa de Técnicos
           </a>
         </div>
-        <div class="lista-pedidos" id="adminPedidos">
-          <!-- Inserido dinamicamente -->
-        </div>
+        <div class="lista-pedidos" id="adminPedidos"></div>
       </div>
     </div>
 
   </div>
 
+  <!-- Botão Fixo de Notificações -->
+  <button onclick="inicializarNotificacoes()" style="position:fixed;bottom:20px;right:20px;z-index:1000;background:linear-gradient(135deg,#ff9800,#ff5722);color:white;border:none;padding:14px 18px;border-radius:50px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(255,152,0,0.4);">
+    🔔 Ativar Notificações
+  </button>
+
+  <!-- Módulo de Notificações -->
+  <script src="notificacoes.js"></script>
+
   <script>
-    // Gerenciador de Abas/Seções
+    // Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("firebase-messaging-sw.js")
+        .then(reg => console.log("[SW] Registado:", reg.scope))
+        .catch(err => console.error("[SW] Erro:", err));
+    }
+
     function abrir(sec) {
       document.querySelectorAll(".section").forEach(s => s.style.display = "none");
       document.getElementById(sec).style.display = "block";
-      
       document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
       document.getElementById("btn-" + sec).classList.add("active");
-
-      // Força o redimensionamento do mapa para evitar bugs visuais de renderização da Leaflet
-      if (sec === 'cliente' && map) {
-        setTimeout(() => { map.invalidateSize(); }, 200);
-      }
+      if (sec === 'cliente' && map) setTimeout(() => { map.invalidateSize(); }, 200);
     }
 
-    // Inicialização do Mapa do Cliente
-    let map;
-    let marker;
+    let map, marker;
 
     function initClientMap() {
-      // Ponto padrão: Luanda (-8.8383, 13.2344)
       const defaultCoord = [-8.8383, 13.2344];
       map = L.map('mapa').setView(defaultCoord, 13);
-
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
+        maxZoom: 19, attribution: '© OpenStreetMap contributors'
       }).addTo(map);
-
-      // Listener para cliques no mapa
       map.on('click', function(e) {
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
-        
-        if (marker) {
-          marker.setLatLng(e.latlng);
-        } else {
-          marker = L.marker(e.latlng).addTo(map);
-        }
-
-        // Atualiza o input de localização com as coordenadas
+        if (marker) { marker.setLatLng(e.latlng); } else { marker = L.marker(e.latlng).addTo(map); }
         document.getElementById("localizacao").value = `Lat: ${lat}, Lon: ${lng}`;
       });
     }
 
-    // Enviar Pedido
     async function enviarPedido() {
       const nome = document.getElementById("nome").value;
       const telefone = document.getElementById("telefone").value;
@@ -610,13 +333,8 @@ window._firebaseApp = app;
       }
 
       const pedido = {
-        nome,
-        telefone,
-        local,
-        servico,
-        descricao,
-        inicio: inicio || "",
-        fim: fim || "",
+        nome, telefone, local, servico, descricao,
+        inicio: inicio || "", fim: fim || "",
         estado: "Aguardando técnico",
         dataCriacao: new Date().toISOString()
       };
@@ -624,50 +342,28 @@ window._firebaseApp = app;
       try {
         await addDoc(collection(db, "pedidos"), pedido);
         alert("Pedido de serviço enviado com sucesso!");
-        // Limpar formulário
-        document.getElementById("nome").value = "";
-        document.getElementById("telefone").value = "";
-        document.getElementById("localizacao").value = "";
-        document.getElementById("descricao").value = "";
-        document.getElementById("inicio").value = "";
-        document.getElementById("fim").value = "";
-        if (marker) {
-          map.removeLayer(marker);
-          marker = null;
-        }
+        ["nome","telefone","localizacao","descricao","inicio","fim"].forEach(id => document.getElementById(id).value = "");
+        if (marker) { map.removeLayer(marker); marker = null; }
       } catch (error) {
-        console.error("Erro ao enviar pedido: ", error);
-        alert("Ocorreu um erro ao enviar o pedido. Verifique as credenciais do Firebase.");
+        console.error("Erro ao enviar pedido:", error);
+        alert("Ocorreu um erro ao enviar o pedido.");
       }
     }
 
-    // Monitorar pedidos do banco de dados (Real-time)
-    let snapshotLoaded = false;
-    
     function monitorarPedidos() {
-      if (!window.db) {
-        setTimeout(monitorarPedidos, 500); // Aguarda o carregamento do Firebase
-        return;
-      }
-
+      if (!window.db) { setTimeout(monitorarPedidos, 500); return; }
       onSnapshot(collection(db, "pedidos"), (snapshot) => {
         let html = "";
-        
         if (snapshot.empty) {
-          html = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum serviço solicitado no momento.</div>`;
+          html = `<div style="text-align:center;color:var(--text-muted);padding:20px;">Nenhum serviço solicitado no momento.</div>`;
         } else {
           snapshot.forEach((docSnap) => {
             const p = docSnap.data();
             const statusClass = p.estado === "Aguardando técnico" ? "status-aguardando" : "status-caminho";
-            
-            let actionBtn = "";
-            if (p.estado === "Aguardando técnico") {
-              actionBtn = `<button class="btn-aceitar" onclick="aceitar('${docSnap.id}')">Aceitar Serviço</button>`;
-            } else if (p.estado === "Técnico a caminho") {
-              const zapNumber = p.telefone.replace(/[^0-9]/g, '');
-              actionBtn = `<a href="https://wa.me/${zapNumber}?text=Olá! Aceitei o seu pedido de serviço no ODJIM Solution." target="_blank" style="display:block; text-align:center; background: #25D366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 13px; margin-top: 5px;">💬 Chamar no WhatsApp</a>`;
-            }
-
+            const zapNumber = p.telefone.replace(/[^0-9]/g, '');
+            const actionBtn = p.estado === "Aguardando técnico"
+              ? `<button class="btn-aceitar" onclick="aceitar('${docSnap.id}')">✅ Aceitar Serviço</button>`
+              : `<a href="https://wa.me/244${zapNumber}?text=Olá! Aceitei o seu pedido no ODJIM Solution." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:10px;border-radius:8px;font-weight:600;font-size:13px;margin-top:5px;">💬 Chamar no WhatsApp</a>`;
             html += `
               <div class="pedido-card">
                 <div class="pedido-header">
@@ -682,82 +378,56 @@ window._firebaseApp = app;
                   ${p.inicio ? `<p><strong>Período:</strong> ${p.inicio} até ${p.fim}</p>` : ''}
                 </div>
                 ${actionBtn}
-              </div>
-            `;
+              </div>`;
           });
         }
-
         document.getElementById("listaPedidos").innerHTML = html;
-        document.getElementById("adminPedidos").innerHTML = html;
-      }, (error) => {
-        console.error("Erro no Listener Firestore: ", error);
+        if (document.getElementById("adminPedidos")) document.getElementById("adminPedidos").innerHTML = html;
       });
     }
 
-    // Aceitar Serviço
     async function aceitar(id) {
       try {
-        await updateDoc(doc(db, "pedidos", id), {
-          estado: "Técnico a caminho"
-        });
-        alert("Você aceitou o serviço! O cliente foi notificado.");
+        await updateDoc(doc(db, "pedidos", id), { estado: "Técnico a caminho" });
+        alert("Serviço aceite! O cliente foi notificado.");
       } catch (error) {
-        console.error("Erro ao aceitar pedido: ", error);
-        alert("Não foi possível aceitar o serviço. Detalhes no console.");
+        alert("Erro ao aceitar o serviço.");
       }
     }
 
-    // Login Admin com Firebase Auth
     async function loginAdmin() {
       const email = document.getElementById("adminEmail").value;
       const pass = document.getElementById("adminPass").value;
-
-      if (!email || !pass) {
-        alert("Preencha o e-mail e a senha.");
-        return;
-      }
-
+      if (!email || !pass) { alert("Preencha o e-mail e a senha."); return; }
       try {
         await signInWithEmailAndPassword(auth, email, pass);
         document.getElementById("painelLoginAdmin").style.display = "none";
         document.getElementById("painelAdmin").style.display = "block";
-        alert("Bem-vindo ao painel!");
       } catch (error) {
-        console.error("Erro no login:", error);
-        alert("Falha no login. Verifique seu e-mail e senha.");
+        alert("Falha no login. Verifique o e-mail e senha.");
       }
     }
 
-    // Recuperar Senha (Esqueci a Senha)
     async function recuperarSenha() {
       const email = document.getElementById("adminEmail").value;
-      if (!email) {
-        alert("Por favor, digite seu e-mail no campo acima e clique em 'Esqueceu a senha?' novamente.");
-        return;
-      }
-
+      if (!email) { alert("Escreva o seu e-mail primeiro."); return; }
       try {
         await sendPasswordResetEmail(auth, email);
-        alert("Um link de redefinição de senha foi enviado para " + email + ". Verifique sua caixa de entrada.");
+        alert("Link de recuperação enviado para " + email);
       } catch (error) {
-        console.error("Erro ao resetar senha:", error);
-        alert("Erro ao enviar o e-mail de redefinição. O e-mail está cadastrado?");
+        alert("Erro ao enviar e-mail de recuperação.");
       }
     }
 
-    // Logout Admin
     async function logoutAdmin() {
       try {
         await signOut(auth);
         document.getElementById("painelAdmin").style.display = "none";
         document.getElementById("painelLoginAdmin").style.display = "block";
         document.getElementById("adminPass").value = "";
-      } catch (error) {
-        console.error("Erro ao sair:", error);
-      }
+      } catch (error) { console.error("Erro ao sair:", error); }
     }
 
-    // Monitorar estado de autenticação (Mantém a sessão ativa)
     function checkAuthStatus() {
       if (!window.auth) return;
       onAuthStateChanged(auth, (user) => {
@@ -768,23 +438,14 @@ window._firebaseApp = app;
       });
     }
 
-    // Iniciar tudo ao carregar a página
     window.onload = function() {
       initClientMap();
       monitorarPedidos();
       checkAuthStatus();
-      
-      <script src="notificacoes.js"></script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("firebase-messaging-sw.js");
-}
-</script>
-
-<button onclick="inicializarNotificacoes()" style="position:fixed;bottom:20px;right:20px;z-index:1000;background:linear-gradient(135deg,#ff9800,#ff5722);color:white;border:none;padding:14px 18px;border-radius:50px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(255,152,0,0.4);">
-  🔔 Ativar Notificações
-</button>
     };
   </script>
+
 </body>
 </html>
+HTMLEOF
+echo "Feito!"
