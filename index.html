@@ -34,6 +34,7 @@
     };
 
     const app = initializeApp(firebaseConfig);
+window._firebaseApp = app;
     const db = getFirestore(app);
     const auth = getAuth(app);
 
@@ -773,9 +774,16 @@
       monitorarPedidos();
       checkAuthStatus();
       
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js').catch(err => console.error("SW erro: ", err));
-      }
+      <script src="notificacoes.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("firebase-messaging-sw.js");
+}
+</script>
+
+<button onclick="inicializarNotificacoes()" style="position:fixed;bottom:20px;right:20px;z-index:1000;background:linear-gradient(135deg,#ff9800,#ff5722);color:white;border:none;padding:14px 18px;border-radius:50px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(255,152,0,0.4);">
+  🔔 Ativar Notificações
+</button>
     };
   </script>
 </body>
