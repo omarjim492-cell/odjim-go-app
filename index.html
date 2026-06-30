@@ -868,3 +868,597 @@
 </script>
 </body>
 </html>
+.emoji-btn .em{font-size:30px;animation:floatEm 3s ease-in-out infinite;display:block;}
+    .emoji-btn .em-label{font-size:10px;font-weight:600;color:var(--muted);}
+    .emoji-btn:hover{border-color:var(--accent);transform:translateY(-3px);}
+    .emoji-btn.sel{border-color:var(--accent);background:rgba(255,152,0,0.15);}
+    .emoji-btn.sel .em{animation:bounceEm 0.4s ease;}
+    .emoji-btn.sel .em-label{color:var(--accent);}
+    .inq-comentario{display:none;margin-top:14px;}
+    .inq-feedback{display:none;margin-top:16px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:20px;text-align:center;}
+    .inq-feedback .big-em{font-size:44px;display:block;margin-bottom:10px;animation:popEm 0.5s ease;}
+    .inq-feedback p{color:#34d399;font-weight:700;font-size:16px;}
+    #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:none;background:rgba(30,41,59,0.97);border:1px solid rgba(255,152,0,0.4);border-left:4px solid var(--accent);color:var(--text);padding:14px 20px;border-radius:12px;max-width:320px;width:90%;text-align:center;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px;}
+    .modal-overlay.aberto{display:flex;}
+    .modal{background:#1e293b;border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:400px;}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center;}
+    .modal-tabs{display:flex;gap:6px;margin-bottom:20px;}
+    .modal-tab{flex:1;padding:10px;border:none;background:rgba(255,255,255,0.04);color:var(--muted);font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:var(--tr);}
+    .modal-tab.ativa{background:var(--accent);color:var(--bg);}
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- MODAL CADASTRO CLIENTE -->
+<div class="modal-overlay" id="modal-cadastro">
+  <div class="modal">
+    <h3>👤 Entrar / Cadastrar</h3>
+    <div class="modal-tabs">
+      <button class="modal-tab ativa" onclick="modalTab('login')">Entrar</button>
+      <button class="modal-tab" onclick="modalTab('registo')">Cadastrar</button>
+    </div>
+    <div id="modal-login">
+      <div class="form-group"><label>Email</label><input id="cl-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Senha</label><input id="cl-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginCliente()">Entrar</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaCliente()" style="color:var(--muted);font-size:13px;text-decoration:none;">Esqueceu a senha?</a></div>
+    </div>
+    <div id="modal-registo" style="display:none;">
+      <div class="form-group"><label>Nome Completo</label><input id="cr-nome" placeholder="O seu nome"></div>
+      <div class="form-group"><label>Email</label><input id="cr-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Telefone</label><input id="cr-tel" placeholder="923 000 000"></div>
+      <div class="form-group"><label>Senha</label><input id="cr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn btn-primary" onclick="cadastrarCliente()">Criar Conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo fade-up">
+    <h1>ODJIM Solution</h1>
+    <p>Tecnologia e Serviços ao seu Alcance 🚀</p>
+    <span class="tagline">Luanda, Angola • Disponível 24h</span>
+  </div>
+  <div class="user-cards fade-up">
+    <div class="user-card" onclick="irCliente()">
+      <span class="icon">👤</span>
+      <div class="info"><h3>Sou Cliente</h3><p>Solicitar serviços e suporte técnico</p></div>
+      <span class="arrow">›</span>
+    </div>
+    <div class="user-card" onclick="irPara('tecnico')">
+      <span class="icon">🔧</span>
+      <div class="info"><h3>Sou Técnico</h3><p>Ver pedidos e gerir os meus serviços</p></div>
+      <span class="arrow">›</span>
+    </div>
+    <div class="user-card" onclick="irPara('admin')">
+      <span class="icon">🛡️</span>
+      <div class="info"><h3>Administrador</h3><p>Gerir técnicos, pedidos e relatórios</p></div>
+      <span class="arrow">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- TELA CLIENTE -->
+<div id="tela-cliente" class="tela">
+  <div class="topbar">
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>ODJIM Solution</h2>
+    <span class="badge" id="badge-cliente">Cliente</span>
+  </div>
+  <div class="conteudo">
+    <div id="notif-banner" class="notif-banner"></div>
+
+    <div class="hero-odjim fade-up">
+      <div class="logo-big">ODJIM Solution</div>
+      <p>A sua plataforma de confiança para serviços técnicos e domésticos em Luanda. Rápido, seguro e profissional.</p>
+    </div>
+
+    <div class="stats fade-up">
+      <div class="stat"><div class="num">50+</div><div class="lab">Técnicos</div></div>
+      <div class="stat"><div class="num">98%</div><div class="lab">Satisfação</div></div>
+      <div class="stat"><div class="num">24h</div><div class="lab">Disponível</div></div>
+    </div>
+
+    <div class="card fade-up">
+      <h3>O que Oferecemos</h3>
+      <div class="servicos-grid">
+        <div class="servico-item"><span class="ico">💻</span>Informática</div>
+        <div class="servico-item"><span class="ico">📡</span>Redes</div>
+        <div class="servico-item"><span class="ico">📹</span>CCTV</div>
+        <div class="servico-item"><span class="ico">⚡</span>Electricidade</div>
+        <div class="servico-item"><span class="ico">❄️</span>Ar Condicionado</div>
+        <div class="servico-item"><span class="ico">🔧</span>Canalização</div>
+        <div class="servico-item"><span class="ico">🎨</span>Pintura</div>
+        <div class="servico-item"><span class="ico">🧹</span>Limpeza</div>
+        <div class="servico-item"><span class="ico">🎭</span>Design</div>
+      </div>
+    </div>
+
+    <div class="card fade-up">
+      <h3>Sobre a ODJIM</h3>
+      <p style="font-size:14px;color:var(--muted);line-height:1.7;">A <strong style="color:var(--text)">ODJIM Solution</strong> é uma empresa angolana especializada em conectar clientes com técnicos qualificados. A nossa missão é garantir que cada angolano tenha acesso rápido e seguro a profissionais de confiança, com total transparência e qualidade garantida.</p>
+    </div>
+
+    <div class="card fade-up">
+      <h3>Solicitar Serviço</h3>
+      <div class="form-group"><label>Nome Completo</label><input id="c-nome" placeholder="O seu nome completo"></div>
+      <div class="form-group"><label>Telefone / WhatsApp</label><input id="c-tel" placeholder="Ex: 923 000 000"></div>
+      <div class="form-group"><label>Email (opcional)</label><input id="c-email" type="email" placeholder="exemplo@email.com"></div>
+      <div class="form-group">
+        <label>Tipo de Serviço</label>
+        <select id="c-servico">
+          <option>Informática</option><option>Redes</option><option>CCTV</option>
+          <option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option>
+          <option>Pintura</option><option>Limpeza</option><option>Babá</option><option>Design gráfico</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Descrição</label><textarea id="c-desc" placeholder="Descreva os detalhes..."></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="form-group"><label>Data Início</label><input type="date" id="c-inicio"></div>
+        <div class="form-group"><label>Data Fim</label><input type="date" id="c-fim"></div>
+      </div>
+      <div class="form-group">
+        <label>Localização</label>
+        <input id="c-local" placeholder="Clique no mapa ou escreva o endereço">
+        <div id="mapa"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:5px;">📍 Clique no mapa para marcar a sua localização</p>
+      </div>
+      <button class="btn btn-primary" onclick="enviarPedido()">🚀 Enviar Pedido</button>
+    </div>
+<div class="card fade-up">
+      <h3>A sua opinião importa 💬</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px;text-align:center;">Como avalia a sua experiência com a ODJIM Solution?</p>
+      <div class="emojis-row">
+        <div class="emoji-btn" onclick="avaliar(this,1,'😡','Muito mau')"><span class="em">😡</span><span class="em-label">Muito mau</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,2,'😕','Mau')"><span class="em">😕</span><span class="em-label">Mau</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,3,'😐','Normal')"><span class="em">😐</span><span class="em-label">Normal</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,4,'😊','Bom')"><span class="em">😊</span><span class="em-label">Bom</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,5,'🤩','Excelente')"><span class="em">🤩</span><span class="em-label">Excelente</span></div>
+      </div>
+      <div class="inq-comentario" id="inq-comentario">
+        <textarea id="av-comentario" placeholder="Comentário opcional..."></textarea>
+        <button class="btn btn-primary" style="margin-top:10px;" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+      </div>
+      <div class="inq-feedback" id="inq-feedback">
+        <span class="big-em" id="feedback-em">🤩</span>
+        <p id="feedback-msg">Obrigado pela sua avaliação!</p>
+      </div>
+    </div>
+
+    <button class="btn btn-outline" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
+    <button class="btn btn-danger" style="width:100%;margin-bottom:20px;" onclick="logoutCliente()">Sair da Conta</button>
+  </div>
+</div>
+
+<!-- TELA TÉCNICO -->
+<div id="tela-tecnico" class="tela">
+  <div class="topbar">
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>Painel Técnico</h2>
+    <span class="badge">Técnico</span>
+  </div>
+  <div class="conteudo">
+    <div id="tecnico-login" class="card fade-up">
+      <h3>Entrar como Técnico</h3>
+      <div class="form-group"><label>Email</label><input id="t-email" type="email" placeholder="tecnico@odjim.com"></div>
+      <div class="form-group"><label>Senha</label><input id="t-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginTecnico()">Entrar</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaTecnico()" style="color:var(--muted);font-size:13px;text-decoration:none;">Esqueceu a senha?</a></div>
+    </div>
+    <div id="tecnico-painel" style="display:none;" class="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h3 style="font-size:18px;font-weight:700;">Olá, Técnico! 👋</h3><p style="font-size:13px;color:var(--muted);">Pedidos disponíveis</p></div>
+        <button class="btn btn-danger" onclick="logoutTecnico()">Sair</button>
+      </div>
+      <button class="btn btn-outline" style="margin-bottom:16px;" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
+      <div class="pedidos-lista" id="t-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar pedidos...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA ADMIN -->
+<div id="tela-admin" class="tela">
+  <div class="topbar">
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>Administração</h2>
+    <span class="badge">Admin</span>
+  </div>
+  <div class="conteudo">
+    <div id="admin-login" class="card fade-up">
+      <h3>🛡️ Acesso Restrito</h3>
+      <div class="form-group"><label>Email Admin</label><input id="a-email" type="email" placeholder="admin@odjim.com"></div>
+      <div class="form-group"><label>Senha</label><input id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginAdmin()">Entrar no Painel</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaAdmin()" style="color:var(--muted);font-size:13px;text-decoration:none;">Esqueceu a senha?</a></div>
+    </div>
+    <div id="admin-painel" style="display:none;" class="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h3 style="font-size:18px;font-weight:700;">Painel Admin 🛡️</h3><p style="font-size:13px;color:var(--muted);">Gestão completa</p></div>
+        <button class="btn btn-danger" onclick="logoutAdmin()">Sair</button>
+      </div>
+      <div class="tabs" style="margin-bottom:20px;">
+        <button class="tab ativa" onclick="abrirTab('tab-pedidos',this)">Pedidos</button>
+        <button class="tab" onclick="abrirTab('tab-tecnicos',this)">Técnicos</button>
+        <button class="tab" onclick="abrirTab('tab-cadastrar',this)">+ Técnico</button>
+      </div>
+      <div id="tab-pedidos">
+        <div class="pedidos-lista" id="a-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar...</div></div>
+      </div>
+      <div id="tab-tecnicos" style="display:none;">
+        <div id="a-tecnicos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar técnicos...</div></div>
+      </div>
+      <div id="tab-cadastrar" style="display:none;">
+        <div class="card">
+          <h3>Cadastrar Novo Técnico</h3>
+          <div class="form-group"><label>Nome</label><input id="nt-nome" placeholder="Nome do técnico"></div>
+          <div class="form-group"><label>Email</label><input id="nt-email" type="email" placeholder="tecnico@odjim.com"></div>
+          <div class="form-group"><label>Telefone</label><input id="nt-tel" placeholder="923 000 000"></div>
+          <div class="form-group">
+            <label>Especialidade</label>
+            <select id="nt-esp">
+              <option>Informática</option><option>Redes</option><option>CCTV</option>
+              <option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option>
+              <option>Pintura</option><option>Limpeza</option><option>Design gráfico</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Senha Inicial</label><input id="nt-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+          <button class="btn btn-primary" onclick="cadastrarTecnico()">✅ Cadastrar Técnico</button>
+        </div>
+      </div>
+    </div>
+  </div>
+      </div><script>
+  // ── TOAST ──
+  function toast(msg, dur=4000) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.style.display = "block";
+    setTimeout(() => t.style.display = "none", dur);
+  }
+
+  // ── NAVEGAÇÃO ──
+  function irPara(tela) {
+    document.getElementById("splash").style.display = "none";
+    document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+    document.getElementById("tela-" + tela).classList.add("ativa");
+    if (tela === "cliente") { initMap(); }
+    if (tela === "tecnico") { verificarTecnico(); }
+    if (tela === "admin") { verificarAdmin(); }
+  }
+
+  function voltar() {
+    document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+    document.getElementById("splash").style.display = "flex";
+  }
+
+  // ── CLIENTE COM CADASTRO OBRIGATÓRIO ──
+  function irCliente() {
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        irPara("cliente");
+        const nome = user.displayName || user.email.split("@")[0];
+        document.getElementById("badge-cliente").textContent = nome;
+      } else {
+        document.getElementById("modal-cadastro").classList.add("aberto");
+      }
+    });
+  }
+
+  function modalTab(tab) {
+    document.getElementById("modal-login").style.display = tab === "login" ? "block" : "none";
+    document.getElementById("modal-registo").style.display = tab === "registo" ? "block" : "none";
+    document.querySelectorAll(".modal-tab").forEach((b,i) => b.classList.toggle("ativa", (i===0&&tab==="login")||(i===1&&tab==="registo")));
+  }
+
+  async function loginCliente() {
+    const email = document.getElementById("cl-email").value.trim();
+    const pass = document.getElementById("cl-pass").value;
+    if (!email || !pass) { toast("⚠️ Preencha email e senha."); return; }
+    try {
+      await auth.signInWithEmailAndPassword(email, pass);
+      document.getElementById("modal-cadastro").classList.remove("aberto");
+      irPara("cliente");
+      toast("✅ Bem-vindo de volta!");
+    } catch(e) { toast("❌ Email ou senha incorretos."); }
+  }
+
+  async function cadastrarCliente() {
+    const nome = document.getElementById("cr-nome").value.trim();
+    const email = document.getElementById("cr-email").value.trim();
+    const tel = document.getElementById("cr-tel").value.trim();
+    const pass = document.getElementById("cr-pass").value;
+    if (!nome || !email || !pass) { toast("⚠️ Preencha todos os campos."); return; }
+    if (pass.length < 6) { toast("⚠️ A senha deve ter pelo menos 6 caracteres."); return; }
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await cred.user.updateProfile({ displayName: nome });
+      await db.collection("clientes").doc(cred.user.uid).set({
+        nome, email, telefone: tel, uid: cred.user.uid, criadoEm: new Date().toISOString()
+      });
+      document.getElementById("modal-cadastro").classList.remove("aberto");
+      irPara("cliente");
+      toast("🎉 Conta criada com sucesso! Bem-vindo, " + nome + "!");
+    } catch(e) {
+      if (e.code === "auth/email-already-in-use") toast("❌ Este email já está registado.");
+      else toast("❌ Erro: " + e.message);
+    }
+  }
+
+  async function recuperarSenhaCliente() {
+    const email = document.getElementById("cl-email").value.trim();
+    if (!email) { toast("⚠️ Escreva o seu email primeiro."); return; }
+    await auth.sendPasswordResetEmail(email);
+    toast("📧 Email de recuperação enviado!");
+  }
+
+  async function logoutCliente() {
+    await auth.signOut();
+    voltar();
+    toast("👋 Sessão terminada.");
+  }
+
+  // ── MAPA ──
+  let map, marker;
+  function initMap() {
+    if (map) { setTimeout(() => map.invalidateSize(), 300); return; }
+    setTimeout(() => {
+      map = L.map("mapa").setView([-8.8383, 13.2344], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+      map.on("click", e => {
+        const lat = e.latlng.lat.toFixed(6), lng = e.latlng.lng.toFixed(6);
+        if (marker) marker.setLatLng(e.latlng); else marker = L.marker(e.latlng).addTo(map);
+        document.getElementById("c-local").value = `Lat: ${lat}, Lon: ${lng}`;
+      });
+    }, 400);
+  }
+
+  // ── ENVIAR PEDIDO ──
+  async function enviarPedido() {
+    const user = auth.currentUser;
+    const nome = document.getElementById("c-nome").value.trim();
+    const tel = document.getElementById("c-tel").value.trim();
+    const local = document.getElementById("c-local").value.trim();
+    if (!nome || !tel || !local) { toast("⚠️ Preencha Nome, Telefone e Localização."); return; }
+    try {
+      await db.collection("pedidos").add({
+        nome, telefone: tel,
+        email: document.getElementById("c-email").value,
+        local, servico: document.getElementById("c-servico").value,
+        descricao: document.getElementById("c-desc").value,
+        inicio: document.getElementById("c-inicio").value || "",
+        fim: document.getElementById("c-fim").value || "",
+        estado: "Aguardando técnico",
+        clienteUid: user ? user.uid : "",
+        dataCriacao: new Date().toISOString()
+      });
+      toast("✅ Pedido enviado! Entraremos em contacto em breve.");
+      ["c-nome","c-tel","c-email","c-local","c-desc","c-inicio","c-fim"].forEach(id => document.getElementById(id).value = "");
+      if (marker) { map.removeLayer(marker); marker = null; }
+    } catch(e) { toast("❌ Erro ao enviar pedido. Tente novamente."); }
+  }
+
+  // ── INQUÉRITO ──
+  let avaliacaoAtual = null;
+
+  function avaliar(btn, nota, emoji, label) {
+    document.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("sel"));
+    btn.classList.add("sel");
+    avaliacaoAtual = { nota, emoji, label };
+    document.getElementById("inq-comentario").style.display = "block";
+    document.getElementById("inq-feedback").style.display = "none";
+  }
+
+  async function enviarAvaliacao() {
+    if (!avaliacaoAtual) { toast("⚠️ Selecione uma avaliação primeiro."); return; }
+    try {
+      await db.collection("avaliacoes").add({
+        ...avaliacaoAtual,
+        comentario: document.getElementById("av-comentario").value,
+        data: new Date().toISOString()
+      });
+      const msgs = {
+        1: "Lamentamos! Vamos melhorar. 🙏",
+        2: "Obrigado pelo feedback! Melhoraremos. 💪",
+        3: "Obrigado! Continuamos a crescer. 🌱",
+        4: "Fico feliz que gostou! 😊",
+        5: "Uau! O seu apoio motiva-nos! 🚀"
+      };
+      document.getElementById("feedback-em").textContent = avaliacaoAtual.emoji;
+      document.getElementById("feedback-msg").textContent = msgs[avaliacaoAtual.nota];
+      document.getElementById("inq-comentario").style.display = "none";
+      document.getElementById("inq-feedback").style.display = "block";
+      document.getElementById("av-comentario").value = "";
+      avaliacaoAtual = null;
+    } catch(e) { toast("❌ Erro ao enviar avaliação."); }
+  }
+
+  // ── TÉCNICO ──
+  function verificarTecnico() {
+    auth.onAuthStateChanged(user => {
+      if (user) mostrarPainelTecnico();
+    });
+  }
+
+  async function loginTecnico() {
+    const email = document.getElementById("t-email").value.trim();
+    const pass = document.getElementById("t-pass").value;
+    if (!email || !pass) { toast("⚠️ Preencha email e senha."); return; }
+    try {
+      await auth.signInWithEmailAndPassword(email, pass);
+      mostrarPainelTecnico();
+      toast("✅ Bem-vindo, Técnico!");
+    } catch { toast("❌ Email ou senha incorretos."); }
+  }
+
+  function mostrarPainelTecnico() {
+    document.getElementById("tecnico-login").style.display = "none";
+    document.getElementById("tecnico-painel").style.display = "block";
+    monitorarPedidos("t-pedidos");
+  }
+
+  async function logoutTecnico() {
+    await auth.signOut();
+    document.getElementById("tecnico-painel").style.display = "none";
+    document.getElementById("tecnico-login").style.display = "block";
+    toast("👋 Sessão terminada.");
+  }
+
+  async function recuperarSenhaTecnico() {
+    const email = document.getElementById("t-email").value.trim();
+    if (!email) { toast("⚠️ Escreva o email primeiro."); return; }
+    await auth.sendPasswordResetEmail(email);
+    toast("📧 Email de recuperação enviado!");
+  }
+
+  // ── ADMIN ──
+  function verificarAdmin() {
+    auth.onAuthStateChanged(user => {
+      if (user) mostrarPainelAdmin();
+    });
+  }
+
+  async function loginAdmin() {
+    const email = document.getElementById("a-email").value.trim();
+    const pass = document.getElementById("a-pass").value;
+    if (!email || !pass) { toast("⚠️ Preencha email e senha."); return; }
+    try {
+      await auth.signInWithEmailAndPassword(email, pass);
+      mostrarPainelAdmin();
+      toast("✅ Bem-vindo, Admin!");
+    } catch { toast("❌ Acesso negado. Verifique as credenciais."); }
+  }
+
+  function mostrarPainelAdmin() {
+    document.getElementById("admin-login").style.display = "none";
+    document.getElementById("admin-painel").style.display = "block";
+    monitorarPedidos("a-pedidos");
+  }
+
+  async function logoutAdmin() {
+    await auth.signOut();
+    document.getElementById("admin-painel").style.display = "none";
+    document.getElementById("admin-login").style.display = "block";
+    toast("👋 Sessão terminada.");
+  }
+
+  async function recuperarSenhaAdmin() {
+    const email = document.getElementById("a-email").value.trim();
+    if (!email) { toast("⚠️ Escreva o email primeiro."); return; }
+    await auth.sendPasswordResetEmail(email);
+    toast("📧 Email de recuperação enviado!");
+  }
+
+  function abrirTab(id, btn) {
+    ["tab-pedidos","tab-tecnicos","tab-cadastrar"].forEach(t => document.getElementById(t).style.display = "none");
+    document.getElementById(id).style.display = "block";
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("ativa"));
+    btn.classList.add("ativa");
+    if (id === "tab-tecnicos") carregarTecnicos();
+  }
+
+  // ── CADASTRAR TÉCNICO ──
+  async function cadastrarTecnico() {
+    const nome = document.getElementById("nt-nome").value.trim();
+    const email = document.getElementById("nt-email").value.trim();
+    const pass = document.getElementById("nt-pass").value;
+    const tel = document.getElementById("nt-tel").value.trim();
+    const esp = document.getElementById("nt-esp").value;
+    if (!nome || !email || !pass) { toast("⚠️ Preencha todos os campos obrigatórios."); return; }
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await db.collection("tecnicos").doc(cred.user.uid).set({
+        nome, email, telefone: tel, especialidade: esp,
+        uid: cred.user.uid, ativo: true, criadoEm: new Date().toISOString()
+      });
+      toast("✅ Técnico " + nome + " cadastrado com sucesso!");
+      ["nt-nome","nt-email","nt-tel","nt-pass"].forEach(id => document.getElementById(id).value = "");
+    } catch(e) {
+      if (e.code === "auth/email-already-in-use") toast("❌ Este email já está registado.");
+      else toast("❌ Erro: " + e.message);
+    }
+  }
+
+  // ── CARREGAR TÉCNICOS ──
+  async function carregarTecnicos() {
+    const el = document.getElementById("a-tecnicos");
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
+    try {
+      const snap = await db.collection("tecnicos").get();
+      if (snap.empty) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>'; return; }
+      let html = "";
+      snap.forEach(d => {
+        const t = d.data();
+        html += `<div class="tecnico-card">
+          <div class="tecnico-avatar">${t.nome[0].toUpperCase()}</div>
+          <div class="tecnico-info"><h4>${t.nome}</h4><p>${t.especialidade} · ${t.telefone||""}</p></div>
+        </div>`;
+      });
+      el.innerHTML = html;
+    } catch(e) { el.innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;">Erro ao carregar técnicos.</div>'; }
+  }
+
+  // ── MONITORAR PEDIDOS ──
+  function monitorarPedidos(elId) {
+    db.collection("pedidos").orderBy("dataCriacao","desc").onSnapshot(snap => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (snap.empty) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>'; return; }
+      let html = "";
+      snap.forEach(d => {
+        const p = d.data();
+        const sc = p.estado === "Aguardando técnico" ? "s-aguardando" : "s-caminho";
+        const zap = (p.telefone||"").replace(/[^0-9]/g,"");
+        const btn = p.estado === "Aguardando técnico"
+          ? `<button onclick="aceitarPedido('${d.id}')" style="margin-top:8px;background:var(--accent);border:none;color:var(--bg);padding:11px;width:100%;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">✅ Aceitar Pedido</button>`
+          : `<a href="https://wa.me/244${zap}?text=Olá! Aceitei o seu pedido no ODJIM Solution." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:11px;border-radius:8px;font-weight:700;font-size:13px;margin-top:8px;">💬 Contactar no WhatsApp</a>`;
+        html += `<div class="pedido-card">
+          <div class="pedido-top">
+            <span class="pedido-servico">${p.servico}</span>
+            <span class="badge-status ${sc}">${p.estado}</span>
+          </div>
+          <div class="pedido-info">
+            <p><strong>${p.nome}</strong> · ${p.telefone}</p>
+            <p>📍 ${p.local}</p>
+            ${p.descricao ? `<p>📝 ${p.descricao}</p>` : ""}
+            ${p.inicio ? `<p>📅 ${p.inicio} → ${p.fim}</p>` : ""}
+          </div>
+          ${btn}
+        </div>`;
+      });
+      el.innerHTML = html;
+    }, err => {
+      const el = document.getElementById(elId);
+      if (el) el.innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;">Erro ao carregar pedidos.</div>';
+    });
+  }
+
+  async function aceitarPedido(id) {
+    try {
+      await db.collection("pedidos").doc(id).update({ estado: "Técnico a caminho" });
+      toast("✅ Pedido aceite com sucesso!");
+    } catch { toast("❌ Erro ao aceitar pedido."); }
+  }
+
+  // ── NOTIFICAÇÕES ──
+  async function ativarNotificacoes() {
+    if (!("Notification" in window)) { toast("❌ Este browser não suporta notificações."); return; }
+    const perm = await Notification.requestPermission();
+    const b = document.getElementById("notif-banner");
+    if (perm === "granted") {
+      if (b) { b.className = "notif-banner notif-ok"; b.textContent = "🔔 Notificações ativadas!"; b.style.display = "block"; setTimeout(() => b.style.display = "none", 4000); }
+      toast("🔔 Notificações ativadas com sucesso!");
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("firebase-messaging-sw.js")
+          .then(r => console.log("[SW]", r.scope)).catch(e => console.error("[SW]", e));
+      }
+    } else {
+      if (b) { b.className = "notif-banner notif-err"; b.textContent = "🔕 Notificações bloqueadas. Ative nas definições do browser."; b.style.display = "block"; setTimeout(() => b.style.display = "none", 5000); }
+      toast("🔕 Permissão negada. Ative nas definições.");
+    }
+  }
+</script>
+</body>
+  </html>
