@@ -411,7 +411,19 @@ async function enviarPedido(){
   const local=document.getElementById("c-local").value.trim();
   if(!nome||!tel||!local){toast("⚠️ Preencha Nome, Telefone e Localização.");return;}
   try{
-    await db.collection("pedidos").add({
+    await db.collection("pedidos")
+.onSnapshot((snapshot)=>{
+    const pedidos = [];
+
+    snapshot.forEach(doc=>{
+        pedidos.push({
+            id: doc.id,
+            ...doc.data()
+        });
+    });
+
+    renderPedidos(pedidos);
+});
       nome,telefone:tel,email:document.getElementById("c-email").value,
       local,servico:document.getElementById("c-servico").value,
       descricao:document.getElementById("c-desc").value,
