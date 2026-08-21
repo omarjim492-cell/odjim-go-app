@@ -12,21 +12,56 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 <script>
-const firebaseConfig={
+firebase.initializeApp({
   apiKey:"AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
   authDomain:"odjim-solution.firebaseapp.com",
   projectId:"odjim-solution",
   storageBucket:"odjim-solution.firebasestorage.app",
   messagingSenderId:"165673018775",
   appId:"1:165673018775:web:c8b4cc6345b854763950d2"
-};
-firebase.initializeApp(firebaseConfig);
+});
 const db=firebase.firestore();
 const auth=firebase.auth();
-// Instância secundária para criar técnicos sem terminar a sessão do Admin.
-const secondaryApp=firebase.initializeApp(firebaseConfig,"ODJIM_Technician_Registration");
-const secondaryAuth=secondaryApp.auth();
+let messaging=null;
+try { messaging=firebase.messaging(); } catch(e) { console.warn("FCM indisponível neste ambiente", e); }
+
+// ── ODJIM GO FIREBASE SERVICE LAYER ──
+const ODJIM = {
+  serverTimestamp: () => firebase.firestore.FieldValue.serverTimestamp(),
+  userRef: uid => db.collection("usuarios").doc(uid),
+  tecnicoRef: uid => db.collection("tecnicos").doc(uid),
+  pedidoRef: id => db.collection("pedidos").doc(id),
+  async getRole(user=auth.currentUser){
+    if(!user) return null;
+    const snap=await db.collection("usuarios").doc(user.uid).get();
+    return snap.exists ? (snap.data().role || null) : null;
+  },
+  async requireRole(role){
+    const user=auth.currentUser;
+    if(!user) throw new Error("Sessão não autenticada.");
+    const current=await this.getRole(user);
+    if(current!==role && !(role==="admin" && current==="superadmin")) throw new Error("Acesso não autorizado.");
+    return user;
+  },
+  async audit(acao, entidade, entidadeId, extras={}){
+    const user=auth.currentUser;
+    if(!user) return;
+    const role=await this.getRole(user).catch(()=>null);
+    return db.collection("auditoria").add({
+      atorUid:user.uid, atorRole:role || "desconhecido", acao, entidade, entidadeId,
+      ...extras, criadoEm:this.serverTimestamp()
+    });
+  },
+  async notify(uid, tipo, titulo, mensagem, pedidoId=""){
+    if(!uid) return;
+    return db.collection("notificacoes").add({destinatarioUid:uid,tipo,titulo,mensagem,pedidoId,lida:false,criadoEm:this.serverTimestamp()});
+  }
+};
+
+// Cache local do Firestore para melhor resiliência de rede
+db.enablePersistence({synchronizeTabs:true}).catch(err=>console.warn("Persistência Firestore:",err.code));
 </script>
 <style>
 :root{--bg:#0f172a;--accent:#ff9800;--accent2:#ff5722;--text:#f8fafc;--muted:#94a3b8;--glass:rgba(30,41,59,0.75);--border:rgba(255,255,255,0.08);--radius:16px;--tr:all 0.3s ease;}
@@ -323,8 +358,7 @@ select option{background:#1e293b;}
         <button class="tab ativa" onclick="abrirTab('tab-pedidos',this)">Pedidos</button>
         <button class="tab" onclick="abrirTab('tab-tecnicos',this)">Técnicos</button>
         <button class="tab" onclick="abrirTab('tab-cadastrar',this)">+ Técnico</button>
-        <button class="tab" onclick="abrirTab('tab-analytics',this)">📊 Analytics</button>
-         <button class="tab" onclick="abrirTab('tab-info',this)">Info</button>
+        <button class="tab" onclick="abrirTab('tab-info',this)">Info</button>
       </div>
       <div id="tab-pedidos">
         <div class="pedidos-lista" id="a-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar...</div></div>
@@ -343,22 +377,6 @@ select option{background:#1e293b;}
           </div>
           <div class="form-group"><label>Senha Inicial</label><input id="nt-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
           <button class="btn btn-primary" onclick="cadastrarTecnico()">✅ Cadastrar Técnico</button>
-        </div>
-      </div>
-      <!-- TAB ANALYTICS -->
-      <div id="tab-analytics" style="display:none;">
-        <div class="card">
-          <h3>📊 Analytics ODJIM GO</h3>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
-            <div class="stat"><div class="num" id="an-total">0</div><div class="lab">Total de pedidos</div></div>
-            <div class="stat"><div class="num" id="an-concluidos">0</div><div class="lab">Concluídos</div></div>
-            <div class="stat"><div class="num" id="an-pendentes">0</div><div class="lab">Pendentes</div></div>
-            <div class="stat"><div class="num" id="an-cancelados">0</div><div class="lab">Cancelados</div></div>
-          </div>
-          <div style="background:rgba(15,23,42,.5);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="font-weight:700;margin-bottom:12px;">Serviços mais solicitados</div>
-            <div id="an-servicos" style="display:flex;flex-direction:column;gap:8px;"><span style="color:var(--muted)">A carregar...</span></div>
-          </div>
         </div>
       </div>
       <!-- TAB INFO DA EMPRESA -->
@@ -452,9 +470,9 @@ async function cadastrarCliente(){
   try{
     const cred=await auth.createUserWithEmailAndPassword(email,pass);
     await cred.user.updateProfile({displayName:nome});
-    await db.collection("clientes").doc(cred.user.uid).set({
-      nome,email,telefone:tel,uid:cred.user.uid,criadoEm:new Date().toISOString()
-    });
+    const base={nome,email,telefone:tel,uid:cred.user.uid,role:"cliente",ativo:true,criadoEm:ODJIM.serverTimestamp(),atualizadoEm:ODJIM.serverTimestamp()};
+    await ODJIM.userRef(cred.user.uid).set(base,{merge:true});
+    await db.collection("clientes").doc(cred.user.uid).set(base,{merge:true});
     document.getElementById("modal-cadastro").classList.remove("aberto");
     irPara("cliente");
     document.getElementById("badge-cliente").textContent=nome;
@@ -503,17 +521,21 @@ async function enviarPedido(){
   const local=document.getElementById("c-local").value.trim();
   if(!nome||!tel||!local){toast("⚠️ Preencha Nome, Telefone e Localização.");return;}
   try{
-    await db.collection("pedidos").add({
-      nome,telefone:tel,
-      email:document.getElementById("c-email").value,
-      local,servico:document.getElementById("c-servico").value,
-      descricao:document.getElementById("c-desc").value,
+    const user=auth.currentUser;
+    if(!user){toast("⚠️ Entre na sua conta antes de enviar o pedido.");return;}
+    const pedidoRef=db.collection("pedidos").doc();
+    const pedido={
+      id:pedidoRef.id, clienteUid:user.uid, nome, telefone:tel,
+      email:document.getElementById("c-email").value.trim(),
+      local, servico:document.getElementById("c-servico").value,
+      descricao:document.getElementById("c-desc").value.trim(),
       inicio:document.getElementById("c-inicio").value||"",
       fim:document.getElementById("c-fim").value||"",
-      estado:"Aguardando técnico",
-      clienteUid:auth.currentUser?auth.currentUser.uid:"",
-      dataCriacao:new Date().toISOString()
-    });
+      estado:"AGUARDANDO_TECNICO", tecnicoUid:null, tecnicoNome:null,
+      criadoEm:ODJIM.serverTimestamp(), atualizadoEm:ODJIM.serverTimestamp()
+    };
+    await pedidoRef.set(pedido);
+    await ODJIM.audit("CRIAR_PEDIDO","pedido",pedidoRef.id,{estadoNovo:"AGUARDANDO_TECNICO"});
     toast("✅ Pedido enviado com sucesso! Entraremos em contacto em breve.");
     ["c-nome","c-tel","c-email","c-local","c-desc","c-inicio","c-fim"].forEach(id=>document.getElementById(id).value="");
     if(marker){map.removeLayer(marker);marker=null;}
@@ -533,11 +555,10 @@ function avaliar(btn,nota,emoji,label){
 async function enviarAvaliacao(){
   if(!avaliacaoAtual){toast("⚠️ Selecione um emoji primeiro.");return;}
   try{
-    await db.collection("avaliacoes").add({
-      ...avaliacaoAtual,
-      comentario:document.getElementById("av-comentario").value,
-      data:new Date().toISOString()
-    });
+    const user=auth.currentUser;
+    if(!user){toast("⚠️ Entre na sua conta para avaliar.");return;}
+    const ref=db.collection("avaliacoes").doc();
+    await ref.set({id:ref.id,pedidoId:"",clienteUid:user.uid,...avaliacaoAtual,comentario:document.getElementById("av-comentario").value.trim(),criadoEm:ODJIM.serverTimestamp()});
     const msgs={
       1:"Lamentamos a má experiência! Vamos melhorar. 🙏",
       2:"Obrigado pelo feedback! Trabalharemos para melhorar. 💪",
@@ -558,7 +579,7 @@ async function enviarAvaliacao(){
 // ── INFO DA EMPRESA ──
 async function carregarInfoEmpresa(){
   try{
-    const doc=await db.collection("configuracoes").doc("empresa").get();
+    const doc=await db.collection("config").doc("empresa").get();
     if(doc.exists){
       const d=doc.data();
       if(d.descricao)document.getElementById("odjim-descricao").textContent=d.descricao;
@@ -571,7 +592,7 @@ async function carregarInfoEmpresa(){
 
 async function carregarInfoParaEditar(){
   try{
-    const doc=await db.collection("configuracoes").doc("empresa").get();
+    const doc=await db.collection("config").doc("empresa").get();
     if(doc.exists){
       const d=doc.data();
       if(d.descricao)document.getElementById("edit-descricao").value=d.descricao;
@@ -588,17 +609,18 @@ async function salvarInfoEmpresa(){
   const tecnicos=document.getElementById("edit-tecnicos").value.trim();
   const satisfacao=document.getElementById("edit-satisfacao").value.trim();
   try{
-    await db.collection("configuracoes").doc("empresa").set({
-      descricao,sobre,tecnicos,satisfacao,
-      atualizadoEm:new Date().toISOString()
-    });
+    await ODJIM.requireRole("admin");
+    await db.collection("config").doc("empresa").set({descricao,sobre,tecnicos,satisfacao,atualizadoEm:ODJIM.serverTimestamp()},{merge:true});
+    await ODJIM.audit("ATUALIZAR_CONFIG_EMPRESA","config","empresa");
     toast("✅ Informações da ODJIM atualizadas com sucesso!");
   }catch(e){toast("❌ Erro ao guardar: "+e.message);}
 }
 
 // ── TÉCNICO ──
 function verificarTecnico(){
-  auth.onAuthStateChanged(user=>{if(user)mostrarPainelTecnico();});
+  const user=auth.currentUser;
+  if(!user){document.getElementById("tecnico-login").style.display="block";return;}
+  ODJIM.getRole(user).then(role=>{if(role==="tecnico")mostrarPainelTecnico();else toast("❌ Esta conta não tem perfil de técnico.");}).catch(()=>{});
 }
 
 async function loginTecnico(){
@@ -606,7 +628,9 @@ async function loginTecnico(){
   const pass=document.getElementById("t-pass").value;
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
-    await auth.signInWithEmailAndPassword(email,pass);
+    const cred=await auth.signInWithEmailAndPassword(email,pass);
+    const role=await ODJIM.getRole(cred.user);
+    if(role!=="tecnico"){await auth.signOut();throw new Error("Esta conta não possui perfil de técnico.");}
     mostrarPainelTecnico();
     toast("✅ Bem-vindo ao painel técnico!");
   }catch(e){
@@ -623,8 +647,6 @@ function mostrarPainelTecnico(){
 }
 
 async function logoutTecnico(){
-  Object.values(listenersPedidos).forEach(fn=>{try{fn()}catch(e){}});
-  listenersPedidos={};
   await auth.signOut();
   document.getElementById("tecnico-painel").style.display="none";
   document.getElementById("tecnico-login").style.display="block";
@@ -645,7 +667,9 @@ async function recuperarSenhaTecnico(){
 
 // ── ADMIN ──
 function verificarAdmin(){
-  auth.onAuthStateChanged(user=>{if(user)mostrarPainelAdmin();});
+  const user=auth.currentUser;
+  if(!user){document.getElementById("admin-login").style.display="block";return;}
+  ODJIM.getRole(user).then(role=>{if(role==="admin"||role==="superadmin")mostrarPainelAdmin();else toast("❌ Acesso administrativo negado.");}).catch(()=>{});
 }
 
 async function loginAdmin(){
@@ -653,7 +677,9 @@ async function loginAdmin(){
   const pass=document.getElementById("a-pass").value;
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
-    await auth.signInWithEmailAndPassword(email,pass);
+    const cred=await auth.signInWithEmailAndPassword(email,pass);
+    const role=await ODJIM.getRole(cred.user);
+    if(role!=="admin" && role!=="superadmin"){await auth.signOut();throw new Error("Esta conta não possui perfil administrativo.");}
     mostrarPainelAdmin();
     toast("✅ Bem-vindo, Admin!");
   }catch(e){
@@ -670,8 +696,6 @@ function mostrarPainelAdmin(){
 }
 
 async function logoutAdmin(){
-  Object.values(listenersPedidos).forEach(fn=>{try{fn()}catch(e){}});
-  listenersPedidos={};
   await auth.signOut();
   document.getElementById("admin-painel").style.display="none";
   document.getElementById("admin-login").style.display="block";
@@ -691,7 +715,7 @@ async function recuperarSenhaAdmin(){
 }
 
 function abrirTab(id,btn){
-  ["tab-pedidos","tab-tecnicos","tab-cadastrar","tab-analytics","tab-info"].forEach(t=>document.getElementById(t).style.display="none");
+  ["tab-pedidos","tab-tecnicos","tab-cadastrar","tab-info"].forEach(t=>document.getElementById(t).style.display="none");
   document.getElementById(id).style.display="block";
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("ativa"));
   btn.classList.add("ativa");
@@ -701,61 +725,38 @@ function abrirTab(id,btn){
 
 // ── CADASTRAR TÉCNICO ──
 async function cadastrarTecnico(){
+  const admin=await ODJIM.requireRole("admin").catch(e=>{toast("❌ "+e.message);return null;});
+  if(!admin)return;
   const nome=document.getElementById("nt-nome").value.trim();
   const email=document.getElementById("nt-email").value.trim();
   const pass=document.getElementById("nt-pass").value;
   const tel=document.getElementById("nt-tel").value.trim();
   const esp=document.getElementById("nt-esp").value;
   if(!nome||!email||!pass){toast("⚠️ Preencha todos os campos obrigatórios.");return;}
+  if(pass.length<6){toast("⚠️ Senha mínimo 6 caracteres.");return;}
+  let secondary=null;
   try{
-    const cred=await auth.createUserWithEmailAndPassword(email,pass);
-    await db.collection("tecnicos").doc(cred.user.uid).set({
-      nome,email,telefone:tel,especialidade:esp,
-      uid:cred.user.uid,ativo:true,
-      criadoEm:new Date().toISOString()
-    });
+    // Criação pela instância secundária preserva a sessão do administrador.
+    secondary=firebase.initializeApp(firebase.app().options,"odjimAdminCreate");
+    const secondaryAuth=secondary.auth();
+    const cred=await secondaryAuth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:nome});
+    const base={uid:cred.user.uid,nome,email,telefone:tel,especialidade:esp,role:"tecnico",ativo:true,disponibilidade:"disponivel",criadoEm:ODJIM.serverTimestamp(),atualizadoEm:ODJIM.serverTimestamp()};
+    await ODJIM.userRef(cred.user.uid).set(base,{merge:true});
+    await ODJIM.tecnicoRef(cred.user.uid).set(base,{merge:true});
+    await ODJIM.audit("CRIAR_TECNICO","tecnico",cred.user.uid,{nome,email});
+    await secondaryAuth.signOut();
+    await secondary.delete();
     toast("✅ Técnico "+nome+" cadastrado com sucesso!");
     ["nt-nome","nt-email","nt-tel","nt-pass"].forEach(id=>document.getElementById(id).value="");
+    carregarTecnicos();
   }catch(e){
-    if(e.code==="auth/email-already-in-use"){
-      // Guardar no Firestore mesmo que já exista na Auth
-      await db.collection("tecnicos").add({
-        nome,email,telefone:tel,especialidade:esp,
-        ativo:true,criadoEm:new Date().toISOString()
-      });
-      toast("✅ Técnico "+nome+" adicionado!");
-      ["nt-nome","nt-email","nt-tel","nt-pass"].forEach(id=>document.getElementById(id).value="");
-    } else {
-      toast("❌ Erro: "+e.message);
-    }
+    if(secondary){try{await secondary.delete();}catch(_){} }
+    toast("❌ Erro ao cadastrar técnico: "+e.message);
   }
 }
 
 // ── CARREGAR TÉCNICOS ──
-async function carregarAnalytics(){
-  const totalEl=document.getElementById("an-total");
-  if(!totalEl)return;
-  try{
-    const snap=await db.collection("pedidos").get();
-    let concluidos=0,pendentes=0,cancelados=0;
-    const servicos={};
-    snap.forEach(d=>{
-      const p=d.data(), estado=(p.estado||"").toLowerCase();
-      if(estado.includes("conclu"))concluidos++;
-      else if(estado.includes("cancel"))cancelados++;
-      else pendentes++;
-      const serv=p.servico||"Sem serviço"; servicos[serv]=(servicos[serv]||0)+1;
-    });
-    totalEl.textContent=snap.size;
-    document.getElementById("an-concluidos").textContent=concluidos;
-    document.getElementById("an-pendentes").textContent=pendentes;
-    document.getElementById("an-cancelados").textContent=cancelados;
-    const ordenados=Object.entries(servicos).sort((a,b)=>b[1]-a[1]);
-    const max=ordenados[0]?.[1]||1;
-    document.getElementById("an-servicos").innerHTML=ordenados.slice(0,8).map(([nome,n])=>`<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${nome}</span><strong>${n}</strong></div><div style="height:7px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden"><div style="height:100%;width:${Math.round(n/max*100)}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:10px"></div></div></div>`).join("")||"<span style='color:var(--muted)'>Sem dados.</span>";
-  }catch(e){toast("❌ Erro ao carregar Analytics: "+e.message);}
-}
-
 async function carregarTecnicos(){
   const el=document.getElementById("a-tecnicos");
   el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
@@ -776,66 +777,84 @@ async function carregarTecnicos(){
 }
 
 // ── MONITORAR PEDIDOS (tempo real, todos dispositivos) ──
-let listenersPedidos={};
-function renderPedidos(elId,docs){
-  const el=document.getElementById(elId); if(!el)return;
-  const lista=Object.entries(docs).sort((a,b)=>{
-    const da=a[1].dataCriacao||"", db=b[1].dataCriacao||""; return String(db).localeCompare(String(da));
-  });
-  if(!lista.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>';return;}
-  let html="";
-  lista.forEach(([id,p])=>{
-    const sc=p.estado==="Aguardando técnico"?"s-aguardando":"s-caminho";
-    const zap=(p.telefone||"").replace(/[^0-9]/g,"");
-    const btn=p.estado==="Aguardando técnico"
-      ?`<button onclick="aceitarPedido('${id}')" style="margin-top:8px;background:var(--accent);border:none;color:var(--bg);padding:11px;width:100%;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">✅ Aceitar Pedido</button>`
-      :`<a href="https://wa.me/244${zap}?text=Olá ${encodeURIComponent(p.nome||"")}! Aceitei o seu pedido de ${encodeURIComponent(p.servico||"")} no ODJIM Solution. Estou a caminho!" target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:11px;border-radius:8px;font-weight:700;font-size:13px;margin-top:8px;">💬 Contactar no WhatsApp</a>`;
-    html+=`<div class="pedido-card"><div class="pedido-top"><span class="pedido-servico">${p.servico||"Serviço"}</span><span class="badge-status ${sc}">${p.estado||"Sem estado"}</span></div><div class="pedido-info"><p><strong>${p.nome||"Cliente"}</strong> · ${p.telefone||""}</p><p>📍 ${p.local||""}</p>${p.descricao?`<p>📝 ${p.descricao}</p>`:""}${p.inicio?`<p>📅 ${p.inicio} → ${p.fim||""}</p>`:""}</div>${btn}</div>`;
-  });
-  el.innerHTML=html;
-}
-
+let pedidoUnsubscribers={};
 function monitorarPedidos(elId){
-  if(listenersPedidos[elId]){listenersPedidos[elId].forEach(fn=>{try{fn()}catch(e){}});}
-  const unsubs=[], docs={};
+  if(pedidoUnsubscribers[elId]) pedidoUnsubscribers[elId]();
+  let q=db.collection("pedidos");
   const user=auth.currentUser;
-  if(!user)return;
-  const atualizar=()=>renderPedidos(elId,docs);
-  const ligar=(query,prefix)=>{
-    const unsub=query.onSnapshot(snap=>{
-      Object.keys(docs).filter(k=>k.startsWith(prefix+":" )).forEach(k=>delete docs[k]);
-      snap.forEach(d=>docs[prefix+":"+d.id]={...d.data(),__id:d.id});
-      atualizar();
-    },err=>{const el=document.getElementById(elId);if(el)el.innerHTML=`<div style="text-align:center;color:#f87171;padding:20px;">Erro: ${err.message}</div>`;});
-    unsubs.push(unsub);
-  };
-  if(elId==="t-pedidos") {
-    ligar(db.collection("pedidos").where("estado","==","Aguardando técnico"),"aguardando");
-    ligar(db.collection("pedidos").where("tecnicoUid","==",user.uid),"meus");
-  } else {
-    ligar(db.collection("pedidos"),"todos");
-  }
-  listenersPedidos[elId]=unsubs;
+  if(elId==="t-pedidos" && user) q=q.where("tecnicoUid","==",user.uid);
+  else if(elId==="a-pedidos") q=q;
+  pedidoUnsubscribers[elId]=q.onSnapshot(snap=>{
+    const el=document.getElementById(elId); if(!el)return;
+    if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>';return;}
+    let html="";
+    snap.forEach(d=>{
+      const p=d.data();
+      const statusMap={AGUARDANDO_TECNICO:"Aguardando técnico",TECNICO_ATRIBUIDO:"Técnico atribuído",A_CAMINHO:"A caminho",EM_EXECUCAO:"Em execução",CONCLUIDO:"Concluído",CANCELADO:"Cancelado"};
+      const estado=statusMap[p.estado]||p.estado||"—";
+      const sc=["AGUARDANDO_TECNICO"].includes(p.estado)||p.estado==="Aguardando técnico"?"s-aguardando":"s-caminho";
+      const zap=(p.telefone||"").replace(/[^0-9]/g,"");
+      let btn="";
+      if(elId==="t-pedidos" && (p.estado==="AGUARDANDO_TECNICO"||p.estado==="Aguardando técnico")) btn=`<button onclick="aceitarPedido('${d.id}')" style="margin-top:8px;background:var(--accent);border:none;color:var(--bg);padding:11px;width:100%;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">✅ Aceitar Pedido</button>`;
+      else if(elId==="t-pedidos" && zap) btn=`<a href="https://wa.me/244${zap}?text=Olá ${encodeURIComponent(p.nome||"")}! Estou a caminho para o seu pedido de ${encodeURIComponent(p.servico||"")}." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:11px;border-radius:8px;font-weight:700;font-size:13px;margin-top:8px;">💬 Contactar no WhatsApp</a>`;
+      html+=`<div class="pedido-card"><div class="pedido-top"><span class="pedido-servico">${p.servico||"Serviço"}</span><span class="badge-status ${sc}">${estado}</span></div><div class="pedido-info"><p><strong>${p.nome||"Cliente"}</strong> · ${p.telefone||""}</p><p>📍 ${p.local||""}</p>${p.descricao?`<p>📝 ${p.descricao}</p>`:""}${p.inicio?`<p>📅 ${p.inicio} → ${p.fim||""}</p>`:""}${p.tecnicoNome?`<p>🔧 ${p.tecnicoNome}</p>`:""}</div>${btn}</div>`;
+    });
+    el.innerHTML=html;
+  },err=>{const el=document.getElementById(elId);if(el)el.innerHTML=`<div style="text-align:center;color:#f87171;padding:20px;">Erro: ${err.message}</div>`;});
 }
 
 async function aceitarPedido(id){
   try{
-    const user=auth.currentUser;
-    await db.collection("pedidos").doc(id).update({estado:"Técnico a caminho",tecnicoUid:user?user.uid:null,atualizadoEm:new Date().toISOString()});
-    toast("✅ Pedido aceite! O cliente foi notificado.");
-  }catch{toast("❌ Erro ao aceitar pedido.");}
+    const user=await ODJIM.requireRole("tecnico");
+    const ref=ODJIM.pedidoRef(id);
+    const snap=await ref.get();
+    if(!snap.exists) throw new Error("Pedido não encontrado.");
+    const p=snap.data();
+    if(p.tecnicoUid && p.tecnicoUid!==user.uid) throw new Error("Este pedido já foi atribuído a outro técnico.");
+    const tecnicoSnap=await ODJIM.tecnicoRef(user.uid).get();
+    const tecnico=tecnicoSnap.exists?tecnicoSnap.data():{};
+    await ref.update({tecnicoUid:user.uid,tecnicoNome:tecnico.nome||user.displayName||"Técnico",estado:"A_CAMINHO",atualizadoEm:ODJIM.serverTimestamp()});
+    await ODJIM.notify(p.clienteUid,"PEDIDO_ATUALIZADO","Técnico atribuído","O técnico está a caminho do seu pedido.",id);
+    await ODJIM.audit("ATRIBUIR_TECNICO","pedido",id,{estadoAnterior:p.estado,estadoNovo:"A_CAMINHO",tecnicoNovo:user.uid});
+    toast("✅ Pedido aceite e atribuído a si.");
+  }catch(e){toast("❌ "+e.message);}
 }
 
 // ── NOTIFICAÇÕES ──
 async function ativarNotificacoes(){
-  if(!("Notification" in window)){toast("❌ Este browser não suporta notificações.");return;}
-  const perm=await Notification.requestPermission();
-  if(perm==="granted"){
-    toast("🔔 Notificações ativadas com sucesso!");
-  } else {
-    toast("🔕 Notificações bloqueadas. Vá às definições do browser para ativar.");
-  }
+  if(!auth.currentUser){toast("⚠️ Entre na sua conta primeiro.");return;}
+  if(!messaging){toast("❌ Firebase Messaging não está disponível neste browser.");return;}
+  if(!window.isSecureContext){toast("❌ Notificações requerem HTTPS (ou localhost).");return;}
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){toast("🔕 Notificações bloqueadas.");return;}
+    // O token FCM web exige uma VAPID key pública configurada no Firebase Console.
+    const vapid=window.ODJIM_VAPID_KEY||"";
+    if(!vapid){toast("⚠️ Configure a VAPID Key do Firebase para ativar Push.",6000);return;}
+    const token=await messaging.getToken({vapidKey:vapid,serviceWorkerRegistration:await navigator.serviceWorker.ready});
+    await db.collection("dispositivos").doc(btoa(token).replace(/[^a-zA-Z0-9]/g,"").slice(0,120)).set({uid:auth.currentUser.uid,token,plataforma:"web",ativo:true,ultimoAcesso:ODJIM.serverTimestamp()},{merge:true});
+    toast("🔔 Notificações push ativadas!");
+  }catch(e){toast("❌ Erro nas notificações: "+e.message);}
 }
+
+// Define aqui apenas a chave pública VAPID fornecida no Firebase Console.
+window.ODJIM_VAPID_KEY = window.ODJIM_VAPID_KEY || "";
+
+// Estado de autenticação global: evita que uma conta autenticada fique perdida entre telas.
+if(messaging){
+  messaging.onMessage(payload=>{
+    const n=payload.notification||{};
+    toast("🔔 "+(n.title||"ODJIM GO")+" — "+(n.body||"Nova atualização."),6000);
+  });
+}
+
+auth.onAuthStateChanged(async user=>{
+  if(!user) return;
+  try{
+    const role=await ODJIM.getRole(user);
+    if(role) document.body.dataset.role=role;
+  }catch(e){console.warn("Perfil Firebase:",e);}
+});
 </script>
 </body>
 </html>
