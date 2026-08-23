@@ -1,4 +1,3 @@
-
     match /avaliacoes/{id} {
       allow read: if signedIn() && (isAdmin() || resource.data.clienteUid == request.auth.uid);
       allow create: if isClient() && request.resource.data.clienteUid == request.auth.uid;
