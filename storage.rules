@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function userDoc() {
+      return firestore.get(/databases/(default)/documents/usuarios/$(request.auth.uid)).data;
+    }
+    function isAdmin() { return signedIn() && userDoc().role == "admin"; }
+    function isTecnico() { return signedIn() && userDoc().role == "tecnico"; }
+
+    match /pedidos/{pedidoId}/{allPaths=**} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.metadata.ownerUid == request.auth.uid ||
+        firestore.get(/databases/(default)/documents/pedidos/$(pedidoId)).data.clienteUid == request.auth.uid ||
+        firestore.get(/databases/(default)/documents/pedidos/$(pedidoId)).data.tecnicoUid == request.auth.uid
+      );
+      allow write: if signedIn() && (
+        isAdmin() ||
+        (request.resource.size < 10 * 1024 * 1024 &&
+         request.resource.contentType in ["image/jpeg","image/png","image/webp","application/pdf","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/csv"] &&
+         (firestore.get(/databases/(default)/documents/pedidos/$(pedidoId)).data.clienteUid == request.auth.uid ||
+          firestore.get(/databases/(default)/documents/pedidos/$(pedidoId)).data.tecnicoUid == request.auth.uid ||
+          isTecnico())))
+      );
+    }
+
+    match /usuarios/{uid}/{allPaths=**} {
+      allow read, write: if signedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    match /empresa/{allPaths=**} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}
