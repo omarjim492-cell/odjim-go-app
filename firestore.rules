@@ -1,0 +1,40 @@
+
+    match /avaliacoes/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.clienteUid == request.auth.uid);
+      allow create: if isClient() && request.resource.data.clienteUid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /notificacoes/{id} {
+      allow read, update: if signedIn() && resource.data.destinatarioUid == request.auth.uid;
+      allow create: if signedIn() && (isAdmin() || isTechnician());
+      allow delete: if isAdmin();
+    }
+
+    match /dispositivos/{id} {
+      allow read, create, update, delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
+    match /servicos/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /config/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /auditoria/{id} {
+      allow read: if isAdmin();
+      allow create: if signedIn() && request.resource.data.atorUid == request.auth.uid
+        && request.resource.data.atorRole == role();
+      allow update, delete: if false;
+    }
+
+    match /financeiro/{id} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
