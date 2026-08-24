@@ -535,8 +535,30 @@ async function salvarInfo(){
     if(stat1)document.getElementById("info-stat1").textContent=stat1;
   }catch(e){toast("❌ Erro ao guardar: "+e.message);}
 }
-  function verificarTecnico(){
-  auth.onAuthStateChanged(user=>{if(user)mostrarPainelTecnico();});
+  async function verificarTecnico(){
+  const user = await aguardarAuthFirebase();
+
+  if(!user){
+    document.getElementById("tecnico-painel").style.display = "none";
+    document.getElementById("tecnico-login").style.display = "block";
+    return;
+  }
+
+  try{
+    const role = await ODJIM.getRole(user);
+
+    if(role === "tecnico"){
+      mostrarPainelTecnico();
+    }else{
+      document.getElementById("tecnico-painel").style.display = "none";
+      document.getElementById("tecnico-login").style.display = "block";
+      toast("❌ Esta conta não tem perfil de técnico.");
+    }
+  }catch(e){
+    console.error("Erro ao verificar técnico:", e);
+    document.getElementById("tecnico-painel").style.display = "none";
+    document.getElementById("tecnico-login").style.display = "block";
+  }
 }
 
 async function loginTecnico(){
@@ -576,8 +598,45 @@ async function recuperarSenhaTecnico(){
   }catch(e){toast("❌ Erro: "+e.message);}
 }
 
-function verificarAdmin(){
-  auth.onAuthStateChanged(user=>{if(user)mostrarPainelAdmin();});
+  // Aguarda o Firebase terminar de restaurar a sessão
+function aguardarAuthFirebase(){
+  return new Promise((resolve) => {
+    if (auth.currentUser) {
+      resolve(auth.currentUser);
+      return;
+    }
+
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+}
+  
+async function verificarAdmin(){
+  const user = await aguardarAuthFirebase();
+
+  if(!user){
+    document.getElementById("admin-login").style.display = "block";
+    document.getElementById("admin-painel").style.display = "none";
+    return;
+  }
+
+  try{
+    const role = await ODJIM.getRole(user);
+
+    if(role === "admin" || role === "superadmin"){
+      mostrarPainelAdmin();
+    }else{
+      document.getElementById("admin-painel").style.display = "none";
+      document.getElementById("admin-login").style.display = "block";
+      toast("❌ Acesso administrativo negado.");
+    }
+  }catch(e){
+    console.error("Erro ao verificar administrador:", e);
+    document.getElementById("admin-painel").style.display = "none";
+    document.getElementById("admin-login").style.display = "block";
+  }
 }
 
 async function loginAdmin(){
