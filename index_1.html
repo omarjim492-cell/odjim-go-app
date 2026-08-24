@@ -1,442 +1,212 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ODJIM Solution | Serviços Profissionais</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
-<script>
-// Configuração do teu Firebase
-firebase.initializeApp({
-  apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
-  authDomain: "odjim-solution.firebaseapp.com",
-  projectId: "odjim-solution",
-  storageBucket: "odjim-solution.firebasestorage.app",
-  messagingSenderId: "165673018775",
-  appId: "1:165673018775:web:c8b4cc6345b854763950d2"
-});
-
-const db = firebase.firestore();
-const auth = firebase.auth();
-const storage = firebase.storage();
-
-// Camada de Serviço ODJIM
-const ODJIM = {
-  serverTimestamp: () => firebase.firestore.FieldValue.serverTimestamp(),
-  userRef: uid => db.collection("usuarios").doc(uid),
-  tecnicoRef: uid => db.collection("tecnicos").doc(uid),
-  pedidoRef: id => db.collection("pedidos").doc(id),
-  async getRole(user = auth.currentUser) {
-    if (!user) return null;
-    const snap = await db.collection("usuarios").doc(user.uid).get();
-    return snap.exists ? (snap.data().role || null) : null;
-  },
-  async requireRole(role) {
-    const user = auth.currentUser;
-    if (!user) throw new Error("Sessão não autenticada.");
-    const current = await this.getRole(user);
-    if (current !== role && !(role === "admin" && current === "superadmin")) throw new Error("Acesso não autorizado.");
-    return user;
-  },
-  async audit(acao, entidade, entidadeId, extras = {}) {
-    const user = auth.currentUser;
-    if (!user) return;
-    return db.collection("auditoria").add({
-      atorUid: user.uid, acao, entidade, entidadeId,
-      ...extras, criadoEm: this.serverTimestamp()
-    });
-  }
-};
-</script>
-
-<style>
-:root {
-    --bg: #0f172a; --accent: #ff9800; --accent2: #ff5722; --text: #f8fafc; 
-    --muted: #94a3b8; --glass: rgba(30,41,59,0.7); --border: rgba(255,255,255,0.08); 
-    --radius: 16px; --ease: cubic-bezier(0.4, 0, 0.2, 1);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-body { background: radial-gradient(circle at top right, #1e1b4b, var(--bg)); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-
-/* Animações Profissionais */
-@keyframes reveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes skeleton-pulse { 0% { background: rgba(255,255,255,0.05); } 50% { background: rgba(255,255,255,0.1); } 100% { background: rgba(255,255,255,0.05); } }
-.fade-up { animation: reveal 0.5s var(--ease) forwards; }
-.skeleton { animation: skeleton-pulse 1.5s infinite; border-radius: 8px; background: rgba(255,255,255,0.05); }
-
-/* UI Elements */
-.card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--border); padding: 22px; border-radius: var(--radius); margin-bottom: 20px; }
-.btn { border: none; padding: 14px; width: 100%; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
-.btn-primary:active { transform: scale(0.96); }
-.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-
-/* Telas e Nav */
-.tela { display: none; min-height: 100vh; flex-direction: column; padding-bottom: 40px; }
-.tela.ativa { display: flex; animation: reveal 0.4s var(--ease); }
-.topbar { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--glass); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-.conteudo { flex: 1; padding: 20px; max-width: 500px; width: 100%; margin: 0 auto; }
-
-/* Map & Forms */
-#mapa { height: 200px; width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--border); }
-input, select, textarea { width: 100%; background: rgba(15,23,42,0.8); border: 1px solid var(--border); padding: 13px; color: var(--text); border-radius: 12px; margin-top: 5px; outline: none; }
-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); }
-
-/* Chat Bubbles */
-.msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 14px; margin-bottom: 8px; }
-.msg.eu { align-self: flex-end; background: var(--accent); color: #000; border-bottom-right-radius: 2px; }
-.msg.outro { align-self: flex-start; background: rgba(255,255,255,0.1); border-bottom-left-radius: 2px; }
-
-/* Emoji Feedback */
-.emojis-row { display: flex; justify-content: space-around; margin: 20px 0; }
-.emoji-btn { cursor: pointer; font-size: 30px; transition: 0.3s; filter: grayscale(1); }
-.emoji-btn.sel { filter: grayscale(0); transform: scale(1.3); }
-
-/* Modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-.modal-overlay.aberto { display: flex; }
-.modal { background: #1e293b; border-radius: var(--radius); padding: 24px; width: 100%; max-width: 400px; }
-
-/* Dashboard Relatórios */
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.stat-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-.stat-val { font-size: 24px; font-weight: 800; color: var(--accent); }
-</style>
-</head>
 <body>
+<div id="toast"></div>
 
-<div id="toast" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--accent2); color:white; padding:12px 24px; border-radius:50px; z-index:9999; font-weight:700;"></div>
-
-<!-- SPLASH SCREEN -->
-<div id="splash" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; gap:30px;">
-  <div style="text-align:center;">
-    <h1 style="font-size:42px; font-weight:800; background:linear-gradient(to right,#ff9800,#ff5722); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">ODJIM Solution</h1>
-    <p style="color:var(--muted);">Tecnologia em Angola 🚀</p>
-  </div>
-  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; padding:20px;">
-    <button class="btn btn-primary" onclick="irCliente()">Sou Cliente</button>
-    <button class="btn btn-outline" onclick="irPara('tecnico')">Sou Técnico</button>
-    <button class="btn btn-outline" onclick="irPara('admin')">Administração</button>
+<div class="modal-overlay" id="modal-cadastro">
+  <div class="modal">
+    <h3>👤 Entrar / Cadastrar</h3>
+    <div class="modal-tabs">
+      <button class="modal-tab ativa" onclick="modalTab('login')">Entrar</button>
+      <button class="modal-tab" onclick="modalTab('registo')">Cadastrar</button>
+    </div>
+    <div id="modal-login">
+      <div class="form-group"><label>Email</label><input id="cl-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Senha</label><input id="cl-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginCliente()">Entrar</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaCliente()" style="color:var(--accent);font-size:13px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
+    </div>
+    <div id="modal-registo" style="display:none;">
+      <div class="form-group"><label>Nome Completo</label><input id="cr-nome" placeholder="O seu nome"></div>
+      <div class="form-group"><label>Email</label><input id="cr-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Telefone</label><input id="cr-tel" placeholder="923 000 000"></div>
+      <div class="form-group"><label>Senha</label><input id="cr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn btn-primary" onclick="cadastrarCliente()">Criar Conta</button>
+    </div>
   </div>
 </div>
 
-<!-- TELA CLIENTE -->
+<div id="splash">
+  <div class="splash-logo fade-up">
+    <h1>ODJIM Solution</h1>
+    <p>Tecnologia e Serviços ao seu Alcance 🚀</p>
+    <span class="tagline">Luanda, Angola • Disponível 24h</span>
+  </div>
+  <div class="user-cards fade-up">
+    <div class="user-card" onclick="irCliente()">
+      <span class="icon">👤</span>
+      <div class="info"><h3>Sou Cliente</h3><p>Solicitar serviços e suporte técnico</p></div>
+      <span class="arrow">›</span>
+    </div>
+    <div class="user-card" onclick="irPara('tecnico')">
+      <span class="icon">🔧</span>
+      <div class="info"><h3>Sou Técnico</h3><p>Ver pedidos e gerir os meus serviços</p></div>
+      <span class="arrow">›</span>
+    </div>
+    <div class="user-card" onclick="irPara('admin')">
+      <span class="icon">🛡️</span>
+      <div class="info"><h3>Administrador</h3><p>Gerir técnicos, pedidos e relatórios</p></div>
+      <span class="arrow">›</span>
+    </div>
+  </div>
+</div>
+
 <div id="tela-cliente" class="tela">
   <div class="topbar">
-    <button onclick="voltar()" style="background:none; border:none; color:white; font-size:24px;">‹</button>
-    <h2 style="flex:1;">Painel Cliente</h2>
-    <span id="cliente-nome" style="font-size:12px; color:var(--accent);">Aceder...</span>
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>ODJIM Solution</h2>
+    <span class="badge" id="badge-cliente">Cliente</span>
   </div>
   <div class="conteudo">
-    <div class="card">
-      <h3>Solicitar Novo Serviço</h3>
-      <div style="margin-top:15px;">
-        <label>Tipo de Serviço</label>
-        <select id="c-servico">
-          <option>Informática</option><option>Electricidade</option><option>CCTV</option><option>Limpeza</option>
-        </select>
-        <label style="margin-top:10px; display:block;">Descrição do Problema</label>
-        <textarea id="c-desc" placeholder="Ex: O meu AC não gela..."></textarea>
-        
-        <label style="margin-top:10px; display:block;">Foto do Problema</label>
-        <input type="file" id="c-foto" accept="image/*" style="display:none;" onchange="previewImg(event)">
-        <button class="btn btn-outline" style="margin-top:5px;" onclick="document.getElementById('c-foto').click()">📸 Anexar Foto</button>
-        <img id="p-img" style="display:none; width:100%; border-radius:10px; margin-top:10px;">
-
-        <label style="margin-top:10px; display:block;">Sua Localização</label>
-        <input id="c-local" readonly placeholder="Clique no mapa...">
-        <div id="mapa"></div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="enviarPedido()">🚀 Enviar Pedido</button>
+    <div class="hero-odjim fade-up">
+      <div class="logo-big" id="info-titulo">ODJIM Solution</div>
+      <p id="info-descricao">A sua plataforma de confiança para serviços técnicos e domésticos em Luanda. Rápido, seguro e profissional.</p>
+    </div>
+    <div class="stats fade-up">
+      <div class="stat"><div class="num" id="info-stat1">50+</div><div class="lab">Técnicos</div></div>
+      <div class="stat"><div class="num">98%</div><div class="lab">Satisfação</div></div>
+      <div class="stat"><div class="num">24h</div><div class="lab">Disponível</div></div>
+    </div>
+    <div class="card fade-up">
+      <h3>O que Oferecemos</h3>
+      <div class="servicos-grid">
+        <div class="servico-item"><span class="ico">💻</span>Informática</div>
+        <div class="servico-item"><span class="ico">📡</span>Redes</div>
+        <div class="servico-item"><span class="ico">📹</span>CCTV</div>
+        <div class="servico-item"><span class="ico">⚡</span>Electricidade</div>
+        <div class="servico-item"><span class="ico">❄️</span>Ar Cond.</div>
+        <div class="servico-item"><span class="ico">🔧</span>Canalização</div>
+        <div class="servico-item"><span class="ico">🎨</span>Pintura</div>
+        <div class="servico-item"><span class="ico">🧹</span>Limpeza</div>
+        <div class="servico-item"><span class="ico">🎭</span>Design</div>
       </div>
     </div>
-
-    <div class="card">
-      <h3>Meus Pedidos</h3>
-      <div id="lista-meus-pedidos"></div>
+    <div class="card fade-up">
+      <h3>Sobre a ODJIM</h3>
+      <p id="info-sobre" style="font-size:14px;color:var(--muted);line-height:1.7;">A <strong style="color:var(--text)">ODJIM Solution</strong> é uma empresa angolana especializada em conectar clientes com técnicos qualificados. A nossa missão é garantir que cada angolano tenha acesso rápido e seguro a profissionais de confiança, com total transparência e qualidade garantida.</p>
     </div>
+    <div class="card fade-up">
+      <h3>Solicitar Serviço</h3>
+      <div class="form-group"><label>Nome Completo</label><input id="c-nome" placeholder="O seu nome completo"></div>
+      <div class="form-group"><label>Telefone / WhatsApp</label><input id="c-tel" placeholder="Ex: 923 000 000"></div>
+      <div class="form-group"><label>Email (opcional)</label><input id="c-email" type="email" placeholder="exemplo@email.com"></div>
+      <div class="form-group">
+        <label>Tipo de Serviço</label>
+        <select id="c-servico">
+          <option>Informática</option><option>Redes</option><option>CCTV</option>
+          <option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option>
+          <option>Pintura</option><option>Limpeza</option><option>Babá</option><option>Design gráfico</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Descrição</label><textarea id="c-desc" placeholder="Descreva os detalhes..."></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="form-group"><label>Data Início</label><input type="date" id="c-inicio"></div>
+        <div class="form-group"><label>Data Fim</label><input type="date" id="c-fim"></div>
+      </div>
+      <div class="form-group">
+        <label>Localização</label>
+        <input id="c-local" placeholder="Clique no mapa ou escreva o endereço">
+        <div id="mapa"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:5px;">📍 Clique no mapa para marcar a sua localização</p>
+      </div>
+      <button class="btn btn-primary" onclick="enviarPedido()">🚀 Enviar Pedido</button>
+    </div>
+    <div class="card fade-up">
+      <h3>A sua opinião importa 💬</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px;text-align:center;">Como avalia a sua experiência?</p>
+      <div class="emojis-row">
+        <div class="emoji-btn" onclick="avaliar(this,1,'😡','Muito mau')"><span class="em">😡</span><span class="em-label">Muito mau</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,2,'😕','Mau')"><span class="em">😕</span><span class="em-label">Mau</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,3,'😐','Normal')"><span class="em">😐</span><span class="em-label">Normal</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,4,'😊','Bom')"><span class="em">😊</span><span class="em-label">Bom</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,5,'🤩','Excelente')"><span class="em">🤩</span><span class="em-label">Excelente</span></div>
+      </div>
+      <div class="inq-comentario" id="inq-comentario">
+        <textarea id="av-comentario" placeholder="Comentário opcional..."></textarea>
+        <button class="btn btn-primary" style="margin-top:10px;" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+      </div>
+      <div class="inq-feedback" id="inq-feedback">
+        <span class="big-em" id="feedback-em">🤩</span>
+        <p id="feedback-msg">Obrigado pela sua avaliação!</p>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
+    <button class="btn" style="background:transparent;border:1px solid rgba(239,68,68,0.3);color:#ef4444;margin-bottom:20px;" onclick="logoutCliente()">Sair da Conta</button>
+  </div>
+</div>
 
-    <div class="card">
-        <h3>Como foi a experiência?</h3>
-        <div class="emojis-row">
-            <span class="emoji-btn" onclick="avaliar(this,1)">😡</span>
-            <span class="emoji-btn" onclick="avaliar(this,3)">😐</span>
-            <span class="emoji-btn" onclick="avaliar(this,5)">🤩</span>
-        </div>
-        <button class="btn btn-outline" onclick="enviarAvaliacao()">Enviar Feedback</button>
+<div id="tela-tecnico" class="tela">
+  <div class="topbar">
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>Painel Técnico</h2>
+    <span class="badge">Técnico</span>
+  </div>
+  <div class="conteudo">
+    <div id="tecnico-login" class="card fade-up">
+      <h3>Entrar como Técnico</h3>
+      <div class="form-group"><label>Email</label><input id="t-email" type="email" placeholder="tecnico@odjim.com"></div>
+      <div class="form-group"><label>Senha</label><input id="t-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginTecnico()">Entrar</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaTecnico()" style="color:var(--accent);font-size:13px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
+    </div>
+    <div id="tecnico-painel" style="display:none;" class="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h3 style="font-size:18px;font-weight:700;">Olá, Técnico! 👋</h3><p style="font-size:13px;color:var(--muted);">Pedidos em tempo real</p></div>
+        <button class="btn btn-danger" onclick="logoutTecnico()">Sair</button>
+      </div>
+      <button class="btn btn-outline" style="margin-bottom:16px;" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
+      <div class="pedidos-lista" id="t-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar pedidos...</div></div>
     </div>
   </div>
 </div>
 
-<!-- TELA TÉCNICO -->
-<div id="tela-tecnico" class="tela">
-    <div class="topbar"><button onclick="voltar()">‹</button><h2>Painel Técnico</h2></div>
-    <div class="conteudo">
-        <div id="login-tecnico-box" class="card">
-            <h3>Entrar como Técnico</h3>
-            <input id="t-email" placeholder="Email">
-            <input id="t-pass" type="password" placeholder="Senha">
-            <button class="btn btn-primary" onclick="loginT()">Entrar</button>
-        </div>
-        <div id="painel-tecnico-box" style="display:none;">
-            <h3>Pedidos Disponíveis</h3>
-            <div id="lista-pedidos-tecnico"></div>
-        </div>
-    </div>
-</div>
-
-<!-- TELA ADMIN -->
 <div id="tela-admin" class="tela">
-    <div class="topbar"><button onclick="voltar()">‹</button><h2>Admin Dashboard</h2></div>
-    <div class="conteudo">
-        <div id="login-admin-box" class="card">
-            <input id="a-email" placeholder="Admin Email">
-            <input id="a-pass" type="password" placeholder="Senha">
-            <button class="btn btn-primary" onclick="loginA()">Entrar</button>
-        </div>
-        <div id="painel-admin-box" style="display:none;">
-            <div class="stat-grid">
-                <div class="stat-box"><div class="stat-val" id="st-total">0</div><div style="font-size:10px;">PEDIDOS</div></div>
-                <div class="stat-box"><div class="stat-val" id="st-nota">0.0</div><div style="font-size:10px;">NOTA MÉDIA</div></div>
-            </div>
-            <button class="btn btn-outline" onclick="exportCSV()">📥 Exportar Dados CSV</button>
-            <h3 style="margin:20px 0 10px;">Gestão de Pedidos</h3>
-            <div id="lista-admin-pedidos"></div>
-        </div>
+  <div class="topbar">
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>Administração</h2>
+    <span class="badge">Admin</span>
+  </div>
+  <div class="conteudo">
+    <div id="admin-login" class="card fade-up">
+      <h3>🛡️ Acesso Restrito</h3>
+      <div class="form-group"><label>Email Admin</label><input id="a-email" type="email" placeholder="admin@odjim.com"></div>
+      <div class="form-group"><label>Senha</label><input id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginAdmin()">Entrar no Painel</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaAdmin()" style="color:var(--accent);font-size:13px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
     </div>
-</div>
-
-<!-- MODAL CHAT -->
-<div id="chat-modal" class="modal-overlay">
-    <div class="modal" style="height:70vh; display:flex; flex-direction:column;">
-        <h3 id="chat-t">Chat</h3>
-        <div id="chat-msgs" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding:10px;"></div>
-        <div style="display:flex; gap:10px;">
-            <input id="chat-in" placeholder="Escreva...">
-            <button onclick="sendMsg()" style="padding:10px; background:var(--accent); border:none; border-radius:10px;">➔</button>
+    <div id="admin-painel" style="display:none;" class="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h3 style="font-size:18px;font-weight:700;">Painel Admin 🛡️</h3><p style="font-size:13px;color:var(--muted);">Gestão completa</p></div>
+        <button class="btn btn-danger" onclick="logoutAdmin()">Sair</button>
+      </div>
+      <div class="tabs" style="margin-bottom:20px;">
+        <button class="tab ativa" onclick="abrirTab('tab-pedidos',this)">Pedidos</button>
+        <button class="tab" onclick="abrirTab('tab-tecnicos',this)">Técnicos</button>
+        <button class="tab" onclick="abrirTab('tab-cadastrar',this)">+ Técnico</button>
+        <button class="tab" onclick="abrirTab('tab-info',this)">Info</button>
+      </div>
+      <div id="tab-pedidos"><div class="pedidos-lista" id="a-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar...</div></div></div>
+      <div id="tab-tecnicos" style="display:none;"><div id="a-tecnicos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar técnicos...</div></div></div>
+      <div id="tab-cadastrar" style="display:none;">
+        <div class="card">
+          <h3>Cadastrar Novo Técnico</h3>
+          <div class="form-group"><label>Nome</label><input id="nt-nome" placeholder="Nome do técnico"></div>
+          <div class="form-group"><label>Email</label><input id="nt-email" type="email" placeholder="tecnico@odjim.com"></div>
+          <div class="form-group"><label>Telefone</label><input id="nt-tel" placeholder="923 000 000"></div>
+          <div class="form-group"><label>Especialidade</label>
+            <select id="nt-esp"><option>Informática</option><option>Redes</option><option>CCTV</option><option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option><option>Pintura</option><option>Limpeza</option><option>Design gráfico</option></select>
+          </div>
+          <button class="btn btn-primary" onclick="cadastrarTecnico()">✅ Cadastrar Técnico</button>
         </div>
-        <button class="btn" onclick="closeChat()">Fechar</button>
+      </div>
+      <div id="tab-info" style="display:none;">
+        <div class="card">
+          <h3>✏️ Editar Info da ODJIM</h3>
+          <div class="form-group"><label>Título Principal</label><input id="edit-titulo" placeholder="ODJIM Solution"></div>
+          <div class="form-group"><label>Descrição Hero</label><textarea id="edit-descricao" placeholder="Descrição da empresa..."></textarea></div>
+          <div class="form-group"><label>Sobre a ODJIM</label><textarea id="edit-sobre" placeholder="Texto sobre a empresa..."></textarea></div>
+          <div class="form-group"><label>Nº de Técnicos</label><input id="edit-stat1" placeholder="50+"></div>
+          <button class="btn btn-primary" onclick="salvarInfo()">💾 Guardar Informações</button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
-
-<!-- LOGIN CLIENTE MODAL -->
-<div id="modal-auth" class="modal-overlay">
-    <div class="modal">
-        <h3>👤 Entrar / Registar</h3>
-        <input id="au-email" placeholder="Email">
-        <input id="au-pass" type="password" placeholder="Senha">
-        <button class="btn btn-primary" style="margin-top:10px;" onclick="authAcao('login')">Entrar</button>
-        <button class="btn btn-outline" style="margin-top:10px;" onclick="authAcao('reg')">Criar Conta</button>
-    </div>
-</div>
-
-<script>
-// --- CORE LOGIC ---
-function toast(m){const t=document.getElementById("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",3000)}
-function irPara(t){
-    document.getElementById("splash").style.display="none";
-    document.querySelectorAll(".tela").forEach(x=>x.classList.remove("ativa"));
-    document.getElementById("tela-"+t).classList.add("ativa");
-    if(t==='cliente') initMap();
-}
-function voltar(){location.reload();}
-
-// --- AUTH ---
-async function irCliente(){
-    if(auth.currentUser) {
-        irPara("cliente");
-        document.getElementById("cliente-nome").textContent = auth.currentUser.displayName || "Utilizador";
-        loadMeusPedidos();
-    } else {
-        document.getElementById("modal-auth").classList.add("aberto");
-    }
-}
-
-async function authAcao(tipo){
-    const e=document.getElementById("au-email").value, p=document.getElementById("au-pass").value;
-    try {
-        if(tipo==='login') await auth.signInWithEmailAndPassword(e,p);
-        else {
-            const c = await auth.createUserWithEmailAndPassword(e,p);
-            await c.user.updateProfile({displayName: e.split('@')[0]});
-            await db.collection("usuarios").doc(c.user.uid).set({email:e, role:'cliente', criadoEm: ODJIM.serverTimestamp()});
-        }
-        location.reload();
-    } catch(err){ toast(err.message); }
-}
-
-// --- MAP & REVERSE GEOCODING ---
-let map, marker;
-function initMap(){
-    if(map) return;
-    map = L.map('mapa').setView([-8.8383, 13.2344], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    map.on('click', async e => {
-        const {lat, lng} = e.latlng;
-        if(marker) marker.setLatLng(e.latlng); else marker = L.marker(e.latlng).addTo(map);
-        document.getElementById("c-local").value = "A localizar morada...";
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            const data = await res.json();
-            document.getElementById("c-local").value = data.display_name;
-        } catch { document.getElementById("c-local").value = `${lat}, ${lng}`; }
-    });
-}
-
-// --- PEDIDOS & UPLOAD ---
-let fotoF = null;
-function previewImg(e){
-    fotoF = e.target.files[0];
-    const r = new FileReader();
-    r.onload = x => { const i=document.getElementById("p-img"); i.src=x.target.result; i.style.display="block"; }
-    r.readAsDataURL(fotoF);
-}
-
-async function enviarPedido(){
-    const serv = document.getElementById("c-servico").value;
-    const desc = document.getElementById("c-desc").value;
-    const loc = document.getElementById("c-local").value;
-    if(!loc) return toast("Selecione o local no mapa!");
-
-    try {
-        toast("A enviar pedido...");
-        let url = "";
-        const id = db.collection("pedidos").doc().id;
-        if(fotoF){
-            const ref = storage.ref(`pedidos/${id}`);
-            await ref.put(fotoF);
-            url = await ref.getDownloadURL();
-        }
-        await db.collection("pedidos").doc(id).set({
-            id, servico:serv, descricao:desc, local:loc, foto:url,
-            clienteUid: auth.currentUser.uid, clienteNome: auth.currentUser.displayName,
-            estado: "AGUARDANDO", criadoEm: ODJIM.serverTimestamp()
-        });
-        toast("✅ Sucesso!");
-        setTimeout(()=>location.reload(), 2000);
-    } catch(err){ toast(err.message); }
-}
-
-// --- CHAT LOGIC ---
-let chatID = null, unsubC = null;
-function openChat(id, t){
-    chatID = id; document.getElementById("chat-t").textContent = t;
-    document.getElementById("chat-modal").classList.add("aberto");
-    unsubC = db.collection("pedidos").doc(id).collection("chat").orderBy("criadoEm","asc").onSnapshot(s => {
-        const b = document.getElementById("chat-msgs"); b.innerHTML = "";
-        s.forEach(d => {
-            const m = d.data();
-            const sou = m.uid === auth.currentUser.uid;
-            b.innerHTML += `<div class="msg ${sou?'eu':'outro'}"><strong>${m.nome}</strong><br>${m.txt}</div>`;
-        });
-        b.scrollTop = b.scrollHeight;
-    });
-}
-function closeChat(){ document.getElementById("chat-modal").classList.remove("aberto"); if(unsubC) unsubC(); }
-async function sendMsg(){
-    const i = document.getElementById("chat-in");
-    if(!i.value) return;
-    await db.collection("pedidos").doc(chatID).collection("chat").add({
-        txt: i.value, uid: auth.currentUser.uid, nome: auth.currentUser.displayName, criadoEm: ODJIM.serverTimestamp()
-    });
-    i.value = "";
-}
-
-// --- TÉCNICO & ADMIN ---
-async function loginT(){
-    try {
-        const e=document.getElementById("t-email").value, p=document.getElementById("t-pass").value;
-        const res = await auth.signInWithEmailAndPassword(e,p);
-        const u = await db.collection("usuarios").doc(res.user.uid).get();
-        if(u.data().role !== 'tecnico') return toast("Acesso negado.");
-        document.getElementById("login-tecnico-box").style.display="none";
-        document.getElementById("painel-tecnico-box").style.display="block";
-        loadPedidosTecnico();
-    } catch(err){ toast(err.message); }
-}
-
-function loadPedidosTecnico(){
-    db.collection("pedidos").where("estado","==","AGUARDANDO").onSnapshot(s => {
-        const l = document.getElementById("lista-pedidos-tecnico"); l.innerHTML = "";
-        s.forEach(d => {
-            const p = d.data();
-            l.innerHTML += `<div class="card"><h4>${p.servico}</h4><p>${p.local}</p>
-                <button class="btn btn-primary" onclick="aceitar('${p.id}')">Aceitar Serviço</button></div>`;
-        });
-    });
-}
-
-async function aceitar(id){
-    await db.collection("pedidos").doc(id).update({estado: "EM_CAMINHO", tecnicoUid: auth.currentUser.uid, tecnicoNome: auth.currentUser.displayName});
-    toast("Serviço aceite!");
-    setTimeout(()=>openChat(id, "Conversa com Cliente"), 500);
-}
-
-// --- ADMIN DASHBOARD ---
-async function loginA(){
-    const e=document.getElementById("a-email").value, p=document.getElementById("a-pass").value;
-    const res = await auth.signInWithEmailAndPassword(e,p);
-    const u = await db.collection("usuarios").doc(res.user.uid).get();
-    if(u.data().role !== 'admin') return toast("Acesso restrito.");
-    document.getElementById("login-admin-box").style.display="none";
-    document.getElementById("painel-admin-box").style.display="block";
-    loadAdminStats();
-}
-
-async function loadAdminStats(){
-    db.collection("pedidos").onSnapshot(s => {
-        document.getElementById("st-total").textContent = s.size;
-        const l = document.getElementById("lista-admin-pedidos"); l.innerHTML = "";
-        s.forEach(d => {
-            const p = d.data();
-            l.innerHTML += `<div class="card" style="font-size:12px;">
-                <strong>${p.servico}</strong> - ${p.estado} <br>
-                <button onclick="openChat('${p.id}','Admin Supervision')">👁️ Ver Chat</button>
-            </div>`;
-        });
-    });
-}
-
-async function exportCSV(){
-    const s = await db.collection("pedidos").get();
-    let csv = "Servico,Estado,Cliente,Local\n";
-    s.forEach(d => { const p=d.data(); csv += `${p.servico},${p.estado},${p.clienteNome},${p.local}\n`; });
-    const b = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b); a.download = 'relatorio_odjim.csv'; a.click();
-}
-
-function loadMeusPedidos(){
-    db.collection("pedidos").where("clienteUid","==",auth.currentUser.uid).onSnapshot(s => {
-        const l = document.getElementById("lista-meus-pedidos"); l.innerHTML = "";
-        s.forEach(d => {
-            const p = d.data();
-            l.innerHTML += `<div class="card"><strong>${p.servico}</strong>: ${p.estado} 
-                <button class="btn btn-outline" style="margin-top:10px;" onclick="openChat('${p.id}','Suporte Técnico')">💬 Chat</button></div>`;
-        });
-    });
-}
-
-let notaS = 0;
-function avaliar(el, n){ 
-    document.querySelectorAll(".emoji-btn").forEach(x=>x.classList.remove("sel")); 
-    el.classList.add("sel"); notaS = n; 
-}
-async function enviarAvaliacao(){
-    if(!notaS) return toast("Escolha um emoji!");
-    await db.collection("avaliacoes").add({nota:notaS, uid:auth.currentUser.uid, criadoEm: ODJIM.serverTimestamp()});
-    toast("Obrigado!");
-}
-</script>
-</body>
-</html>
