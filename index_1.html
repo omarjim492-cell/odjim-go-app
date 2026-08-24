@@ -623,15 +623,14 @@ async function recuperarSenhaTecnico(){
 
 // Admin
 function verificarAdmin(){
-  // Não auto-login para admin - requer login manual sempre
-  const adminEmail = localStorage.getItem("adminEmail");
-  if(adminEmail){
-    auth.onAuthStateChanged(user=>{
-      if(user && user.email === adminEmail){
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      const adminEmail = sessionStorage.getItem("adminLogado");
+      if(adminEmail && user.email === adminEmail){
         mostrarPainelAdmin();
       }
-    });
-  }
+    }
+  });
 }
 
 async function loginAdmin(){
@@ -640,7 +639,7 @@ async function loginAdmin(){
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
     await auth.signInWithEmailAndPassword(email,pass);
-    localStorage.setItem("adminEmail", email);
+    sessionStorage.setItem("adminLogado", email);
     mostrarPainelAdmin();
     toast("✅ Bem-vindo, Admin!");
   }catch(e){
@@ -654,6 +653,7 @@ function mostrarPainelAdmin(){
   document.getElementById("admin-login").style.display="none";
   document.getElementById("admin-painel").style.display="block";
   monitorarPedidos("a-pedidos");
+  carregarTecnicos();
   // Carregar valores atuais no formulário de edição
   db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
@@ -668,7 +668,7 @@ function mostrarPainelAdmin(){
 
 async function logoutAdmin(){
   await auth.signOut();
-  localStorage.removeItem("adminEmail");
+  sessionStorage.removeItem("adminLogado");
   document.getElementById("admin-painel").style.display="none";
   document.getElementById("admin-login").style.display="block";
   toast("👋 Sessão terminada.");
@@ -700,22 +700,24 @@ async function cadastrarTecnico(){
   const esp=document.getElementById("nt-esp").value;
   if(!nome||!email){toast("⚠️ Preencha Nome e Email.");return;}
   try{
+    // Verificar se já existe para evitar duplicados
+    const existe = await db.collection("tecnicos").where("email","==",email).get();
+    if(!existe.empty){toast("⚠️ Técnico com este email já existe!");return;}
     await db.collection("tecnicos").add({
       nome,email,telefone:tel,especialidade:esp,
       ativo:true,criadoEm:new Date().toISOString()
     });
-    toast("✅ Técnico "+nome+" cadastrado! Ele pode criar a sua conta ao entrar.");
+    toast("✅ Técnico "+nome+" cadastrado com sucesso!");
     ["nt-nome","nt-email","nt-tel","nt-pass"].forEach(id=>document.getElementById(id).value="");
-    setTimeout(()=>carregarTecnicos(),1000);
+    setTimeout(()=>carregarTecnicos(),500);
   }catch(e){toast("❌ Erro: "+e.message);}
 }
 
 // Carregar Técnicos
-async function carregarTecnicos(){
+function carregarTecnicos(){
   const el=document.getElementById("a-tecnicos");
   el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
-  try{
-    const snap=await db.collection("tecnicos").get();
+  db.collection("tecnicos").onSnapshot(snap=>{
     if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>';return;}
     let html="";
     snap.forEach(d=>{
@@ -731,7 +733,7 @@ async function carregarTecnicos(){
       </div>`;
     });
     el.innerHTML=html;
-  }catch(e){el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';}
+  },e=>{el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';});
 }
 
 // Monitorar Pedidos em tempo real
