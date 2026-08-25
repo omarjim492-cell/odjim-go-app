@@ -3,4940 +3,768 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ODJIM Solution</title>
-
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
-<meta name="description" content="ODJIM Solution - Tecnologia e Serviços ao seu Alcance">
-
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
-
 <script>
-/* ============================================================
-   FIREBASE - CONFIGURAÇÃO
-============================================================ */
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
-  authDomain: "odjim-solution.firebaseapp.com",
-  projectId: "odjim-solution",
-  storageBucket: "odjim-solution.firebasestorage.app",
-  messagingSenderId: "165673018775",
-  appId: "1:165673018775:web:c8b4cc6345b854763950d2"
-};
-
-/* Firebase principal */
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-/*
-  Segunda instância do Firebase.
-
-  É utilizada exclusivamente para criar contas de técnicos
-  sem expulsar o administrador da sessão atual.
-*/
-let secondaryApp = null;
-let secondaryAuth = null;
-
-try {
-  secondaryApp = firebase.initializeApp(firebaseConfig, "ODJIMSecondary");
-  secondaryAuth = secondaryApp.auth();
-} catch (e) {
-  console.warn("Firebase secundário:", e);
-}
-
-/* Firebase Messaging */
-let messaging = null;
-
-try {
-  if (firebase.messaging.isSupported()) {
-    messaging = firebase.messaging();
-  }
-} catch (e) {
-  console.warn("Firebase Messaging indisponível:", e);
-}
+firebase.initializeApp({
+  apiKey:"AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
+  authDomain:"odjim-solution.firebaseapp.com",
+  projectId:"odjim-solution",
+  storageBucket:"odjim-solution.firebasestorage.app",
+  messagingSenderId:"165673018775",
+  appId:"1:165673018775:web:c8b4cc6345b854763950d2"
+});
+const db=firebase.firestore();
+const auth=firebase.auth();
 </script>
-
 <style>
-
-:root{
-  --bg:#0f172a;
-  --bg2:#111827;
-  --accent:#ff9800;
-  --accent2:#ff5722;
-  --green:#10b981;
-  --red:#ef4444;
-  --text:#f8fafc;
-  --muted:#94a3b8;
-  --glass:rgba(30,41,59,0.75);
-  --border:rgba(255,255,255,0.08);
-  --radius:16px;
-  --tr:all .3s ease;
-}
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:'Outfit',sans-serif;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  background:
-    radial-gradient(circle at top right,#1e1b4b,var(--bg));
-  color:var(--text);
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* ============================================================
-   SPLASH
-============================================================ */
-
-#splash{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:30px 20px;
-  gap:30px;
-}
-
-.splash-logo{
-  text-align:center;
-}
-
-.splash-logo h1{
-  font-size:42px;
-  font-weight:800;
-  letter-spacing:-2px;
-  background:linear-gradient(to right,#ff9800,#ff5722);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.splash-logo p{
-  color:var(--muted);
-  font-size:15px;
-  margin-top:6px;
-}
-
-.tagline{
-  margin-top:14px;
-  font-size:13px;
-  color:var(--muted);
-  background:var(--glass);
-  border:1px solid var(--border);
-  padding:10px 18px;
-  border-radius:50px;
-  display:inline-block;
-}
-
-.user-cards{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  width:100%;
-  max-width:400px;
-}
-
-.user-card{
-  display:flex;
-  align-items:center;
-  gap:18px;
-  background:var(--glass);
-  border:1px solid var(--border);
-  padding:20px 24px;
-  border-radius:var(--radius);
-  cursor:pointer;
-  transition:var(--tr);
-  backdrop-filter:blur(12px);
-}
-
-.user-card:hover{
-  border-color:var(--accent);
-  transform:translateY(-2px);
-}
-
-.user-card .icon{
-  font-size:32px;
-}
-
-.user-card .info h3{
-  font-size:17px;
-  font-weight:700;
-}
-
-.user-card .info p{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:3px;
-}
-
-.user-card .arrow{
-  margin-left:auto;
-  color:var(--muted);
-  font-size:20px;
-}
-
-/* ============================================================
-   TELAS
-============================================================ */
-
-.tela{
-  display:none;
-  min-height:100vh;
-  flex-direction:column;
-}
-
-.tela.ativa{
-  display:flex;
-}
-
-/* ============================================================
-   TOPBAR
-============================================================ */
-
-.topbar{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:16px 20px;
-  background:var(--glass);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-
-.topbar .back{
-  background:none;
-  border:none;
-  color:var(--muted);
-  font-size:30px;
-  cursor:pointer;
-}
-
-.topbar h2{
-  font-size:18px;
-  font-weight:700;
-  flex:1;
-}
-
-.topbar .badge{
-  background:var(--accent);
-  color:var(--bg);
-  font-size:11px;
-  font-weight:700;
-  padding:4px 10px;
-  border-radius:20px;
-}
-
-/* ============================================================
-   CONTEÚDO
-============================================================ */
-
-.conteudo{
-  flex:1;
-  padding:20px;
-  max-width:500px;
-  width:100%;
-  margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-.card{
-  background:var(--glass);
-  backdrop-filter:blur(16px);
-  border:1px solid var(--border);
-  padding:22px;
-  border-radius:var(--radius);
-  box-shadow:0 8px 24px rgba(0,0,0,.2);
-}
-
-.card h3{
-  font-size:17px;
-  font-weight:700;
-  margin-bottom:16px;
-  border-left:4px solid var(--accent);
-  padding-left:10px;
-}
-
-/* ============================================================
-   HERO
-============================================================ */
-
-.hero-odjim{
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255,152,0,.15),
-      rgba(255,87,34,.1)
-    );
-  border:1px solid rgba(255,152,0,.25);
-  border-radius:var(--radius);
-  padding:24px;
-  text-align:center;
-}
-
-.hero-odjim .logo-big{
-  font-size:36px;
-  font-weight:800;
-  background:linear-gradient(to right,#ff9800,#ff5722);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.hero-odjim p{
-  color:var(--muted);
-  font-size:14px;
-  margin-top:8px;
-  line-height:1.6;
-}
-
-/* ============================================================
-   SERVIÇOS
-============================================================ */
-
-.servicos-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-@keyframes pulseServ{
-  0%,100%{
-    transform:scale(1);
-  }
-
-  50%{
-    transform:scale(1.04);
-    box-shadow:0 4px 16px rgba(255,152,0,.18);
-  }
-}
-
-.servico-item{
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px 8px;
-  text-align:center;
-  font-size:12px;
-  font-weight:600;
-  color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-  transition:var(--tr);
-  animation:pulseServ 3s ease-in-out infinite;
-}
-
-.servico-item:nth-child(2){animation-delay:.3s}
-.servico-item:nth-child(3){animation-delay:.6s}
-.servico-item:nth-child(4){animation-delay:.9s}
-.servico-item:nth-child(5){animation-delay:1.2s}
-.servico-item:nth-child(6){animation-delay:1.5s}
-.servico-item:nth-child(7){animation-delay:1.8s}
-.servico-item:nth-child(8){animation-delay:2.1s}
-.servico-item:nth-child(9){animation-delay:2.4s}
-
-.servico-item:hover{
-  border-color:var(--accent);
-  color:var(--text);
-  background:rgba(255,152,0,.08);
-}
-
-.servico-item .ico{
-  font-size:26px;
-}
-
-/* ============================================================
-   STATS
-============================================================ */
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.stat{
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:16px;
-  text-align:center;
-}
-
-.stat .num{
-  font-size:26px;
-  font-weight:800;
-  color:var(--accent);
-}
-
-.stat .lab{
-  font-size:11px;
-  color:var(--muted);
-  margin-top:4px;
-}
-
-/* ============================================================
-   FORMULÁRIOS
-============================================================ */
-
-.form-group{
-  margin-bottom:14px;
-}
-
-.form-group label{
-  display:block;
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.5px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-input,
-select,
-textarea{
-  width:100%;
-  background:rgba(15,23,42,.7);
-  border:1px solid var(--border);
-  padding:13px;
-  font-size:15px;
-  color:var(--text);
-  border-radius:12px;
-  outline:none;
-  transition:var(--tr);
-}
-
-input:focus,
-select:focus,
-textarea:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(255,152,0,.15);
-}
-
-input::placeholder,
-textarea::placeholder{
-  color:#475569;
-}
-
-textarea{
-  resize:none;
-  height:85px;
-}
-
-select option{
-  background:#1e293b;
-}
-
-/* ============================================================
-   BOTÕES
-============================================================ */
-
-.btn{
-  border:none;
-  padding:15px;
-  width:100%;
-  font-size:15px;
-  font-weight:700;
-  border-radius:12px;
-  cursor:pointer;
-  transition:var(--tr);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-}
-
-.btn-primary{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:white;
-  box-shadow:0 4px 14px rgba(255,152,0,.3);
-}
-
-.btn-primary:hover{
-  transform:translateY(-1px);
-}
-
-.btn-primary:active{
-  transform:scale(.98);
-}
-
-.btn-outline{
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--muted);
-}
-
-.btn-outline:hover{
-  border-color:var(--accent);
-  color:var(--text);
-}
-
-.btn-danger{
-  background:transparent;
-  border:1px solid rgba(239,68,68,.3);
-  color:#ef4444;
-  padding:8px 14px;
-  width:auto;
-  font-size:13px;
-  border-radius:8px;
-}
-
-/* ============================================================
-   MAPA
-============================================================ */
-
-#mapa{
-  height:200px;
-  width:100%;
-  margin-top:8px;
-  border-radius:12px;
-  border:1px solid var(--border);
-}
-
-/* ============================================================
-   PEDIDOS
-============================================================ */
-
-.pedidos-lista{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  max-height:500px;
-  overflow-y:auto;
-}
-
-.pedido-card{
-  background:rgba(15,23,42,.5);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.pedido-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:6px;
-}
-
-.pedido-servico{
-  font-weight:700;
-  color:var(--accent);
-  font-size:15px;
-}
-
-.badge-status{
-  font-size:10px;
-  font-weight:700;
-  padding:4px 8px;
-  border-radius:20px;
-  text-transform:uppercase;
-}
-
-.s-aguardando{
-  background:rgba(234,179,8,.15);
-  color:#facc15;
-  border:1px solid rgba(234,179,8,.3);
-}
-
-.s-caminho{
-  background:rgba(34,197,94,.15);
-  color:#4ade80;
-  border:1px solid rgba(34,197,94,.3);
-}
-
-.s-concluido{
-  background:rgba(59,130,246,.15);
-  color:#60a5fa;
-  border:1px solid rgba(59,130,246,.3);
-}
-
-.pedido-info{
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.5;
-}
-
-.pedido-info strong{
-  color:var(--text);
-}
-
-/* ============================================================
-   TABS
-============================================================ */
-
-.tabs{
-  display:flex;
-  gap:6px;
-  background:var(--glass);
-  border:1px solid var(--border);
-  padding:6px;
-  border-radius:14px;
-  overflow-x:auto;
-}
-
-.tab{
-  flex:1;
-  padding:10px;
-  border:none;
-  background:transparent;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:600;
-  border-radius:10px;
-  cursor:pointer;
-  transition:var(--tr);
-  white-space:nowrap;
-}
-
-.tab.ativa{
-  background:var(--accent);
-  color:var(--bg);
-}
-
-/* ============================================================
-   TÉCNICOS
-============================================================ */
-
-.tecnico-card{
-  background:rgba(15,23,42,.5);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:16px;
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin-bottom:10px;
-}
-
-.tecnico-avatar{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  font-weight:800;
-  color:white;
-  flex-shrink:0;
-}
-
-.tecnico-info h4{
-  font-size:15px;
-  font-weight:700;
-}
-
-.tecnico-info p{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:3px;
-}
-
-/* ============================================================
-   ANIMAÇÕES
-============================================================ */
-
-@keyframes fadeUp{
-  from{
-    opacity:0;
-    transform:translateY(12px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-.fade-up{
-  animation:fadeUp .4s ease;
-}
-
-@keyframes floatEm{
-  0%,100%{
-    transform:translateY(0);
-  }
-
-  50%{
-    transform:translateY(-6px);
-  }
-}
-
-@keyframes popEm{
-  0%{
-    transform:scale(.5);
-    opacity:0;
-  }
-
-  70%{
-    transform:scale(1.2);
-  }
-
-  100%{
-    transform:scale(1);
-    opacity:1;
-  }
-}
-
-@keyframes bounceEm{
-  0%,100%{
-    transform:scale(1);
-  }
-
-  30%{
-    transform:scale(1.35);
-  }
-
-  60%{
-    transform:scale(.92);
-  }
-}
-
-/* ============================================================
-   AVALIAÇÃO
-============================================================ */
-
-.emojis-row{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:16px;
-}
-
-.emoji-btn{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-  background:rgba(255,255,255,.04);
-  border:2px solid var(--border);
-  border-radius:16px;
-  padding:14px 10px;
-  cursor:pointer;
-  transition:var(--tr);
-  min-width:60px;
-}
-
-.emoji-btn .em{
-  font-size:30px;
-  animation:floatEm 3s ease-in-out infinite;
-  display:block;
-}
-
-.emoji-btn .em-label{
-  font-size:10px;
-  font-weight:600;
-  color:var(--muted);
-}
-
-.emoji-btn:hover{
-  border-color:var(--accent);
-  transform:translateY(-3px);
-}
-
-.emoji-btn.sel{
-  border-color:var(--accent);
-  background:rgba(255,152,0,.15);
-}
-
-.emoji-btn.sel .em{
-  animation:bounceEm .4s ease;
-}
-
-.emoji-btn.sel .em-label{
-  color:var(--accent);
-}
-
-.inq-comentario{
-  display:none;
-  margin-top:14px;
-}
-
-.inq-feedback{
-  display:none;
-  margin-top:16px;
-  background:rgba(16,185,129,.12);
-  border:1px solid rgba(16,185,129,.3);
-  border-radius:12px;
-  padding:20px;
-  text-align:center;
-}
-
-.inq-feedback .big-em{
-  font-size:44px;
-  display:block;
-  margin-bottom:10px;
-  animation:popEm .5s ease;
-}
-
-.inq-feedback p{
-  color:#34d399;
-  font-weight:700;
-  font-size:16px;
-}
-
-/* ============================================================
-   TOAST
-============================================================ */
-
-#toast{
-  position:fixed;
-  top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:9999;
-  display:none;
-  background:rgba(30,41,59,.97);
-  border-left:4px solid var(--accent);
-  color:var(--text);
-  padding:14px 20px;
-  border-radius:12px;
-  max-width:320px;
-  width:90%;
-  text-align:center;
-  font-size:14px;
-  font-weight:600;
-  box-shadow:0 8px 32px rgba(0,0,0,.4);
-}
-
-/* ============================================================
-   MODAL
-============================================================ */
-
-.modal-overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  z-index:200;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.modal-overlay.aberto{
-  display:flex;
-}
-
-.modal{
-  background:#1e293b;
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:24px;
-  width:100%;
-  max-width:400px;
-}
-
-.modal h3{
-  font-size:18px;
-  font-weight:700;
-  margin-bottom:20px;
-  text-align:center;
-}
-
-.modal-tabs{
-  display:flex;
-  gap:6px;
-  margin-bottom:20px;
-}
-
-.modal-tab{
-  flex:1;
-  padding:10px;
-  border:none;
-  background:rgba(255,255,255,.04);
-  color:var(--muted);
-  font-size:13px;
-  font-weight:600;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-.modal-tab.ativa{
-  background:var(--accent);
-  color:var(--bg);
-}
-
-/* ============================================================
-   RESPONSIVO
-============================================================ */
-
-@media(max-width:380px){
-
-  .splash-logo h1{
-    font-size:34px;
-  }
-
-  .servicos-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .stats{
-    grid-template-columns:1fr;
-  }
-}
-
+:root{--bg:#0f172a;--accent:#ff9800;--accent2:#ff5722;--text:#f8fafc;--muted:#94a3b8;--glass:rgba(30,41,59,0.75);--border:rgba(255,255,255,0.08);--radius:16px;--tr:all 0.3s ease;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Outfit',sans-serif;}
+body{background:radial-gradient(circle at top right,#1e1b4b,var(--bg));color:var(--text);min-height:100vh;overflow-x:hidden;}
+#splash{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;gap:30px;}
+.splash-logo{text-align:center;}
+.splash-logo h1{font-size:42px;font-weight:800;letter-spacing:-2px;background:linear-gradient(to right,#ff9800,#ff5722);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.splash-logo p{color:var(--muted);font-size:15px;margin-top:6px;}
+.tagline{margin-top:14px;font-size:13px;color:var(--muted);background:var(--glass);border:1px solid var(--border);padding:10px 18px;border-radius:50px;display:inline-block;}
+.user-cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:400px;}
+.user-card{display:flex;align-items:center;gap:18px;background:var(--glass);border:1px solid var(--border);padding:20px 24px;border-radius:var(--radius);cursor:pointer;transition:var(--tr);backdrop-filter:blur(12px);}
+.user-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.user-card .icon{font-size:32px;}
+.user-card .info h3{font-size:17px;font-weight:700;}
+.user-card .info p{font-size:12px;color:var(--muted);margin-top:3px;}
+.user-card .arrow{margin-left:auto;color:var(--muted);font-size:20px;}
+.tela{display:none;min-height:100vh;flex-direction:column;}
+.tela.ativa{display:flex;}
+.topbar{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--glass);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.topbar .back{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;}
+.topbar h2{font-size:18px;font-weight:700;flex:1;}
+.topbar .badge{background:var(--accent);color:var(--bg);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
+.conteudo{flex:1;padding:20px;max-width:500px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:20px;}
+.card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--border);padding:22px;border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+.card h3{font-size:17px;font-weight:700;margin-bottom:16px;border-left:4px solid var(--accent);padding-left:10px;}
+.hero-odjim{background:linear-gradient(135deg,rgba(255,152,0,0.15),rgba(255,87,34,0.1));border:1px solid rgba(255,152,0,0.25);border-radius:var(--radius);padding:24px;text-align:center;}
+.hero-odjim .logo-big{font-size:36px;font-weight:800;background:linear-gradient(to right,#ff9800,#ff5722);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-odjim p{color:var(--muted);font-size:14px;margin-top:8px;line-height:1.6;}
+.servicos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@keyframes pulseServ{0%,100%{transform:scale(1)}50%{transform:scale(1.04);box-shadow:0 4px 16px rgba(255,152,0,0.18)}}
+.servico-item{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px;transition:var(--tr);animation:pulseServ 3s ease-in-out infinite;}
+.servico-item:nth-child(2){animation-delay:0.3s;}.servico-item:nth-child(3){animation-delay:0.6s;}.servico-item:nth-child(4){animation-delay:0.9s;}.servico-item:nth-child(5){animation-delay:1.2s;}.servico-item:nth-child(6){animation-delay:1.5s;}.servico-item:nth-child(7){animation-delay:1.8s;}.servico-item:nth-child(8){animation-delay:2.1s;}.servico-item:nth-child(9){animation-delay:2.4s;}
+.servico-item:hover{border-color:var(--accent);color:var(--text);background:rgba(255,152,0,0.08);}
+.servico-item .ico{font-size:26px;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.stat{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.stat .num{font-size:26px;font-weight:800;color:var(--accent);}
+.stat .lab{font-size:11px;color:var(--muted);margin-top:4px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px;}
+input,select,textarea{width:100%;background:rgba(15,23,42,0.7);border:1px solid var(--border);padding:13px;font-size:15px;color:var(--text);border-radius:12px;outline:none;transition:var(--tr);}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,152,0,0.15);}
+input::placeholder,textarea::placeholder{color:#475569;}
+textarea{resize:none;height:85px;}
+select option{background:#1e293b;}
+.btn{border:none;padding:15px;width:100%;font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;transition:var(--tr);display:flex;justify-content:center;align-items:center;gap:8px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 4px 14px rgba(255,152,0,0.3);}
+.btn-primary:active{transform:scale(0.98);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-danger{background:transparent;border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 14px;width:auto;font-size:13px;border-radius:8px;}
+#mapa{height:200px;width:100%;margin-top:8px;border-radius:12px;border:1px solid var(--border);}
+.pedidos-lista{display:flex;flex-direction:column;gap:12px;max-height:500px;overflow-y:auto;}
+.pedido-card{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;}
+.pedido-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+.pedido-servico{font-weight:700;color:var(--accent);font-size:15px;}
+.badge-status{font-size:10px;font-weight:700;padding:4px 8px;border-radius:20px;text-transform:uppercase;}
+.s-aguardando{background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.3);}
+.s-caminho{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);}
+.pedido-info{font-size:13px;color:var(--muted);line-height:1.5;}
+.pedido-info strong{color:var(--text);}
+.tabs{display:flex;gap:6px;background:var(--glass);border:1px solid var(--border);padding:6px;border-radius:14px;overflow-x:auto;}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:600;border-radius:10px;cursor:pointer;transition:var(--tr);white-space:nowrap;}
+.tab.ativa{background:var(--accent);color:var(--bg);}
+.tecnico-card{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.tecnico-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;flex-shrink:0;}
+.tecnico-info h4{font-size:15px;font-weight:700;}
+.tecnico-info p{font-size:12px;color:var(--muted);margin-top:3px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp 0.4s ease;}
+@keyframes floatEm{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes popEm{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+@keyframes bounceEm{0%,100%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(0.92)}}
+.emojis-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.emoji-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:2px solid var(--border);border-radius:16px;padding:14px 10px;cursor:pointer;transition:var(--tr);min-width:60px;}
+.emoji-btn .em{font-size:30px;animation:floatEm 3s ease-in-out infinite;display:block;}
+.emoji-btn .em-label{font-size:10px;font-weight:600;color:var(--muted);}
+.emoji-btn:hover{border-color:var(--accent);transform:translateY(-3px);}
+.emoji-btn.sel{border-color:var(--accent);background:rgba(255,152,0,0.15);}
+.emoji-btn.sel .em{animation:bounceEm 0.4s ease;}
+.emoji-btn.sel .em-label{color:var(--accent);}
+.inq-comentario{display:none;margin-top:14px;}
+.inq-feedback{display:none;margin-top:16px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:20px;text-align:center;}
+.inq-feedback .big-em{font-size:44px;display:block;margin-bottom:10px;animation:popEm 0.5s ease;}
+.inq-feedback p{color:#34d399;font-weight:700;font-size:16px;}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:none;background:rgba(30,41,59,0.97);border-left:4px solid var(--accent);color:var(--text);padding:14px 20px;border-radius:12px;max-width:320px;width:90%;text-align:center;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.aberto{display:flex;}
+.modal{background:#1e293b;border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:400px;}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center;}
+.modal-tabs{display:flex;gap:6px;margin-bottom:20px;}
+.modal-tab{flex:1;padding:10px;border:none;background:rgba(255,255,255,0.04);color:var(--muted);font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:var(--tr);}
+.modal-tab.ativa{background:var(--accent);color:var(--bg);}
 </style>
 </head>
-
 <body>
-
 <div id="toast"></div>
 
-<!-- ============================================================
-     MODAL CLIENTE
-============================================================ -->
-
 <div class="modal-overlay" id="modal-cadastro">
-
   <div class="modal">
-
     <h3>👤 Entrar / Cadastrar</h3>
-
     <div class="modal-tabs">
-
-      <button
-        class="modal-tab ativa"
-        onclick="modalTab('login')">
-        Entrar
-      </button>
-
-      <button
-        class="modal-tab"
-        onclick="modalTab('registo')">
-        Cadastrar
-      </button>
-
+      <button class="modal-tab ativa" onclick="modalTab('login')">Entrar</button>
+      <button class="modal-tab" onclick="modalTab('registo')">Cadastrar</button>
     </div>
-
-    <!-- LOGIN -->
-
     <div id="modal-login">
-
-      <div class="form-group">
-        <label>Email</label>
-        <input
-          id="cl-email"
-          type="email"
-          placeholder="email@exemplo.com">
-      </div>
-
-      <div class="form-group">
-        <label>Senha</label>
-        <input
-          id="cl-pass"
-          type="password"
-          placeholder="••••••••">
-      </div>
-
-      <button
-        class="btn btn-primary"
-        onclick="loginCliente()">
-        Entrar
-      </button>
-
-      <div style="text-align:center;margin-top:12px;">
-
-        <a
-          href="#"
-          onclick="event.preventDefault();recuperarSenhaCliente()"
-          style="color:var(--accent);font-size:13px;text-decoration:none;">
-          🔑 Esqueceu a senha?
-        </a>
-
-      </div>
-
+      <div class="form-group"><label>Email</label><input id="cl-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Senha</label><input id="cl-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginCliente()">Entrar</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaCliente()" style="color:var(--accent);font-size:13px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
     </div>
-
-    <!-- REGISTO -->
-
     <div id="modal-registo" style="display:none;">
-
-      <div class="form-group">
-        <label>Nome Completo</label>
-        <input
-          id="cr-nome"
-          placeholder="O seu nome">
-      </div>
-
-      <div class="form-group">
-        <label>Email</label>
-        <input
-          id="cr-email"
-          type="email"
-          placeholder="email@exemplo.com">
-      </div>
-
-      <div class="form-group">
-        <label>Telefone</label>
-        <input
-          id="cr-tel"
-          placeholder="923 000 000">
-      </div>
-
-      <div class="form-group">
-        <label>Senha</label>
-        <input
-          id="cr-pass"
-          type="password"
-          placeholder="Mínimo 6 caracteres">
-      </div>
-
-      <button
-        class="btn btn-primary"
-        onclick="cadastrarCliente()">
-        Criar Conta
-      </button>
-
+      <div class="form-group"><label>Nome Completo</label><input id="cr-nome" placeholder="O seu nome"></div>
+      <div class="form-group"><label>Email</label><input id="cr-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Telefone</label><input id="cr-tel" placeholder="923 000 000"></div>
+      <div class="form-group"><label>Senha</label><input id="cr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn btn-primary" onclick="cadastrarCliente()">Criar Conta</button>
     </div>
-
   </div>
-
 </div>
-
-<!-- ============================================================
-     SPLASH
-============================================================ -->
 
 <div id="splash">
-
   <div class="splash-logo fade-up">
-
     <h1>ODJIM Solution</h1>
-
-    <p>
-      Tecnologia e Serviços ao seu Alcance 🚀
-    </p>
-
-    <span class="tagline">
-      Luanda, Angola • Disponível 24h
-    </span>
-
+    <p>Tecnologia e Serviços ao seu Alcance 🚀</p>
+    <span class="tagline">Luanda, Angola • Disponível 24h</span>
   </div>
-
   <div class="user-cards fade-up">
-
-    <div
-      class="user-card"
-      onclick="irCliente()">
-
+    <div class="user-card" onclick="irCliente()">
       <span class="icon">👤</span>
-
-      <div class="info">
-        <h3>Sou Cliente</h3>
-        <p>
-          Solicitar serviços e suporte técnico
-        </p>
-      </div>
-
+      <div class="info"><h3>Sou Cliente</h3><p>Solicitar serviços e suporte técnico</p></div>
       <span class="arrow">›</span>
-
     </div>
-
-    <div
-      class="user-card"
-      onclick="irPara('tecnico')">
-
+    <div class="user-card" onclick="irPara('tecnico')">
       <span class="icon">🔧</span>
-
-      <div class="info">
-        <h3>Sou Técnico</h3>
-        <p>
-          Ver pedidos e gerir os meus serviços
-        </p>
-      </div>
-
+      <div class="info"><h3>Sou Técnico</h3><p>Ver pedidos e gerir os meus serviços</p></div>
       <span class="arrow">›</span>
-
     </div>
-
-    <div
-      class="user-card"
-      onclick="irPara('admin')">
-
+    <div class="user-card" onclick="irPara('admin')">
       <span class="icon">🛡️</span>
-
-      <div class="info">
-        <h3>Administrador</h3>
-        <p>
-          Gerir técnicos, pedidos e relatórios
-        </p>
-      </div>
-
+      <div class="info"><h3>Administrador</h3><p>Gerir técnicos, pedidos e relatórios</p></div>
       <span class="arrow">›</span>
-
     </div>
-
   </div>
-
 </div>
-
-<!-- ============================================================
-     CLIENTE
-============================================================ -->
 
 <div id="tela-cliente" class="tela">
-
   <div class="topbar">
-
-    <button
-      class="back"
-      onclick="voltar()">
-      ‹
-    </button>
-
+    <button class="back" onclick="voltar()">‹</button>
     <h2>ODJIM Solution</h2>
-
-    <span
-      class="badge"
-      id="badge-cliente">
-      Cliente
-    </span>
-
+    <span class="badge" id="badge-cliente">Cliente</span>
   </div>
-
   <div class="conteudo">
-
     <div class="hero-odjim fade-up">
-
-      <div
-        class="logo-big"
-        id="info-titulo">
-        ODJIM Solution
-      </div>
-
-      <p id="info-descricao">
-        A sua plataforma de confiança para serviços
-        técnicos e domésticos em Luanda.
-        Rápido, seguro e profissional.
-      </p>
-
+      <div class="logo-big" id="info-titulo">ODJIM Solution</div>
+      <p id="info-descricao">A sua plataforma de confiança para serviços técnicos e domésticos em Luanda. Rápido, seguro e profissional.</p>
     </div>
-
     <div class="stats fade-up">
-
-      <div class="stat">
-        <div
-          class="num"
-          id="info-stat1">
-          50+
-        </div>
-        <div class="lab">
-          Técnicos
-        </div>
-      </div>
-
-      <div class="stat">
-        <div class="num">
-          98%
-        </div>
-        <div class="lab">
-          Satisfação
-        </div>
-      </div>
-
-      <div class="stat">
-        <div class="num">
-          24h
-        </div>
-        <div class="lab">
-          Disponível
-        </div>
-      </div>
-
+      <div class="stat"><div class="num" id="info-stat1">50+</div><div class="lab">Técnicos</div></div>
+      <div class="stat"><div class="num">98%</div><div class="lab">Satisfação</div></div>
+      <div class="stat"><div class="num">24h</div><div class="lab">Disponível</div></div>
     </div>
-
-    <!-- SERVIÇOS -->
-
     <div class="card fade-up">
-
-      <h3>
-        O que Oferecemos
-      </h3>
-
+      <h3>O que Oferecemos</h3>
       <div class="servicos-grid">
-
-        <div class="servico-item">
-          <span class="ico">💻</span>
-          Informática
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">📡</span>
-          Redes
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">📹</span>
-          CCTV
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">⚡</span>
-          Electricidade
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">❄️</span>
-          Ar Cond.
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">🔧</span>
-          Canalização
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">🎨</span>
-          Pintura
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">🧹</span>
-          Limpeza
-        </div>
-
-        <div class="servico-item">
-          <span class="ico">🎭</span>
-          Design
-        </div>
-
+        <div class="servico-item"><span class="ico">💻</span>Informática</div>
+        <div class="servico-item"><span class="ico">📡</span>Redes</div>
+        <div class="servico-item"><span class="ico">📹</span>CCTV</div>
+        <div class="servico-item"><span class="ico">⚡</span>Electricidade</div>
+        <div class="servico-item"><span class="ico">❄️</span>Ar Cond.</div>
+        <div class="servico-item"><span class="ico">🔧</span>Canalização</div>
+        <div class="servico-item"><span class="ico">🎨</span>Pintura</div>
+        <div class="servico-item"><span class="ico">🧹</span>Limpeza</div>
+        <div class="servico-item"><span class="ico">🎭</span>Design</div>
       </div>
-
     </div>
-
-    <!-- SOBRE -->
-
     <div class="card fade-up">
-
-      <h3>
-        Sobre a ODJIM
-      </h3>
-
-      <p
-        id="info-sobre"
-        style="font-size:14px;color:var(--muted);line-height:1.7;">
-
-        A
-        <strong style="color:var(--text)">
-          ODJIM Solution
-        </strong>
-        é uma empresa angolana especializada em
-        conectar clientes com técnicos qualificados.
-
-        A nossa missão é garantir que cada angolano
-        tenha acesso rápido e seguro a profissionais
-        de confiança, com total transparência e
-        qualidade garantida.
-
-      </p>
-
+      <h3>Sobre a ODJIM</h3>
+      <p id="info-sobre" style="font-size:14px;color:var(--muted);line-height:1.7;">A <strong style="color:var(--text)">ODJIM Solution</strong> é uma empresa angolana especializada em conectar clientes com técnicos qualificados. A nossa missão é garantir que cada angolano tenha acesso rápido e seguro a profissionais de confiança, com total transparência e qualidade garantida.</p>
     </div>
-
-    <!-- PEDIDO -->
-
     <div class="card fade-up">
-
-      <h3>
-        Solicitar Serviço
-      </h3>
-
+      <h3>Solicitar Serviço</h3>
+      <div class="form-group"><label>Nome Completo</label><input id="c-nome" placeholder="O seu nome completo"></div>
+      <div class="form-group"><label>Telefone / WhatsApp</label><input id="c-tel" placeholder="Ex: 923 000 000"></div>
+      <div class="form-group"><label>Email (opcional)</label><input id="c-email" type="email" placeholder="exemplo@email.com"></div>
       <div class="form-group">
-
-        <label>
-          Nome Completo
-        </label>
-
-        <input
-          id="c-nome"
-          placeholder="O seu nome completo">
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Telefone / WhatsApp
-        </label>
-
-        <input
-          id="c-tel"
-          placeholder="Ex: 923 000 000">
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Email (opcional)
-        </label>
-
-        <input
-          id="c-email"
-          type="email"
-          placeholder="exemplo@email.com">
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Tipo de Serviço
-        </label>
-
+        <label>Tipo de Serviço</label>
         <select id="c-servico">
-
-          <option>Informática</option>
-          <option>Redes</option>
-          <option>CCTV</option>
-          <option>Electricidade</option>
-          <option>Ar condicionado</option>
-          <option>Canalização</option>
-          <option>Pintura</option>
-          <option>Limpeza</option>
-          <option>Babá</option>
-          <option>Design gráfico</option>
-
+          <option>Informática</option><option>Redes</option><option>CCTV</option>
+          <option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option>
+          <option>Pintura</option><option>Limpeza</option><option>Babá</option><option>Design gráfico</option>
         </select>
-
       </div>
-
+      <div class="form-group"><label>Descrição</label><textarea id="c-desc" placeholder="Descreva os detalhes..."></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="form-group"><label>Data Início</label><input type="date" id="c-inicio"></div>
+        <div class="form-group"><label>Data Fim</label><input type="date" id="c-fim"></div>
+      </div>
       <div class="form-group">
-
-        <label>
-          Descrição
-        </label>
-
-        <textarea
-          id="c-desc"
-          placeholder="Descreva os detalhes...">
-        </textarea>
-
-      </div>
-
-      <div
-        style="
-          display:grid;
-          grid-template-columns:1fr 1fr;
-          gap:10px;
-          margin-bottom:14px;
-        ">
-
-        <div class="form-group">
-
-          <label>
-            Data Início
-          </label>
-
-          <input
-            type="date"
-            id="c-inicio">
-
-        </div>
-
-        <div class="form-group">
-
-          <label>
-            Data Fim
-          </label>
-
-          <input
-            type="date"
-            id="c-fim">
-
-        </div>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Localização
-        </label>
-
-        <input
-          id="c-local"
-          placeholder="Clique no mapa ou escreva o endereço">
-
+        <label>Localização</label>
+        <input id="c-local" placeholder="Clique no mapa ou escreva o endereço">
         <div id="mapa"></div>
-
-        <p
-          style="
-            font-size:11px;
-            color:var(--muted);
-            margin-top:5px;
-          ">
-
-          📍 Clique no mapa para marcar a sua localização
-
-        </p>
-
+        <p style="font-size:11px;color:var(--muted);margin-top:5px;">📍 Clique no mapa para marcar a sua localização</p>
       </div>
-
-      <button
-        class="btn btn-primary"
-        onclick="enviarPedido()">
-
-        🚀 Enviar Pedido
-
-      </button>
-
+      <button class="btn btn-primary" onclick="enviarPedido()">🚀 Enviar Pedido</button>
     </div>
-
-    <!-- AVALIAÇÃO -->
-
     <div class="card fade-up">
-
-      <h3>
-        A sua opinião importa 💬
-      </h3>
-
-      <p
-        style="
-          font-size:14px;
-          color:var(--muted);
-          margin-bottom:16px;
-          text-align:center;
-        ">
-
-        Como avalia a sua experiência?
-
-      </p>
-
+      <h3>A sua opinião importa 💬</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px;text-align:center;">Como avalia a sua experiência?</p>
       <div class="emojis-row">
-
-        <div
-          class="emoji-btn"
-          onclick="avaliar(this,1,'😡','Muito mau')">
-
-          <span class="em">😡</span>
-          <span class="em-label">Muito mau</span>
-
-        </div>
-
-        <div
-          class="emoji-btn"
-          onclick="avaliar(this,2,'😕','Mau')">
-
-          <span class="em">😕</span>
-          <span class="em-label">Mau</span>
-
-        </div>
-
-        <div
-          class="emoji-btn"
-          onclick="avaliar(this,3,'😐','Normal')">
-
-          <span class="em">😐</span>
-          <span class="em-label">Normal</span>
-
-        </div>
-
-        <div
-          class="emoji-btn"
-          onclick="avaliar(this,4,'😊','Bom')">
-
-          <span class="em">😊</span>
-          <span class="em-label">Bom</span>
-
-        </div>
-
-        <div
-          class="emoji-btn"
-          onclick="avaliar(this,5,'🤩','Excelente')">
-
-          <span class="em">🤩</span>
-          <span class="em-label">Excelente</span>
-
-        </div>
-
+        <div class="emoji-btn" onclick="avaliar(this,1,'😡','Muito mau')"><span class="em">😡</span><span class="em-label">Muito mau</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,2,'😕','Mau')"><span class="em">😕</span><span class="em-label">Mau</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,3,'😐','Normal')"><span class="em">😐</span><span class="em-label">Normal</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,4,'😊','Bom')"><span class="em">😊</span><span class="em-label">Bom</span></div>
+        <div class="emoji-btn" onclick="avaliar(this,5,'🤩','Excelente')"><span class="em">🤩</span><span class="em-label">Excelente</span></div>
       </div>
-
-      <div
-        class="inq-comentario"
-        id="inq-comentario">
-
-        <textarea
-          id="av-comentario"
-          placeholder="Comentário opcional...">
-        </textarea>
-
-        <button
-          class="btn btn-primary"
-          style="margin-top:10px;"
-          onclick="enviarAvaliacao()">
-
-          Enviar Avaliação
-
-        </button>
-
+      <div class="inq-comentario" id="inq-comentario">
+        <textarea id="av-comentario" placeholder="Comentário opcional..."></textarea>
+        <button class="btn btn-primary" style="margin-top:10px;" onclick="enviarAvaliacao()">Enviar Avaliação</button>
       </div>
-
-      <div
-        class="inq-feedback"
-        id="inq-feedback">
-
-        <span
-          class="big-em"
-          id="feedback-em">
-          🤩
-        </span>
-
-        <p id="feedback-msg">
-          Obrigado pela sua avaliação!
-        </p>
-
+      <div class="inq-feedback" id="inq-feedback">
+        <span class="big-em" id="feedback-em">🤩</span>
+        <p id="feedback-msg">Obrigado pela sua avaliação!</p>
       </div>
-
     </div>
-
-    <button
-      class="btn btn-outline"
-      onclick="ativarNotificacoes()">
-
-      🔔 Ativar Notificações
-
-    </button>
-
-    <button
-      class="btn"
-      style="
-        background:transparent;
-        border:1px solid rgba(239,68,68,.3);
-        color:#ef4444;
-        margin-bottom:20px;
-      "
-      onclick="logoutCliente()">
-
-      Sair da Conta
-
-    </button>
-
+    <button class="btn btn-outline" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
+    <button class="btn" style="background:transparent;border:1px solid rgba(239,68,68,0.3);color:#ef4444;margin-bottom:20px;" onclick="logoutCliente()">Sair da Conta</button>
   </div>
-
 </div>
-
-<!-- ============================================================
-     TÉCNICO
-============================================================ -->
 
 <div id="tela-tecnico" class="tela">
-
   <div class="topbar">
-
-    <button
-      class="back"
-      onclick="voltar()">
-      ‹
-    </button>
-
-    <h2>
-      Painel Técnico
-    </h2>
-
-    <span class="badge">
-      Técnico
-    </span>
-
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>Painel Técnico</h2>
+    <span class="badge">Técnico</span>
   </div>
-
   <div class="conteudo">
-
-    <!-- LOGIN -->
-
-    <div
-      id="tecnico-login"
-      class="card fade-up">
-
-      <h3>
-        Entrar como Técnico
-      </h3>
-
-      <div class="form-group">
-
-        <label>
-          Email
-        </label>
-
-        <input
-          id="t-email"
-          type="email"
-          placeholder="tecnico@odjim.com">
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Senha
-        </label>
-
-        <input
-          id="t-pass"
-          type="password"
-          placeholder="••••••••">
-
-      </div>
-
-      <button
-        class="btn btn-primary"
-        onclick="loginTecnico()">
-
-        Entrar
-
-      </button>
-
-      <div style="text-align:center;margin-top:12px;">
-
-        <a
-          href="#"
-          onclick="event.preventDefault();recuperarSenhaTecnico()"
-          style="color:var(--accent);font-size:13px;text-decoration:none;">
-
-          🔑 Esqueceu a senha?
-
-        </a>
-
-      </div>
-
+    <div id="tecnico-login" class="card fade-up">
+      <h3>Entrar como Técnico</h3>
+      <div class="form-group"><label>Email</label><input id="t-email" type="email" placeholder="tecnico@odjim.com"></div>
+      <div class="form-group"><label>Senha</label><input id="t-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginTecnico()">Entrar</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaTecnico()" style="color:var(--accent);font-size:13px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
     </div>
-
-    <!-- PAINEL -->
-
-    <div
-      id="tecnico-painel"
-      style="display:none;"
-      class="fade-up">
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          margin-bottom:16px;
-        ">
-
-        <div>
-
-          <h3
-            id="tecnico-nome-painel"
-            style="font-size:18px;font-weight:700;">
-
-            Olá, Técnico! 👋
-
-          </h3>
-
-          <p
-            style="font-size:13px;color:var(--muted);">
-
-            Pedidos em tempo real
-
-          </p>
-
-        </div>
-
-        <button
-          class="btn btn-danger"
-          onclick="logoutTecnico()">
-
-          Sair
-
-        </button>
-
+    <div id="tecnico-painel" style="display:none;" class="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h3 style="font-size:18px;font-weight:700;">Olá, Técnico! 👋</h3><p style="font-size:13px;color:var(--muted);">Pedidos em tempo real</p></div>
+        <button class="btn btn-danger" onclick="logoutTecnico()">Sair</button>
       </div>
-
-      <button
-        class="btn btn-outline"
-        style="margin-bottom:16px;"
-        onclick="ativarNotificacoes()">
-
-        🔔 Ativar Notificações
-
-      </button>
-
-      <div
-        class="pedidos-lista"
-        id="t-pedidos">
-
-        <div
-          style="
-            text-align:center;
-            color:var(--muted);
-            padding:30px;
-          ">
-
-          A carregar pedidos...
-
-        </div>
-
-      </div>
-
+      <button class="btn btn-outline" style="margin-bottom:16px;" onclick="ativarNotificacoes()">🔔 Ativar Notificações</button>
+      <div class="pedidos-lista" id="t-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar pedidos...</div></div>
     </div>
-
   </div>
-
 </div>
 
-<!-- ============================================================
-     ADMIN
-============================================================ -->
-
 <div id="tela-admin" class="tela">
-
   <div class="topbar">
-
-    <button
-      class="back"
-      onclick="voltar()">
-      ‹
-    </button>
-
-    <h2>
-      Administração
-    </h2>
-
-    <span class="badge">
-      Admin
-    </span>
-
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>Administração</h2>
+    <span class="badge">Admin</span>
   </div>
-
   <div class="conteudo">
-
-    <!-- LOGIN ADMIN -->
-
-    <div
-      id="admin-login"
-      class="card fade-up">
-
-      <h3>
-        🛡️ Acesso Restrito
-      </h3>
-
-      <div class="form-group">
-
-        <label>
-          Email Admin
-        </label>
-
-        <input
-          id="a-email"
-          type="email"
-          placeholder="admin@odjim.com">
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Senha
-        </label>
-
-        <input
-          id="a-pass"
-          type="password"
-          placeholder="••••••••">
-
-      </div>
-
-      <button
-        class="btn btn-primary"
-        onclick="loginAdmin()">
-
-        Entrar no Painel
-
-      </button>
-
-      <div style="text-align:center;margin-top:12px;">
-
-        <a
-          href="#"
-          onclick="event.preventDefault();recuperarSenhaAdmin()"
-          style="color:var(--accent);font-size:13px;text-decoration:none;">
-
-          🔑 Esqueceu a senha?
-
-        </a>
-
-      </div>
-
+    <div id="admin-login" class="card fade-up">
+      <h3>🛡️ Acesso Restrito</h3>
+      <div class="form-group"><label>Email Admin</label><input id="a-email" type="email" placeholder="admin@odjim.com"></div>
+      <div class="form-group"><label>Senha</label><input id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="loginAdmin()">Entrar no Painel</button>
+      <div style="text-align:center;margin-top:12px;"><a href="#" onclick="recuperarSenhaAdmin()" style="color:var(--accent);font-size:13px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
     </div>
-
-    <!-- PAINEL ADMIN -->
-
-    <div
-      id="admin-painel"
-      style="display:none;"
-      class="fade-up">
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          margin-bottom:16px;
-        ">
-
-        <div>
-
-          <h3
-            id="admin-nome-painel"
-            style="font-size:18px;font-weight:700;">
-
-            Painel Admin 🛡️
-
-          </h3>
-
-          <p
-            style="font-size:13px;color:var(--muted);">
-
-            Gestão completa
-
-          </p>
-
-        </div>
-
-        <button
-          class="btn btn-danger"
-          onclick="logoutAdmin()">
-
-          Sair
-
-        </button>
-
+    <div id="admin-painel" style="display:none;" class="fade-up">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div><h3 style="font-size:18px;font-weight:700;">Painel Admin 🛡️</h3><p style="font-size:13px;color:var(--muted);">Gestão completa</p></div>
+        <button class="btn btn-danger" onclick="logoutAdmin()">Sair</button>
       </div>
-
-      <div
-        class="tabs"
-        style="margin-bottom:20px;">
-
-        <button
-          class="tab ativa"
-          onclick="abrirTab('tab-pedidos',this)">
-
-          Pedidos
-
-        </button>
-
-        <button
-          class="tab"
-          onclick="abrirTab('tab-tecnicos',this)">
-
-          Técnicos
-
-        </button>
-
-        <button
-          class="tab"
-          onclick="abrirTab('tab-cadastrar',this)">
-
-          + Técnico
-
-        </button>
-
-        <button
-          class="tab"
-          onclick="abrirTab('tab-info',this)">
-
-          Info
-
-        </button>
-
+      <div class="tabs" style="margin-bottom:20px;">
+        <button class="tab ativa" onclick="abrirTab('tab-pedidos',this)">Pedidos</button>
+        <button class="tab" onclick="abrirTab('tab-tecnicos',this)">Técnicos</button>
+        <button class="tab" onclick="abrirTab('tab-cadastrar',this)">+ Técnico</button>
+        <button class="tab" onclick="abrirTab('tab-info',this)">Info</button>
       </div>
-
-      <!-- PEDIDOS -->
-
-      <div id="tab-pedidos">
-
-        <div
-          class="pedidos-lista"
-          id="a-pedidos">
-
-          <div
-            style="
-              text-align:center;
-              color:var(--muted);
-              padding:30px;
-            ">
-
-            A carregar...
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- TÉCNICOS -->
-
-      <div
-        id="tab-tecnicos"
-        style="display:none;">
-
-        <div id="a-tecnicos">
-
-          <div
-            style="
-              text-align:center;
-              color:var(--muted);
-              padding:30px;
-            ">
-
-            A carregar técnicos...
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- CADASTRAR TÉCNICO -->
-
-      <div
-        id="tab-cadastrar"
-        style="display:none;">
-
+      <div id="tab-pedidos"><div class="pedidos-lista" id="a-pedidos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar...</div></div></div>
+      <div id="tab-tecnicos" style="display:none;"><div id="a-tecnicos"><div style="text-align:center;color:var(--muted);padding:30px;">A carregar técnicos...</div></div></div>
+      <div id="tab-cadastrar" style="display:none;">
         <div class="card">
-
-          <h3>
-            Cadastrar Novo Técnico
-          </h3>
-
-          <div class="form-group">
-
-            <label>
-              Nome
-            </label>
-
-            <input
-              id="nt-nome"
-              placeholder="Nome do técnico">
-
+          <h3>Cadastrar Novo Técnico</h3>
+          <div class="form-group"><label>Nome</label><input id="nt-nome" placeholder="Nome do técnico"></div>
+          <div class="form-group"><label>Email</label><input id="nt-email" type="email" placeholder="tecnico@odjim.com"></div>
+          <div class="form-group"><label>Telefone</label><input id="nt-tel" placeholder="923 000 000"></div>
+          <div class="form-group"><label>Especialidade</label>
+            <select id="nt-esp"><option>Informática</option><option>Redes</option><option>CCTV</option><option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option><option>Pintura</option><option>Limpeza</option><option>Design gráfico</option></select>
           </div>
-
-          <div class="form-group">
-
-            <label>
-              Email
-            </label>
-
-            <input
-              id="nt-email"
-              type="email"
-              placeholder="tecnico@odjim.com">
-
-          </div>
-
-          <div class="form-group">
-
-            <label>
-              Telefone
-            </label>
-
-            <input
-              id="nt-tel"
-              placeholder="923 000 000">
-
-          </div>
-
-          <div class="form-group">
-
-            <label>
-              Especialidade
-            </label>
-
-            <select id="nt-esp">
-
-              <option>Informática</option>
-              <option>Redes</option>
-              <option>CCTV</option>
-              <option>Electricidade</option>
-              <option>Ar condicionado</option>
-              <option>Canalização</option>
-              <option>Pintura</option>
-              <option>Limpeza</option>
-              <option>Design gráfico</option>
-
-            </select>
-
-          </div>
-
-          <div class="form-group">
-
-            <label>
-              Senha Inicial
-            </label>
-
-            <input
-              id="nt-pass"
-              type="password"
-              placeholder="Mínimo 6 caracteres">
-
-          </div>
-
-          <button
-            class="btn btn-primary"
-            onclick="cadastrarTecnico()">
-
-            ✅ Cadastrar Técnico
-
-          </button>
-
+          <button class="btn btn-primary" onclick="cadastrarTecnico()">✅ Cadastrar Técnico</button>
         </div>
-
       </div>
-
-      <!-- INFORMAÇÕES -->
-
-      <div
-        id="tab-info"
-        style="display:none;">
-
+      <div id="tab-info" style="display:none;">
         <div class="card">
-
-          <h3>
-            ✏️ Editar Info da ODJIM
-          </h3>
-
-          <div class="form-group">
-
-            <label>
-              Título Principal
-            </label>
-
-            <input
-              id="edit-titulo"
-              placeholder="ODJIM Solution">
-
-          </div>
-
-          <div class="form-group">
-
-            <label>
-              Descrição Hero
-            </label>
-
-            <textarea
-              id="edit-descricao"
-              placeholder="Descrição da empresa...">
-            </textarea>
-
-          </div>
-
-          <div class="form-group">
-
-            <label>
-              Sobre a ODJIM
-            </label>
-
-            <textarea
-              id="edit-sobre"
-              placeholder="Texto sobre a empresa...">
-            </textarea>
-
-          </div>
-
-          <div class="form-group">
-
-            <label>
-              Nº de Técnicos
-            </label>
-
-            <input
-              id="edit-stat1"
-              placeholder="50+">
-
-          </div>
-
-          <button
-            class="btn btn-primary"
-            onclick="salvarInfo()">
-
-            💾 Guardar Informações
-
-          </button>
-
+          <h3>✏️ Editar Info da ODJIM</h3>
+          <div class="form-group"><label>Título Principal</label><input id="edit-titulo" placeholder="ODJIM Solution"></div>
+          <div class="form-group"><label>Descrição Hero</label><textarea id="edit-descricao" placeholder="Descrição da empresa..."></textarea></div>
+          <div class="form-group"><label>Sobre a ODJIM</label><textarea id="edit-sobre" placeholder="Texto sobre a empresa..."></textarea></div>
+          <div class="form-group"><label>Nº de Técnicos</label><input id="edit-stat1" placeholder="50+"></div>
+          <button class="btn btn-primary" onclick="salvarInfo()">💾 Guardar Informações</button>
         </div>
-
       </div>
-
     </div>
-
   </div>
-
 </div>
 
 <script>
-
-/* ============================================================
-   VARIÁVEIS GLOBAIS
-============================================================ */
-
-let map = null;
-let marker = null;
-
-let avaliacaoAtual = null;
-
-let unsubscribeTecnicoPedidos = null;
-let unsubscribeAdminPedidos = null;
-
-let toastTimer = null;
-
-
-/* ============================================================
-   TOAST
-============================================================ */
-
-function toast(msg, dur = 4000){
-
-  const t = document.getElementById("toast");
-
-  if(!t) return;
-
-  clearTimeout(toastTimer);
-
-  t.textContent = msg;
-  t.style.display = "block";
-
-  toastTimer = setTimeout(() => {
-
-    t.style.display = "none";
-
-  }, dur);
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("firebase-messaging-sw.js").catch(e=>console.log(e));
 }
 
-
-/* ============================================================
-   ESCAPAR HTML
-   Protege a interface contra HTML inserido nos dados.
-============================================================ */
-
-function escapeHTML(value){
-
-  if(value === null || value === undefined){
-    return "";
-  }
-
-  return String(value)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+// ── TOAST ──
+function toast(msg,dur=4000){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.style.display="block";
+  setTimeout(()=>t.style.display="none",dur);
 }
 
-
-/* ============================================================
-   ERROS FIREBASE
-============================================================ */
-
-function mensagemErroFirebase(error){
-
-  if(!error){
-    return "Ocorreu um erro.";
-  }
-
-  switch(error.code){
-
-    case "auth/invalid-email":
-      return "❌ O email não é válido.";
-
-    case "auth/user-not-found":
-      return "❌ Não existe uma conta com este email.";
-
-    case "auth/wrong-password":
-    case "auth/invalid-credential":
-      return "❌ Email ou senha incorretos.";
-
-    case "auth/email-already-in-use":
-      return "❌ Este email já está registado.";
-
-    case "auth/weak-password":
-      return "❌ A senha deve ter pelo menos 6 caracteres.";
-
-    case "auth/too-many-requests":
-      return "⚠️ Muitas tentativas. Aguarde alguns minutos.";
-
-    case "auth/network-request-failed":
-      return "❌ Falha de ligação à Internet.";
-
-    case "permission-denied":
-      return "❌ O Firebase bloqueou esta operação. Vamos corrigir as Rules.";
-
-    default:
-      return "❌ " + (error.message || "Ocorreu um erro.");
-  }
-}
-
-
-/* ============================================================
-   NAVEGAÇÃO
-============================================================ */
-
+// ── NAVEGAÇÃO ──
 function irPara(tela){
-
-  document.getElementById("splash").style.display = "none";
-
-  document
-    .querySelectorAll(".tela")
-    .forEach(t => t.classList.remove("ativa"));
-
-  const destino = document.getElementById("tela-" + tela);
-
-  if(destino){
-    destino.classList.add("ativa");
-  }
-
-  if(tela === "cliente"){
-
-    setTimeout(() => initMap(), 200);
-
-    carregarInfoEmpresa();
-
-    preencherDadosCliente();
-
-  }
-
-  if(tela === "tecnico"){
-    verificarTecnico();
-  }
-
-  if(tela === "admin"){
-    verificarAdmin();
-  }
+  document.getElementById("splash").style.display="none";
+  document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
+  document.getElementById("tela-"+tela).classList.add("ativa");
+  if(tela==="cliente"){initMap();carregarInfoEmpresa();}
+  if(tela==="tecnico")verificarTecnico();
+  if(tela==="admin")verificarAdmin();
 }
-
 
 function voltar(){
-
-  document
-    .querySelectorAll(".tela")
-    .forEach(t => t.classList.remove("ativa"));
-
-  document.getElementById("splash").style.display = "flex";
-
-  pararListeners();
-
-  if(map){
-    setTimeout(() => {
-      try{
-        map.invalidateSize();
-      }catch(e){}
-    },100);
-  }
+  document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
+  document.getElementById("splash").style.display="flex";
 }
-
-
-/* ============================================================
-   CLIENTE
-============================================================ */
 
 function irCliente(){
-
-  const user = auth.currentUser;
-
+  const user=auth.currentUser;
   if(user){
-
     irPara("cliente");
-
-    document.getElementById("badge-cliente").textContent =
-      user.displayName || "Cliente";
-
-  }else{
-
-    document
-      .getElementById("modal-cadastro")
-      .classList.add("aberto");
-
+    document.getElementById("badge-cliente").textContent=user.displayName||"Cliente";
+  } else {
+    document.getElementById("modal-cadastro").classList.add("aberto");
   }
 }
-
-
-/* ============================================================
-   MODAL
-============================================================ */
 
 function modalTab(tab){
-
-  document.getElementById("modal-login").style.display =
-    tab === "login" ? "block" : "none";
-
-  document.getElementById("modal-registo").style.display =
-    tab === "registo" ? "block" : "none";
-
-  document
-    .querySelectorAll(".modal-tab")
-    .forEach((b,i) => {
-
-      b.classList.toggle(
-        "ativa",
-        (i === 0 && tab === "login") ||
-        (i === 1 && tab === "registo")
-      );
-
-    });
+  document.getElementById("modal-login").style.display=tab==="login"?"block":"none";
+  document.getElementById("modal-registo").style.display=tab==="registo"?"block":"none";
+  document.querySelectorAll(".modal-tab").forEach((b,i)=>b.classList.toggle("ativa",(i===0&&tab==="login")||(i===1&&tab==="registo")));
 }
 
-
-/* ============================================================
-   LOGIN CLIENTE
-============================================================ */
-
+// ── CLIENTE ──
 async function loginCliente(){
-
-  const email =
-    document.getElementById("cl-email").value.trim();
-
-  const pass =
-    document.getElementById("cl-pass").value;
-
-  if(!email || !pass){
-
-    toast("⚠️ Preencha email e senha.");
-
-    return;
-  }
-
+  const email=document.getElementById("cl-email").value.trim();
+  const pass=document.getElementById("cl-pass").value;
+  if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
-
-    const cred =
-      await auth.signInWithEmailAndPassword(email,pass);
-
-    document
-      .getElementById("modal-cadastro")
-      .classList.remove("aberto");
-
+    const cred=await auth.signInWithEmailAndPassword(email,pass);
+    document.getElementById("modal-cadastro").classList.remove("aberto");
     irPara("cliente");
-
-    document.getElementById("badge-cliente").textContent =
-      cred.user.displayName || "Cliente";
-
+    document.getElementById("badge-cliente").textContent=cred.user.displayName||"Cliente";
     toast("✅ Bem-vindo de volta!");
-
   }catch(e){
-
-    console.error(e);
-
-    toast(mensagemErroFirebase(e));
-
+    if(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential")toast("❌ Email ou senha incorretos.");
+    else if(e.code==="auth/wrong-password")toast("❌ Senha incorreta.");
+    else toast("❌ Erro: "+e.message);
   }
 }
-
-
-/* ============================================================
-   CADASTRO CLIENTE
-============================================================ */
 
 async function cadastrarCliente(){
-
-  const nome =
-    document.getElementById("cr-nome").value.trim();
-
-  const email =
-    document.getElementById("cr-email").value.trim();
-
-  const tel =
-    document.getElementById("cr-tel").value.trim();
-
-  const pass =
-    document.getElementById("cr-pass").value;
-
-  if(!nome || !email || !pass){
-
-    toast("⚠️ Preencha Nome, Email e Senha.");
-
-    return;
-  }
-
-  if(pass.length < 6){
-
-    toast("⚠️ A senha deve ter pelo menos 6 caracteres.");
-
-    return;
-  }
-
+  const nome=document.getElementById("cr-nome").value.trim();
+  const email=document.getElementById("cr-email").value.trim();
+  const tel=document.getElementById("cr-tel").value.trim();
+  const pass=document.getElementById("cr-pass").value;
+  if(!nome||!email||!pass){toast("⚠️ Preencha todos os campos.");return;}
+  if(pass.length<6){toast("⚠️ Senha mínimo 6 caracteres.");return;}
   try{
-
-    const cred =
-      await auth.createUserWithEmailAndPassword(
-        email,
-        pass
-      );
-
-    await cred.user.updateProfile({
-      displayName: nome
+    const cred=await auth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:nome});
+    await db.collection("clientes").doc(cred.user.uid).set({
+      nome,email,telefone:tel,uid:cred.user.uid,criadoEm:new Date().toISOString()
     });
-
-    await db
-      .collection("clientes")
-      .doc(cred.user.uid)
-      .set({
-
-        uid: cred.user.uid,
-        nome: nome,
-        email: email,
-        telefone: tel,
-        role: "cliente",
-        ativo: true,
-        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-    document
-      .getElementById("modal-cadastro")
-      .classList.remove("aberto");
-
-    document.getElementById("badge-cliente").textContent =
-      nome;
-
+    document.getElementById("modal-cadastro").classList.remove("aberto");
     irPara("cliente");
-
-    toast("🎉 Conta criada com sucesso, " + nome + "!");
-
+    document.getElementById("badge-cliente").textContent=nome;
+    toast("🎉 Bem-vindo, "+nome+"!");
   }catch(e){
-
-    console.error(e);
-
-    toast(mensagemErroFirebase(e));
-
+    if(e.code==="auth/email-already-in-use")toast("❌ Email já registado. Use 'Entrar'.");
+    else toast("❌ Erro: "+e.message);
   }
 }
-
-
-/* ============================================================
-   RECUPERAR SENHA CLIENTE
-============================================================ */
 
 async function recuperarSenhaCliente(){
-
-  const email =
-    document.getElementById("cl-email").value.trim();
-
-  if(!email){
-
-    toast("⚠️ Escreva o seu email primeiro.");
-
-    return;
-  }
-
+  const email=document.getElementById("cl-email").value.trim();
+  if(!email){toast("⚠️ Escreva o seu email no campo acima primeiro.");return;}
   try{
-
     await auth.sendPasswordResetEmail(email);
-
-    toast(
-      "📧 Email de recuperação enviado para " + email + "!"
-    );
-
+    toast("📧 Email de recuperação enviado para "+email+"!");
   }catch(e){
-
-    console.error(e);
-
-    toast(mensagemErroFirebase(e));
-
+    if(e.code==="auth/user-not-found")toast("❌ Email não encontrado.");
+    else toast("❌ Erro: "+e.message);
   }
 }
 
+async function logoutCliente(){await auth.signOut();voltar();toast("👋 Sessão terminada.");}
 
-/* ============================================================
-   LOGOUT CLIENTE
-============================================================ */
-
-async function logoutCliente(){
-
-  try{
-
-    await auth.signOut();
-
-    pararListeners();
-
-    voltar();
-
-    toast("👋 Sessão terminada.");
-
-  }catch(e){
-
-    toast(mensagemErroFirebase(e));
-
-  }
-}
-
-
-/* ============================================================
-   PREENCHER DADOS CLIENTE
-============================================================ */
-
-async function preencherDadosCliente(){
-
-  const user = auth.currentUser;
-
-  if(!user) return;
-
-  try{
-
-    const doc =
-      await db.collection("clientes")
-      .doc(user.uid)
-      .get();
-
-    if(!doc.exists) return;
-
-    const d = doc.data();
-
-    document.getElementById("c-nome").value =
-      d.nome || user.displayName || "";
-
-    document.getElementById("c-tel").value =
-      d.telefone || "";
-
-    document.getElementById("c-email").value =
-      d.email || user.email || "";
-
-  }catch(e){
-
-    console.warn(
-      "Não foi possível carregar dados do cliente:",
-      e
-    );
-
-  }
-}
-
-
-/* ============================================================
-   MAPA
-============================================================ */
-
+// ── MAPA ──
+let map,marker;
 function initMap(){
-
-  const elemento = document.getElementById("mapa");
-
-  if(!elemento) return;
-
-  if(map){
-
-    setTimeout(() => {
-
-      try{
-        map.invalidateSize();
-      }catch(e){}
-
-    },300);
-
-    return;
-  }
-
-  setTimeout(() => {
-
-    try{
-
-      map = L.map("mapa").setView(
-        [-8.8383,13.2344],
-        13
-      );
-
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-          maxZoom:19,
-          attribution:"© OpenStreetMap"
-        }
-      ).addTo(map);
-
-      map.on("click", e => {
-
-        const lat =
-          e.latlng.lat.toFixed(6);
-
-        const lng =
-          e.latlng.lng.toFixed(6);
-
-        if(marker){
-
-          marker.setLatLng(e.latlng);
-
-        }else{
-
-          marker =
-            L.marker(e.latlng)
-            .addTo(map);
-
-        }
-
-        document.getElementById("c-local").value =
-          `Lat: ${lat}, Lon: ${lng}`;
-
-      });
-
-      setTimeout(() => {
-
-        try{
-          map.invalidateSize();
-        }catch(e){}
-
-      },300);
-
-    }catch(e){
-
-      console.error("Erro no mapa:",e);
-
-      toast(
-        "⚠️ Não foi possível carregar o mapa."
-      );
-
-    }
-
-  },300);
-}
-
-
-/* ============================================================
-   ENVIAR PEDIDO
-============================================================ */
-
-async function enviarPedido(){
-
-  const nome =
-    document.getElementById("c-nome").value.trim();
-
-  const tel =
-    document.getElementById("c-tel").value.trim();
-
-  const email =
-    document.getElementById("c-email").value.trim();
-
-  const servico =
-    document.getElementById("c-servico").value;
-
-  const descricao =
-    document.getElementById("c-desc").value.trim();
-
-  const inicio =
-    document.getElementById("c-inicio").value || "";
-
-  const fim =
-    document.getElementById("c-fim").value || "";
-
-  const local =
-    document.getElementById("c-local").value.trim();
-
-  if(!nome || !tel || !local){
-
-    toast(
-      "⚠️ Preencha Nome, Telefone e Localização."
-    );
-
-    return;
-  }
-
-  const user = auth.currentUser;
-
-  try{
-
-    const dados = {
-
-      nome: nome,
-
-      telefone: tel,
-
-      email: email,
-
-      servico: servico,
-
-      descricao: descricao,
-
-      inicio: inicio,
-
-      fim: fim,
-
-      local: local,
-
-      estado: "Aguardando técnico",
-
-      clienteUid: user ? user.uid : "",
-
-      tecnicoUid: "",
-
-      tecnicoNome: "",
-
-      criadoPor: user ? "cliente_autenticado" : "cliente_publico",
-
-      dataCriacao:
-        firebase.firestore.FieldValue.serverTimestamp(),
-
-      atualizadoEm:
-        firebase.firestore.FieldValue.serverTimestamp()
-
-    };
-
-    const ref =
-      await db.collection("pedidos").add(dados);
-
-    console.log(
-      "Pedido criado:",
-      ref.id
-    );
-
-    toast(
-      "✅ Pedido enviado! Entraremos em contacto em breve."
-    );
-
-    [
-      "c-nome",
-      "c-tel",
-      "c-email",
-      "c-local",
-      "c-desc",
-      "c-inicio",
-      "c-fim"
-    ].forEach(id => {
-
-      const campo =
-        document.getElementById(id);
-
-      if(campo){
-        campo.value = "";
-      }
-
+  if(map){setTimeout(()=>map.invalidateSize(),300);return;}
+  setTimeout(()=>{
+    map=L.map("mapa").setView([-8.8383,13.2344],13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
+    map.on("click",e=>{
+      const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);
+      if(marker)marker.setLatLng(e.latlng);else marker=L.marker(e.latlng).addTo(map);
+      document.getElementById("c-local").value=`Lat: ${lat}, Lon: ${lng}`;
     });
-
-    if(marker && map){
-
-      try{
-        map.removeLayer(marker);
-      }catch(e){}
-
-      marker = null;
-
-    }
-
-    if(user){
-
-      document.getElementById("c-nome").value =
-        user.displayName || nome;
-
-      document.getElementById("c-email").value =
-        user.email || email;
-
-    }
-
-  }catch(e){
-
-    console.error(
-      "Erro ao criar pedido:",
-      e
-    );
-
-    toast(
-      "❌ Erro ao enviar pedido: " +
-      (e.message || "Erro Firebase")
-    );
-
-  }
+  },400);
 }
 
+// ── PEDIDO ──
+async function enviarPedido(){
+  const nome=document.getElementById("c-nome").value.trim();
+  const tel=document.getElementById("c-tel").value.trim();
+  const local=document.getElementById("c-local").value.trim();
+  if(!nome||!tel||!local){toast("⚠️ Preencha Nome, Telefone e Localização.");return;}
+  try{
+    await db.collection("pedidos").add({
+      nome,telefone:tel,
+      email:document.getElementById("c-email").value,
+      local,servico:document.getElementById("c-servico").value,
+      descricao:document.getElementById("c-desc").value,
+      inicio:document.getElementById("c-inicio").value||"",
+      fim:document.getElementById("c-fim").value||"",
+      estado:"Aguardando técnico",
+      clienteUid:auth.currentUser?auth.currentUser.uid:"",
+      dataCriacao:new Date().toISOString()
+    });
+    toast("✅ Pedido enviado! Entraremos em contacto em breve.");
+    ["c-nome","c-tel","c-email","c-local","c-desc","c-inicio","c-fim"].forEach(id=>document.getElementById(id).value="");
+    if(marker){map.removeLayer(marker);marker=null;}
+  }catch(e){toast("❌ Erro ao enviar pedido: "+e.message);}
+}
 
-/* ============================================================
-   AVALIAÇÃO
-============================================================ */
-
-function avaliar(
-  btn,
-  nota,
-  emoji,
-  label
-){
-
-  document
-    .querySelectorAll(".emoji-btn")
-    .forEach(b =>
-      b.classList.remove("sel")
-    );
-
+// ── INQUÉRITO ──
+let avaliacaoAtual=null;
+function avaliar(btn,nota,emoji,label){
+  document.querySelectorAll(".emoji-btn").forEach(b=>b.classList.remove("sel"));
   btn.classList.add("sel");
-
-  avaliacaoAtual = {
-    nota,
-    emoji,
-    label
-  };
-
-  document.getElementById(
-    "inq-comentario"
-  ).style.display = "block";
-
-  document.getElementById(
-    "inq-feedback"
-  ).style.display = "none";
+  avaliacaoAtual={nota,emoji,label};
+  document.getElementById("inq-comentario").style.display="block";
+  document.getElementById("inq-feedback").style.display="none";
 }
-
-
-/* ============================================================
-   ENVIAR AVALIAÇÃO
-============================================================ */
 
 async function enviarAvaliacao(){
-
-  if(!avaliacaoAtual){
-
-    toast(
-      "⚠️ Selecione uma avaliação primeiro."
-    );
-
-    return;
-  }
-
-  const user = auth.currentUser;
-
+  if(!avaliacaoAtual){toast("⚠️ Selecione uma avaliação primeiro.");return;}
   try{
-
-    await db
-      .collection("avaliacoes")
-      .add({
-
-        ...avaliacaoAtual,
-
-        comentario:
-          document.getElementById(
-            "av-comentario"
-          ).value.trim(),
-
-        clienteUid:
-          user ? user.uid : "",
-
-        clienteNome:
-          user ? (user.displayName || "") : "",
-
-        data:
-          firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-    const msgs = {
-
-      1:"Lamentamos! Vamos melhorar. 🙏",
-
-      2:"Obrigado pelo feedback! Melhoraremos. 💪",
-
-      3:"Obrigado! Continuamos a crescer. 🌱",
-
-      4:"Fico feliz que gostou! 😊",
-
-      5:"Uau! O seu apoio motiva-nos! 🚀"
-
-    };
-
-    document.getElementById(
-      "feedback-em"
-    ).textContent =
-      avaliacaoAtual.emoji;
-
-    document.getElementById(
-      "feedback-msg"
-    ).textContent =
-      msgs[avaliacaoAtual.nota];
-
-    document.getElementById(
-      "inq-comentario"
-    ).style.display = "none";
-
-    document.getElementById(
-      "inq-feedback"
-    ).style.display = "block";
-
-    document.getElementById(
-      "av-comentario"
-    ).value = "";
-
-    avaliacaoAtual = null;
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      "❌ Erro ao enviar avaliação: " +
-      (e.message || "")
-    );
-
-  }
+    await db.collection("avaliacoes").add({
+      ...avaliacaoAtual,
+      comentario:document.getElementById("av-comentario").value,
+      data:new Date().toISOString()
+    });
+    const msgs={1:"Lamentamos! Vamos melhorar. 🙏",2:"Obrigado! Melhoraremos. 💪",3:"Obrigado! Continuamos a crescer. 🌱",4:"Fico feliz que gostou! 😊",5:"Uau! O seu apoio motiva-nos! 🚀"};
+    document.getElementById("feedback-em").textContent=avaliacaoAtual.emoji;
+    document.getElementById("feedback-msg").textContent=msgs[avaliacaoAtual.nota];
+    document.getElementById("inq-comentario").style.display="none";
+    document.getElementById("inq-feedback").style.display="block";
+    document.getElementById("av-comentario").value="";
+    avaliacaoAtual=null;
+  }catch(e){toast("❌ Erro ao enviar avaliação: "+e.message);}
 }
 
-
-/* ============================================================
-   INFORMAÇÕES DA EMPRESA
-============================================================ */
-
-async function carregarInfoEmpresa(){
-
-  try{
-
-    const doc =
-      await db
-        .collection("config")
-        .doc("empresa")
-        .get();
-
-    if(!doc.exists){
-      return;
-    }
-
-    const d = doc.data();
-
-    if(d.titulo){
-
-      document.getElementById(
-        "info-titulo"
-      ).textContent = d.titulo;
-
-    }
-
-    if(d.descricao){
-
-      document.getElementById(
-        "info-descricao"
-      ).textContent = d.descricao;
-
-    }
-
-    if(d.sobre){
-
-      document.getElementById(
-        "info-sobre"
-      ).textContent = d.sobre;
-
-    }
-
-    if(d.stat1){
-
-      document.getElementById(
-        "info-stat1"
-      ).textContent = d.stat1;
-
-    }
-
-  }catch(e){
-
-    console.warn(
-      "Informação da empresa indisponível:",
-      e
-    );
-
-  }
-}
-
-
-/* ============================================================
-   ROLE DO UTILIZADOR
-============================================================ */
-
-async function obterRole(user){
-
-  if(!user){
-    return null;
-  }
-
-  /*
-    Primeiro procura na coleção utilizadores.
-  */
-
-  try{
-
-    const userDoc =
-      await db
-        .collection("utilizadores")
-        .doc(user.uid)
-        .get();
-
-    if(userDoc.exists){
-
-      const d = userDoc.data();
-
-      if(d.role){
-        return d.role;
-      }
-
-    }
-
-  }catch(e){
-
-    console.warn(
-      "Coleção utilizadores indisponível:",
-      e
-    );
-
-  }
-
-  /*
-    Depois verifica técnico.
-  */
-
-  try{
-
-    const tecnicoDoc =
-      await db
-        .collection("tecnicos")
-        .doc(user.uid)
-        .get();
-
-    if(tecnicoDoc.exists){
-
-      const d = tecnicoDoc.data();
-
-      if(d.role){
-        return d.role;
-      }
-
-      return "tecnico";
-
-    }
-
-  }catch(e){
-
-    console.warn(
-      "Coleção tecnicos indisponível:",
-      e
-    );
-
-  }
-
-  /*
-    Depois verifica cliente.
-  */
-
-  try{
-
-    const clienteDoc =
-      await db
-        .collection("clientes")
-        .doc(user.uid)
-        .get();
-
-    if(clienteDoc.exists){
-
-      const d = clienteDoc.data();
-
-      return d.role || "cliente";
-
-    }
-
-  }catch(e){
-
-    console.warn(
-      "Coleção clientes indisponível:",
-      e
-    );
-
-  }
-
-  return "cliente";
-}
-
-
-/*
-  Compatibilidade com a estrutura antiga.
-*/
-
-window.ODJIM = {
-
-  getRole: obterRole
-
-};
-
-
-/* ============================================================
-   AGUARDAR AUTH
-============================================================ */
-
-function aguardarAuthFirebase(){
-
-  return new Promise(resolve => {
-
-    if(auth.currentUser){
-
-      resolve(auth.currentUser);
-
-      return;
-
-    }
-
-    const unsubscribe =
-      auth.onAuthStateChanged(user => {
-
-        unsubscribe();
-
-        resolve(user);
-
-      });
-
-  });
-}
-
-
-/* ============================================================
-   TÉCNICO
-============================================================ */
-
-async function verificarTecnico(){
-
-  const user =
-    await aguardarAuthFirebase();
-
-  if(!user){
-
-    mostrarLoginTecnico();
-
-    return;
-  }
-
-  try{
-
-    const role =
-      await obterRole(user);
-
-    if(
-      role === "tecnico" ||
-      role === "admin" ||
-      role === "superadmin"
-    ){
-
-      mostrarPainelTecnico();
-
-    }else{
-
-      mostrarLoginTecnico();
-
-      toast(
-        "❌ Esta conta não possui perfil de técnico."
-      );
-
-    }
-
-  }catch(e){
-
-    console.error(e);
-
-    mostrarLoginTecnico();
-
-  }
-}
-
-
-function mostrarLoginTecnico(){
-
-  document.getElementById(
-    "tecnico-painel"
-  ).style.display = "none";
-
-  document.getElementById(
-    "tecnico-login"
-  ).style.display = "block";
-}
-
-
-async function loginTecnico(){
-
-  const email =
-    document.getElementById("t-email")
-    .value.trim();
-
-  const pass =
-    document.getElementById("t-pass")
-    .value;
-
-  if(!email || !pass){
-
-    toast(
-      "⚠️ Preencha email e senha."
-    );
-
-    return;
-  }
-
-  try{
-
-    const cred =
-      await auth.signInWithEmailAndPassword(
-        email,
-        pass
-      );
-
-    const role =
-      await obterRole(cred.user);
-
-    if(
-      role !== "tecnico" &&
-      role !== "admin" &&
-      role !== "superadmin"
-    ){
-
-      await auth.signOut();
-
-      toast(
-        "❌ Esta conta não é de técnico."
-      );
-
-      return;
-
-    }
-
-    mostrarPainelTecnico();
-
-    toast(
-      "✅ Bem-vindo, Técnico!"
-    );
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-async function mostrarPainelTecnico(){
-
-  const user =
-    auth.currentUser;
-
-  if(!user){
-
-    mostrarLoginTecnico();
-
-    return;
-  }
-
-  document.getElementById(
-    "tecnico-login"
-  ).style.display = "none";
-
-  document.getElementById(
-    "tecnico-painel"
-  ).style.display = "block";
-
-  try{
-
-    const doc =
-      await db
-        .collection("tecnicos")
-        .doc(user.uid)
-        .get();
-
+// ── INFO EMPRESA ──
+function carregarInfoEmpresa(){
+  db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
-
-      const d = doc.data();
-
-      document.getElementById(
-        "tecnico-nome-painel"
-      ).textContent =
-        "Olá, " +
-        (d.nome || user.displayName || "Técnico") +
-        "! 👋";
-
+      const d=doc.data();
+      if(d.titulo)document.getElementById("info-titulo").textContent=d.titulo;
+      if(d.descricao)document.getElementById("info-descricao").textContent=d.descricao;
+      if(d.sobre)document.getElementById("info-sobre").textContent=d.sobre;
+      if(d.stat1)document.getElementById("info-stat1").textContent=d.stat1;
     }
-
-  }catch(e){
-
-    document.getElementById(
-      "tecnico-nome-painel"
-    ).textContent =
-      "Olá, " +
-      (user.displayName || "Técnico") +
-      "! 👋";
-
-  }
-
-  iniciarMonitorTecnico();
-
+  }).catch(()=>{});
 }
-
-
-function iniciarMonitorTecnico(){
-
-  if(unsubscribeTecnicoPedidos){
-
-    unsubscribeTecnicoPedidos();
-
-    unsubscribeTecnicoPedidos = null;
-
-  }
-
-  const el =
-    document.getElementById("t-pedidos");
-
-  if(!el) return;
-
-  el.innerHTML = `
-    <div style="
-      text-align:center;
-      color:var(--muted);
-      padding:30px;">
-      A carregar pedidos...
-    </div>
-  `;
-
-  unsubscribeTecnicoPedidos =
-    db
-      .collection("pedidos")
-      .onSnapshot(
-
-        snap => {
-
-          renderizarPedidos(
-            snap,
-            "t-pedidos",
-            "tecnico"
-          );
-
-        },
-
-        err => {
-
-          console.error(err);
-
-          el.innerHTML = `
-            <div style="
-              text-align:center;
-              color:#f87171;
-              padding:20px;">
-              Erro ao carregar pedidos.
-              <br><br>
-              ${escapeHTML(err.message)}
-            </div>
-          `;
-
-        }
-
-      );
-
-}
-
-
-async function logoutTecnico(){
-
-  try{
-
-    await auth.signOut();
-
-    if(unsubscribeTecnicoPedidos){
-
-      unsubscribeTecnicoPedidos();
-
-      unsubscribeTecnicoPedidos = null;
-
-    }
-
-    mostrarLoginTecnico();
-
-    toast(
-      "👋 Sessão terminada."
-    );
-
-  }catch(e){
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-async function recuperarSenhaTecnico(){
-
-  const email =
-    document.getElementById("t-email")
-    .value.trim();
-
-  if(!email){
-
-    toast(
-      "⚠️ Escreva o email no campo acima primeiro."
-    );
-
-    return;
-  }
-
-  try{
-
-    await auth.sendPasswordResetEmail(
-      email
-    );
-
-    toast(
-      "📧 Email de recuperação enviado!"
-    );
-
-  }catch(e){
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-/* ============================================================
-   ADMIN
-============================================================ */
-
-async function verificarAdmin(){
-
-  const user =
-    await aguardarAuthFirebase();
-
-  if(!user){
-
-    mostrarLoginAdmin();
-
-    return;
-  }
-
-  try{
-
-    const role =
-      await obterRole(user);
-
-    if(
-      role === "admin" ||
-      role === "superadmin"
-    ){
-
-      mostrarPainelAdmin();
-
-    }else{
-
-      mostrarLoginAdmin();
-
-      toast(
-        "❌ Acesso administrativo negado."
-      );
-
-    }
-
-  }catch(e){
-
-    console.error(e);
-
-    mostrarLoginAdmin();
-
-  }
-}
-
-
-function mostrarLoginAdmin(){
-
-  document.getElementById(
-    "admin-login"
-  ).style.display = "block";
-
-  document.getElementById(
-    "admin-painel"
-  ).style.display = "none";
-
-}
-
-
-async function loginAdmin(){
-
-  const email =
-    document.getElementById("a-email")
-    .value.trim();
-
-  const pass =
-    document.getElementById("a-pass")
-    .value;
-
-  if(!email || !pass){
-
-    toast(
-      "⚠️ Preencha email e senha."
-    );
-
-    return;
-  }
-
-  try{
-
-    const cred =
-      await auth.signInWithEmailAndPassword(
-        email,
-        pass
-      );
-
-    const role =
-      await obterRole(cred.user);
-
-    if(
-      role !== "admin" &&
-      role !== "superadmin"
-    ){
-
-      await auth.signOut();
-
-      toast(
-        "❌ Esta conta não possui privilégios de administrador."
-      );
-
-      return;
-
-    }
-
-    mostrarPainelAdmin();
-
-    toast(
-      "✅ Bem-vindo ao Painel Admin!"
-    );
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-async function mostrarPainelAdmin(){
-
-  const user =
-    auth.currentUser;
-
-  if(!user){
-
-    mostrarLoginAdmin();
-
-    return;
-  }
-
-  document.getElementById(
-    "admin-login"
-  ).style.display = "none";
-
-  document.getElementById(
-    "admin-painel"
-  ).style.display = "block";
-
-  document.getElementById(
-    "admin-nome-painel"
-  ).textContent =
-    "Painel Admin 🛡️";
-
-  iniciarMonitorAdmin();
-
-  carregarInfoAdmin();
-
-}
-
-
-function iniciarMonitorAdmin(){
-
-  if(unsubscribeAdminPedidos){
-
-    unsubscribeAdminPedidos();
-
-    unsubscribeAdminPedidos = null;
-
-  }
-
-  unsubscribeAdminPedidos =
-    db
-      .collection("pedidos")
-      .onSnapshot(
-
-        snap => {
-
-          renderizarPedidos(
-            snap,
-            "a-pedidos",
-            "admin"
-          );
-
-        },
-
-        err => {
-
-          console.error(err);
-
-          const el =
-            document.getElementById("a-pedidos");
-
-          if(el){
-
-            el.innerHTML = `
-              <div style="
-                text-align:center;
-                color:#f87171;
-                padding:20px;">
-
-                Erro ao carregar pedidos.
-
-                <br><br>
-
-                ${escapeHTML(err.message)}
-
-              </div>
-            `;
-
-          }
-
-        }
-
-      );
-
-}
-
-
-async function logoutAdmin(){
-
-  try{
-
-    await auth.signOut();
-
-    if(unsubscribeAdminPedidos){
-
-      unsubscribeAdminPedidos();
-
-      unsubscribeAdminPedidos = null;
-
-    }
-
-    mostrarLoginAdmin();
-
-    toast(
-      "👋 Sessão terminada."
-    );
-
-  }catch(e){
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-async function recuperarSenhaAdmin(){
-
-  const email =
-    document.getElementById("a-email")
-    .value.trim();
-
-  if(!email){
-
-    toast(
-      "⚠️ Escreva o email no campo acima primeiro."
-    );
-
-    return;
-  }
-
-  try{
-
-    await auth.sendPasswordResetEmail(
-      email
-    );
-
-    toast(
-      "📧 Email de recuperação enviado!"
-    );
-
-  }catch(e){
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-/* ============================================================
-   RENDERIZAR PEDIDOS
-============================================================ */
-
-function renderizarPedidos(
-  snap,
-  elId,
-  tipo
-){
-
-  const el =
-    document.getElementById(elId);
-
-  if(!el) return;
-
-  if(snap.empty){
-
-    el.innerHTML = `
-      <div style="
-        text-align:center;
-        color:var(--muted);
-        padding:30px;">
-
-        Nenhum pedido no momento.
-
-      </div>
-    `;
-
-    return;
-  }
-
-  const docs = [];
-
-  snap.forEach(doc => {
-
-    docs.push({
-      id:doc.id,
-      ...doc.data()
-    });
-
-  });
-
-  docs.sort((a,b) => {
-
-    const ta =
-      a.dataCriacao &&
-      a.dataCriacao.toMillis
-        ? a.dataCriacao.toMillis()
-        : 0;
-
-    const tb =
-      b.dataCriacao &&
-      b.dataCriacao.toMillis
-        ? b.dataCriacao.toMillis()
-        : 0;
-
-    return tb - ta;
-
-  });
-
-  const user =
-    auth.currentUser;
-
-  let html = "";
-
-  docs.forEach(p => {
-
-    const estado =
-      p.estado || "Aguardando técnico";
-
-    let classeStatus =
-      "s-aguardando";
-
-    if(
-      estado === "Técnico a caminho" ||
-      estado === "Aceite"
-    ){
-
-      classeStatus =
-        "s-caminho";
-
-    }
-
-    if(
-      estado === "Concluído"
-    ){
-
-      classeStatus =
-        "s-concluido";
-
-    }
-
-    const zap =
-      String(p.telefone || "")
-      .replace(/[^0-9]/g,"");
-
-    let botoes = "";
-
-    /*
-      TÉCNICO
-    */
-
-    if(tipo === "tecnico"){
-
-      if(
-        estado === "Aguardando técnico" &&
-        (!p.tecnicoUid || p.tecnicoUid === "")
-      ){
-
-        botoes += `
-          <button
-            onclick="aceitarPedido('${escapeHTML(p.id)}')"
-            style="
-              margin-top:8px;
-              background:var(--accent);
-              border:none;
-              color:var(--bg);
-              padding:11px;
-              width:100%;
-              border-radius:8px;
-              font-weight:700;
-              cursor:pointer;
-              font-size:14px;">
-
-            ✅ Aceitar Pedido
-
-          </button>
-        `;
-
-      }
-
-      if(
-        p.tecnicoUid === (user ? user.uid : "")
-      ){
-
-        botoes += `
-          <a
-            href="https://wa.me/${formatarWhatsApp(zap)}?text=${encodeURIComponent("Olá! Sou o técnico da ODJIM Solution. Aceitei o seu pedido.")}"
-            target="_blank"
-            rel="noopener"
-            style="
-              display:block;
-              text-align:center;
-              background:#25D366;
-              color:white;
-              text-decoration:none;
-              padding:11px;
-              border-radius:8px;
-              font-weight:700;
-              font-size:13px;
-              margin-top:8px;">
-
-            💬 Contactar no WhatsApp
-
-          </a>
-
-          <button
-            onclick="concluirPedido('${escapeHTML(p.id)}')"
-            style="
-              margin-top:8px;
-              background:transparent;
-              border:1px solid rgba(34,197,94,.4);
-              color:#4ade80;
-              padding:10px;
-              width:100%;
-              border-radius:8px;
-              font-weight:700;
-              cursor:pointer;">
-
-            ✅ Marcar como Concluído
-
-          </button>
-        `;
-
-      }
-
-    }
-
-
-    /*
-      ADMIN
-    */
-
-    if(tipo === "admin"){
-
-      if(
-        estado === "Aguardando técnico"
-      ){
-
-        botoes += `
-          <button
-            onclick="aceitarPedido('${escapeHTML(p.id)}')"
-            style="
-              margin-top:8px;
-              background:var(--accent);
-              border:none;
-              color:var(--bg);
-              padding:11px;
-              width:100%;
-              border-radius:8px;
-              font-weight:700;
-              cursor:pointer;">
-
-            👨‍🔧 Atribuir / Aceitar
-
-          </button>
-        `;
-
-      }
-
-      if(p.telefone){
-
-        botoes += `
-          <a
-            href="https://wa.me/${formatarWhatsApp(zap)}?text=${encodeURIComponent("Olá! Contactamos da ODJIM Solution relativamente ao seu pedido.")}"
-            target="_blank"
-            rel="noopener"
-            style="
-              display:block;
-              text-align:center;
-              background:#25D366;
-              color:white;
-              text-decoration:none;
-              padding:11px;
-              border-radius:8px;
-              font-weight:700;
-              font-size:13px;
-              margin-top:8px;">
-
-            💬 WhatsApp
-
-          </a>
-        `;
-
-      }
-
-    }
-
-
-    /*
-      DATA
-    */
-
-    let dataTexto = "";
-
-    if(
-      p.dataCriacao &&
-      p.dataCriacao.toDate
-    ){
-
-      try{
-
-        dataTexto =
-          p.dataCriacao
-          .toDate()
-          .toLocaleString("pt-PT");
-
-      }catch(e){}
-
-    }
-
-
-    html += `
-
-      <div class="pedido-card">
-
-        <div class="pedido-top">
-
-          <span class="pedido-servico">
-
-            ${escapeHTML(p.servico || "Serviço")}
-
-          </span>
-
-          <span
-            class="badge-status ${classeStatus}">
-
-            ${escapeHTML(estado)}
-
-          </span>
-
-        </div>
-
-        <div class="pedido-info">
-
-          <p>
-            <strong>
-              ${escapeHTML(p.nome || "")}
-            </strong>
-            ·
-            ${escapeHTML(p.telefone || "")}
-          </p>
-
-          ${
-            p.email
-              ? `<p>✉️ ${escapeHTML(p.email)}</p>`
-              : ""
-          }
-
-          <p>
-            📍 ${escapeHTML(p.local || "")}
-          </p>
-
-          ${
-            p.descricao
-              ? `<p>📝 ${escapeHTML(p.descricao)}</p>`
-              : ""
-          }
-
-          ${
-            p.inicio
-              ? `<p>📅 ${escapeHTML(p.inicio)}
-                 ${p.fim ? " → " + escapeHTML(p.fim) : ""}
-                 </p>`
-              : ""
-          }
-
-          ${
-            p.tecnicoNome
-              ? `<p>👨‍🔧 Técnico: ${escapeHTML(p.tecnicoNome)}</p>`
-              : ""
-          }
-
-          ${
-            dataTexto
-              ? `<p style="font-size:11px;margin-top:5px;">
-                   🕒 ${escapeHTML(dataTexto)}
-                 </p>`
-              : ""
-          }
-
-        </div>
-
-        ${botoes}
-
-      </div>
-
-    `;
-
-  });
-
-  el.innerHTML = html;
-}
-
-
-/* ============================================================
-   WHATSAPP
-============================================================ */
-
-function formatarWhatsApp(numero){
-
-  if(!numero){
-    return "";
-  }
-
-  let n =
-    String(numero)
-    .replace(/[^0-9]/g,"");
-
-  /*
-    Angola:
-    923000000 -> 244923000000
-  */
-
-  if(n.startsWith("244")){
-    return n;
-  }
-
-  if(n.startsWith("0")){
-    n = n.substring(1);
-  }
-
-  return "244" + n;
-}
-
-
-/* ============================================================
-   ACEITAR PEDIDO
-============================================================ */
-
-async function aceitarPedido(id){
-
-  const user =
-    auth.currentUser;
-
-  if(!user){
-
-    toast(
-      "❌ Precisa estar autenticado."
-    );
-
-    return;
-  }
-
-  try{
-
-    const tecnicoDoc =
-      await db
-        .collection("tecnicos")
-        .doc(user.uid)
-        .get();
-
-    let tecnicoNome =
-      user.displayName || "Técnico";
-
-    if(tecnicoDoc.exists){
-
-      tecnicoNome =
-        tecnicoDoc.data().nome ||
-        tecnicoNome;
-
-    }
-
-    await db
-      .collection("pedidos")
-      .doc(id)
-      .update({
-
-        estado:"Técnico a caminho",
-
-        tecnicoUid:user.uid,
-
-        tecnicoNome:tecnicoNome,
-
-        atualizadoEm:
-          firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-    toast(
-      "✅ Pedido aceite com sucesso!"
-    );
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      "❌ Erro ao aceitar pedido: " +
-      (e.message || "")
-    );
-
-  }
-}
-
-
-/* ============================================================
-   CONCLUIR PEDIDO
-============================================================ */
-
-async function concluirPedido(id){
-
-  try{
-
-    await db
-      .collection("pedidos")
-      .doc(id)
-      .update({
-
-        estado:"Concluído",
-
-        concluidoEm:
-          firebase.firestore.FieldValue.serverTimestamp(),
-
-        atualizadoEm:
-          firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-    toast(
-      "✅ Pedido marcado como concluído!"
-    );
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      "❌ Erro: " +
-      (e.message || "")
-    );
-
-  }
-}
-
-
-/* ============================================================
-   TABS ADMIN
-============================================================ */
-
-function abrirTab(id,btn){
-
-  [
-    "tab-pedidos",
-    "tab-tecnicos",
-    "tab-cadastrar",
-    "tab-info"
-  ].forEach(t => {
-
-    const elemento =
-      document.getElementById(t);
-
-    if(elemento){
-      elemento.style.display = "none";
-    }
-
-  });
-
-  const alvo =
-    document.getElementById(id);
-
-  if(alvo){
-    alvo.style.display = "block";
-  }
-
-  document
-    .querySelectorAll(".tab")
-    .forEach(b =>
-      b.classList.remove("ativa")
-    );
-
-  if(btn){
-    btn.classList.add("ativa");
-  }
-
-  if(id === "tab-tecnicos"){
-
-    carregarTecnicos();
-
-  }
-
-  if(id === "tab-info"){
-
-    carregarInfoAdmin();
-
-  }
-}
-
-
-/* ============================================================
-   CADASTRAR TÉCNICO
-============================================================ */
-
-async function cadastrarTecnico(){
-
-  const nome =
-    document.getElementById("nt-nome")
-    .value.trim();
-
-  const email =
-    document.getElementById("nt-email")
-    .value.trim();
-
-  const tel =
-    document.getElementById("nt-tel")
-    .value.trim();
-
-  const esp =
-    document.getElementById("nt-esp")
-    .value;
-
-  const pass =
-    document.getElementById("nt-pass")
-    .value;
-
-  if(!nome || !email || !pass){
-
-    toast(
-      "⚠️ Preencha Nome, Email e Senha."
-    );
-
-    return;
-  }
-
-  if(pass.length < 6){
-
-    toast(
-      "⚠️ A senha deve ter pelo menos 6 caracteres."
-    );
-
-    return;
-  }
-
-  const adminAtual =
-    auth.currentUser;
-
-  if(!adminAtual){
-
-    toast(
-      "❌ Sessão administrativa expirada."
-    );
-
-    return;
-  }
-
-  if(!secondaryAuth){
-
-    toast(
-      "❌ Serviço de cadastro indisponível."
-    );
-
-    return;
-  }
-
-  try{
-
-    /*
-      CRIA O UTILIZADOR NA SEGUNDA INSTÂNCIA.
-
-      Assim o ADMIN NÃO perde a sessão.
-    */
-
-    const cred =
-      await secondaryAuth
-        .createUserWithEmailAndPassword(
-          email,
-          pass
-        );
-
-    const uid =
-      cred.user.uid;
-
-    await cred.user.updateProfile({
-      displayName:nome
-    });
-
-    /*
-      Cria perfil técnico.
-    */
-
-    await db
-      .collection("tecnicos")
-      .doc(uid)
-      .set({
-
-        uid:uid,
-
-        nome:nome,
-
-        email:email,
-
-        telefone:tel,
-
-        especialidade:esp,
-
-        role:"tecnico",
-
-        ativo:true,
-
-        criadoPor:adminAtual.uid,
-
-        criadoEm:
-          firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-    /*
-      Também cria utilizador central.
-    */
-
-    await db
-      .collection("utilizadores")
-      .doc(uid)
-      .set({
-
-        uid:uid,
-
-        nome:nome,
-
-        email:email,
-
-        role:"tecnico",
-
-        ativo:true,
-
-        criadoPor:adminAtual.uid,
-
-        criadoEm:
-          firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-    /*
-      Termina sessão da segunda instância.
-    */
-
-    await secondaryAuth.signOut();
-
-    [
-      "nt-nome",
-      "nt-email",
-      "nt-tel",
-      "nt-pass"
-    ].forEach(id => {
-
-      document.getElementById(id).value = "";
-
-    });
-
-    toast(
-      "✅ Técnico " +
-      nome +
-      " cadastrado com sucesso!"
-    );
-
-    carregarTecnicos();
-
-  }catch(e){
-
-    console.error(
-      "Erro ao cadastrar técnico:",
-      e
-    );
-
-    try{
-      await secondaryAuth.signOut();
-    }catch(x){}
-
-    toast(
-      mensagemErroFirebase(e)
-    );
-
-  }
-}
-
-
-/* ============================================================
-   CARREGAR TÉCNICOS
-============================================================ */
-
-async function carregarTecnicos(){
-
-  const el =
-    document.getElementById("a-tecnicos");
-
-  if(!el) return;
-
-  el.innerHTML = `
-    <div style="
-      text-align:center;
-      color:var(--muted);
-      padding:20px;">
-
-      A carregar técnicos...
-
-    </div>
-  `;
-
-  try{
-
-    const snap =
-      await db
-        .collection("tecnicos")
-        .get();
-
-    if(snap.empty){
-
-      el.innerHTML = `
-        <div style="
-          text-align:center;
-          color:var(--muted);
-          padding:20px;">
-
-          Nenhum técnico cadastrado.
-
-        </div>
-      `;
-
-      return;
-    }
-
-    let html = "";
-
-    snap.forEach(doc => {
-
-      const t =
-        doc.data();
-
-      const nome =
-        t.nome || "Sem nome";
-
-      const ini =
-        nome
-        .trim()
-        .charAt(0)
-        .toUpperCase() || "T";
-
-      html += `
-
-        <div class="tecnico-card">
-
-          <div class="tecnico-avatar">
-
-            ${escapeHTML(ini)}
-
-          </div>
-
-          <div class="tecnico-info">
-
-            <h4>
-              ${escapeHTML(nome)}
-            </h4>
-
-            <p>
-              ${escapeHTML(t.especialidade || "Sem especialidade")}
-              ·
-              ${escapeHTML(t.telefone || "Sem telefone")}
-            </p>
-
-            <p
-              style="
-                color:var(--muted);
-                font-size:11px;">
-
-              ${escapeHTML(t.email || "")}
-
-            </p>
-
-            <p
-              style="
-                color:${t.ativo === false ? "#ef4444" : "#4ade80"};
-                font-size:11px;
-                margin-top:5px;">
-
-              ${t.ativo === false ? "● Inativo" : "● Ativo"}
-
-            </p>
-
-          </div>
-
-        </div>
-
-      `;
-
-    });
-
-    el.innerHTML = html;
-
-  }catch(e){
-
-    console.error(e);
-
-    el.innerHTML = `
-
-      <div style="
-        text-align:center;
-        color:#f87171;
-        padding:20px;">
-
-        Erro ao carregar técnicos.
-
-        <br><br>
-
-        ${escapeHTML(e.message)}
-
-      </div>
-
-    `;
-
-  }
-}
-
-
-/* ============================================================
-   INFORMAÇÃO ADMIN
-============================================================ */
-
-async function carregarInfoAdmin(){
-
-  try{
-
-    const doc =
-      await db
-        .collection("config")
-        .doc("empresa")
-        .get();
-
-    if(!doc.exists) return;
-
-    const d =
-      doc.data();
-
-    document.getElementById(
-      "edit-titulo"
-    ).value =
-      d.titulo || "";
-
-    document.getElementById(
-      "edit-descricao"
-    ).value =
-      d.descricao || "";
-
-    document.getElementById(
-      "edit-sobre"
-    ).value =
-      d.sobre || "";
-
-    document.getElementById(
-      "edit-stat1"
-    ).value =
-      d.stat1 || "50+";
-
-  }catch(e){
-
-    console.warn(
-      "Não foi possível carregar informação:",
-      e
-    );
-
-  }
-}
-
 
 async function salvarInfo(){
-
-  const titulo =
-    document.getElementById(
-      "edit-titulo"
-    ).value.trim();
-
-  const descricao =
-    document.getElementById(
-      "edit-descricao"
-    ).value.trim();
-
-  const sobre =
-    document.getElementById(
-      "edit-sobre"
-    ).value.trim();
-
-  const stat1 =
-    document.getElementById(
-      "edit-stat1"
-    ).value.trim();
-
-  if(
-    !titulo &&
-    !descricao &&
-    !sobre &&
-    !stat1
-  ){
-
-    toast(
-      "⚠️ Preencha pelo menos um campo."
-    );
-
-    return;
-  }
-
+  const titulo=document.getElementById("edit-titulo").value.trim();
+  const descricao=document.getElementById("edit-descricao").value.trim();
+  const sobre=document.getElementById("edit-sobre").value.trim();
+  const stat1=document.getElementById("edit-stat1").value.trim();
+  if(!titulo&&!descricao&&!sobre){toast("⚠️ Preencha pelo menos um campo.");return;}
   try{
+    await db.collection("config").doc("empresa").set({titulo:titulo||"ODJIM Solution",descricao,sobre,stat1:stat1||"50+",atualizadoEm:new Date().toISOString()},{merge:true});
+    toast("✅ Informações guardadas!");
+    if(titulo)document.getElementById("info-titulo").textContent=titulo;
+    if(descricao)document.getElementById("info-descricao").textContent=descricao;
+    if(sobre)document.getElementById("info-sobre").textContent=sobre;
+    if(stat1)document.getElementById("info-stat1").textContent=stat1;
+  }catch(e){toast("❌ Erro ao guardar: "+e.message);}
+}
 
-    await db
-      .collection("config")
-      .doc("empresa")
-      .set({
+// ── TÉCNICO ──
+// Aguarda Firebase restaurar sessão
+function aguardarAuth(){
+  return new Promise(resolve=>{
+    if(auth.currentUser){resolve(auth.currentUser);return;}
+    const unsub=auth.onAuthStateChanged(user=>{unsub();resolve(user);});
+  });
+}
 
-        titulo:
-          titulo || "ODJIM Solution",
+async function verificarTecnico(){
+  const user=await aguardarAuth();
+  if(user){
+    // Verificar se é técnico no Firestore
+    const snap=await db.collection("tecnicos").where("email","==",user.email).get();
+    if(!snap.empty){
+      mostrarPainelTecnico();
+      return;
+    }
+  }
+  document.getElementById("tecnico-painel").style.display="none";
+  document.getElementById("tecnico-login").style.display="block";
+}
 
-        descricao:
-          descricao ||
-          "Tecnologia e Serviços ao seu Alcance.",
-
-        sobre:
-          sobre ||
-          "A ODJIM Solution é uma empresa angolana especializada em serviços.",
-
-        stat1:
-          stat1 || "50+",
-
-        atualizadoEm:
-          firebase.firestore.FieldValue.serverTimestamp(),
-
-        atualizadoPor:
-          auth.currentUser
-            ? auth.currentUser.uid
-            : ""
-
-      },{
-        merge:true
-      });
-
-    document.getElementById(
-      "info-titulo"
-    ).textContent =
-      titulo || "ODJIM Solution";
-
-    document.getElementById(
-      "info-descricao"
-    ).textContent =
-      descricao ||
-      "Tecnologia e Serviços ao seu Alcance.";
-
-    document.getElementById(
-      "info-sobre"
-    ).textContent =
-      sobre ||
-      "A ODJIM Solution é uma empresa angolana especializada em serviços.";
-
-    document.getElementById(
-      "info-stat1"
-    ).textContent =
-      stat1 || "50+";
-
-    toast(
-      "✅ Informações guardadas com sucesso!"
-    );
-
+async function loginTecnico(){
+  const email=document.getElementById("t-email").value.trim();
+  const pass=document.getElementById("t-pass").value;
+  if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
+  // Verificar se está no Firestore como técnico
+  try{
+    const snap=await db.collection("tecnicos").where("email","==",email).get();
+    if(snap.empty){toast("❌ Técnico não encontrado. Contacte o administrador.");return;}
+  }catch(e){toast("❌ Erro ao verificar: "+e.message);return;}
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
+    mostrarPainelTecnico();
+    toast("✅ Bem-vindo, Técnico!");
   }catch(e){
-
-    console.error(e);
-
-    toast(
-      "❌ Erro ao guardar: " +
-      (e.message || "")
-    );
-
+    if(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential"){
+      // Criar conta se não existe
+      try{
+        await auth.createUserWithEmailAndPassword(email,pass);
+        mostrarPainelTecnico();
+        toast("✅ Conta criada! Bem-vindo!");
+      }catch(e2){toast("❌ Erro: "+e2.message);}
+    } else if(e.code==="auth/wrong-password"){
+      toast("❌ Senha incorreta.");
+    } else {
+      toast("❌ Erro: "+e.message);
+    }
   }
 }
 
+function mostrarPainelTecnico(){
+  document.getElementById("tecnico-login").style.display="none";
+  document.getElementById("tecnico-painel").style.display="block";
+  monitorarPedidos("t-pedidos");
+}
 
-/* ============================================================
-   NOTIFICAÇÕES
-============================================================ */
+async function logoutTecnico(){
+  await auth.signOut();
+  document.getElementById("tecnico-painel").style.display="none";
+  document.getElementById("tecnico-login").style.display="block";
+  toast("👋 Sessão terminada.");
+}
+
+async function recuperarSenhaTecnico(){
+  const email=document.getElementById("t-email").value.trim();
+  if(!email){toast("⚠️ Escreva o email no campo acima primeiro.");return;}
+  try{await auth.sendPasswordResetEmail(email);toast("📧 Email de recuperação enviado!");}
+  catch(e){toast("❌ Erro: "+e.message);}
+}
+
+// ── ADMIN ──
+async function verificarAdmin(){
+  const user=await aguardarAuth();
+  if(user){
+    const adminEmail=localStorage.getItem("odjim_admin_email");
+    if(adminEmail && user.email===adminEmail){
+      mostrarPainelAdmin();
+      return;
+    }
+  }
+  document.getElementById("admin-login").style.display="block";
+  document.getElementById("admin-painel").style.display="none";
+}
+
+async function loginAdmin(){
+  const email=document.getElementById("a-email").value.trim();
+  const pass=document.getElementById("a-pass").value;
+  if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
+    localStorage.setItem("odjim_admin_email",email);
+    mostrarPainelAdmin();
+    toast("✅ Bem-vindo, Admin!");
+  }catch(e){
+    if(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential")toast("❌ Senha incorreta.");
+    else if(e.code==="auth/user-not-found")toast("❌ Email não encontrado.");
+    else toast("❌ Erro: "+e.message);
+  }
+}
+
+function mostrarPainelAdmin(){
+  document.getElementById("admin-login").style.display="none";
+  document.getElementById("admin-painel").style.display="block";
+  monitorarPedidos("a-pedidos");
+  carregarTecnicos();
+  db.collection("config").doc("empresa").get().then(doc=>{
+    if(doc.exists){
+      const d=doc.data();
+      if(d.titulo)document.getElementById("edit-titulo").value=d.titulo;
+      if(d.descricao)document.getElementById("edit-descricao").value=d.descricao;
+      if(d.sobre)document.getElementById("edit-sobre").value=d.sobre;
+      if(d.stat1)document.getElementById("edit-stat1").value=d.stat1;
+    }
+  }).catch(()=>{});
+}
+
+async function logoutAdmin(){
+  await auth.signOut();
+  localStorage.removeItem("odjim_admin_email");
+  document.getElementById("admin-painel").style.display="none";
+  document.getElementById("admin-login").style.display="block";
+  toast("👋 Sessão terminada.");
+}
+
+async function recuperarSenhaAdmin(){
+  const email=document.getElementById("a-email").value.trim();
+  if(!email){toast("⚠️ Escreva o email no campo acima primeiro.");return;}
+  try{await auth.sendPasswordResetEmail(email);toast("📧 Email de recuperação enviado!");}
+  catch(e){toast("❌ Erro: "+e.message);}
+}
+
+function abrirTab(id,btn){
+  ["tab-pedidos","tab-tecnicos","tab-cadastrar","tab-info"].forEach(t=>document.getElementById(t).style.display="none");
+  document.getElementById(id).style.display="block";
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("ativa"));
+  btn.classList.add("ativa");
+  if(id==="tab-tecnicos")carregarTecnicos();
+}
+
+// ── CADASTRAR TÉCNICO (sem criar conta Auth - evita logout do Admin) ──
+async function cadastrarTecnico(){
+  const nome=document.getElementById("nt-nome").value.trim();
+  const email=document.getElementById("nt-email").value.trim();
+  const tel=document.getElementById("nt-tel").value.trim();
+  const esp=document.getElementById("nt-esp").value;
+  if(!nome||!email){toast("⚠️ Preencha Nome e Email.");return;}
+  try{
+    // Verificar duplicados
+    const existe=await db.collection("tecnicos").where("email","==",email).get();
+    if(!existe.empty){toast("⚠️ Técnico com este email já existe!");return;}
+    // Guardar no Firestore sem criar conta Auth (evita logout do Admin)
+    await db.collection("tecnicos").add({
+      nome,email,telefone:tel,especialidade:esp,
+      ativo:true,criadoEm:new Date().toISOString()
+    });
+    toast("✅ Técnico "+nome+" cadastrado com sucesso!");
+    ["nt-nome","nt-email","nt-tel"].forEach(id=>document.getElementById(id).value="");
+    carregarTecnicos();
+  }catch(e){toast("❌ Erro: "+e.message);}
+}
+
+// ── CARREGAR TÉCNICOS (tempo real) ──
+function carregarTecnicos(){
+  const el=document.getElementById("a-tecnicos");
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
+  db.collection("tecnicos").onSnapshot(snap=>{
+    if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>';return;}
+    let html="";
+    snap.forEach(d=>{
+      const t=d.data();
+      const ini=t.nome?t.nome[0].toUpperCase():"T";
+      html+=`<div class="tecnico-card">
+        <div class="tecnico-avatar">${ini}</div>
+        <div class="tecnico-info">
+          <h4>${t.nome||"Sem nome"}</h4>
+          <p>${t.especialidade||""} · ${t.telefone||""}</p>
+          <p style="color:var(--muted);font-size:11px;">${t.email||""}</p>
+        </div>
+      </div>`;
+    });
+    el.innerHTML=html;
+  },e=>{el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';});
+}
+
+// ── MONITORAR PEDIDOS (tempo real) ──
+function monitorarPedidos(elId){
+  db.collection("pedidos").onSnapshot(snap=>{
+    const el=document.getElementById(elId);
+    if(!el)return;
+    if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>';return;}
+    const docs=[];
+    snap.forEach(d=>docs.push({id:d.id,...d.data()}));
+    docs.sort((a,b)=>new Date(b.dataCriacao||0)-new Date(a.dataCriacao||0));
+    let html="";
+    docs.forEach(p=>{
+      const sc=p.estado==="Aguardando técnico"?"s-aguardando":"s-caminho";
+      const zap=(p.telefone||"").replace(/[^0-9]/g,"");
+      const btn=p.estado==="Aguardando técnico"
+        ?`<button onclick="aceitarPedido('${p.id}')" style="margin-top:8px;background:var(--accent);border:none;color:var(--bg);padding:11px;width:100%;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">✅ Aceitar Pedido</button>`
+        :`<a href="https://wa.me/244${zap}?text=Olá! Aceitei o seu pedido no ODJIM Solution." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:11px;border-radius:8px;font-weight:700;font-size:13px;margin-top:8px;">💬 Contactar no WhatsApp</a>`;
+      html+=`<div class="pedido-card">
+        <div class="pedido-top">
+          <span class="pedido-servico">${p.servico||""}</span>
+          <span class="badge-status ${sc}">${p.estado||""}</span>
+        </div>
+        <div class="pedido-info">
+          <p><strong>${p.nome||""}</strong> · ${p.telefone||""}</p>
+          <p>📍 ${p.local||""}</p>
+          ${p.descricao?`<p>📝 ${p.descricao}</p>`:""}
+          ${p.inicio?`<p>📅 ${p.inicio} → ${p.fim}</p>`:""}
+        </div>
+        ${btn}
+      </div>`;
+    });
+    el.innerHTML=html;
+  },err=>{
+    const el=document.getElementById(elId);
+    if(el)el.innerHTML=`<div style="text-align:center;color:#f87171;padding:20px;">Erro: ${err.message}</div>`;
+  });
+}
+
+async function aceitarPedido(id){
+  try{
+    await db.collection("pedidos").doc(id).update({estado:"Técnico a caminho"});
+    toast("✅ Pedido aceite com sucesso!");
+  }catch(e){toast("❌ Erro ao aceitar pedido: "+e.message);}
+}
 
 async function ativarNotificacoes(){
-
-  if(!("Notification" in window)){
-
-    toast(
-      "❌ Este navegador não suporta notificações."
-    );
-
-    return;
-  }
-
-  if(
-    !("serviceWorker" in navigator)
-  ){
-
-    toast(
-      "❌ Este navegador não suporta Service Worker."
-    );
-
-    return;
-  }
-
+  if(!("Notification" in window)){toast("❌ Este browser não suporta notificações.");return;}
   try{
-
-    const perm =
-      await Notification.requestPermission();
-
-    if(perm !== "granted"){
-
-      toast(
-        "🔕 Notificações não foram autorizadas."
-      );
-
-      return;
-    }
-
-    /*
-      Regista o Service Worker.
-    */
-
-    let registration = null;
-
-    try{
-
-      registration =
-        await navigator.serviceWorker.register(
-          "firebase-messaging-sw.js"
-        );
-
-      console.log(
-        "Service Worker registado:",
-        registration
-      );
-
-    }catch(swError){
-
-      console.warn(
-        "Service Worker ainda não configurado:",
-        swError
-      );
-
-      toast(
-        "🔔 Permissão ativada. O Firebase Messaging será configurado na próxima etapa."
-      );
-
-      return;
-    }
-
-    /*
-      O token FCM depende da VAPID KEY.
-
-      NÃO inventamos uma VAPID KEY.
-
-      Vamos colocá-la na próxima etapa do Firebase.
-    */
-
-    if(!messaging){
-
-      toast(
-        "🔔 Permissão ativada. Firebase Messaging será finalizado na configuração Firebase."
-      );
-
-      return;
-    }
-
-    toast(
-      "🔔 Notificações autorizadas!"
-    );
-
-  }catch(e){
-
-    console.error(e);
-
-    toast(
-      "❌ Erro ao ativar notificações."
-    );
-
-  }
+    const perm=await Notification.requestPermission();
+    if(perm==="granted")toast("🔔 Notificações ativadas com sucesso!");
+    else toast("🔕 Notificações bloqueadas. Ative nas definições do browser.");
+  }catch(e){toast("❌ Erro ao ativar notificações.");}
 }
-
-
-/* ============================================================
-   PARAR LISTENERS
-============================================================ */
-
-function pararListeners(){
-
-  if(unsubscribeTecnicoPedidos){
-
-    unsubscribeTecnicoPedidos();
-
-    unsubscribeTecnicoPedidos = null;
-
-  }
-
-  if(unsubscribeAdminPedidos){
-
-    unsubscribeAdminPedidos();
-
-    unsubscribeAdminPedidos = null;
-
-  }
-
-}
-
-
-/* ============================================================
-   RESTAURAR SESSÃO
-============================================================ */
-
-auth.onAuthStateChanged(async user => {
-
-  console.log(
-    "Firebase Auth:",
-    user
-      ? user.email
-      : "Nenhum utilizador autenticado"
-  );
-
-});
-
-
-/* ============================================================
-   SERVICE WORKER
-============================================================ */
-
-if("serviceWorker" in navigator){
-
-  window.addEventListener(
-    "load",
-    () => {
-
-      navigator.serviceWorker
-        .register("firebase-messaging-sw.js")
-        .then(reg => {
-
-          console.log(
-            "Service Worker registado:",
-            reg.scope
-          );
-
-        })
-        .catch(err => {
-
-          /*
-            Não bloqueia a aplicação.
-
-            O Service Worker será configurado
-            corretamente na etapa Firebase/FCM.
-          */
-
-          console.warn(
-            "Service Worker ainda não disponível:",
-            err
-          );
-
-        });
-
-    }
-  );
-
-}
-
-
-/* ============================================================
-   FECHAR MODAL AO CLICAR FORA
-============================================================ */
-
-document
-  .getElementById("modal-cadastro")
-  .addEventListener("click", function(e){
-
-    if(e.target === this){
-
-      this.classList.remove("aberto");
-
-    }
-
-  });
-
-
-/* ============================================================
-   INICIALIZAÇÃO
-============================================================ */
-
-console.log(
-  "ODJIM Solution iniciado."
-);
-
-console.log(
-  "Firebase Project:",
-  firebaseConfig.projectId
-);
-
 </script>
-
 </body>
 </html>
