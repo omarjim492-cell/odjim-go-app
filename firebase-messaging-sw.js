@@ -1,6 +1,22 @@
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
 
+// Versão 2 - força limpeza de cache
+const CACHE_VERSION = "v2";
+
+self.addEventListener("install", e => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => caches.delete(key)))
+    )
+  );
+  return self.clients.claim();
+});
+
 firebase.initializeApp({
   apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
   authDomain: "odjim-solution.firebaseapp.com",
@@ -13,10 +29,10 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-  const { title, body, icon } = payload.notification || {};
+  const { title, body } = payload.notification || {};
   self.registration.showNotification(title || "ODJIM Solution", {
     body: body || "Tens uma nova atualização.",
-    icon: icon || "/icon-192.png",
+    icon: "/icon-192.png",
     vibrate: [200, 100, 200]
   });
 });
@@ -24,11 +40,9 @@ messaging.onBackgroundMessage(function(payload) {
 self.addEventListener("notificationclick", function(event) {
   event.notification.close();
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then(function(clientList) {
+    clients.matchAll({ type: "window" }).then(function(clientList) {
       for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && "focus" in client) {
-          return client.focus();
-        }
+        if ("focus" in client) return client.focus();
       }
       if (clients.openWindow) return clients.openWindow("/");
     })
