@@ -198,8 +198,8 @@ select option{background:#1e293b;}
     <div style="background:linear-gradient(135deg,#1a0a00,#2d1500,#0f172a);border:1px solid rgba(255,152,0,0.3);border-radius:20px;padding:28px 20px;text-align:center;position:relative;overflow:hidden;" class="fade-up">
       <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,152,0,0.2),transparent);border-radius:50%;"></div>
       <div style="position:absolute;bottom:-30px;left:-30px;width:150px;height:150px;background:radial-gradient(circle,rgba(255,87,34,0.15),transparent);border-radius:50%;"></div>
-      <div style="font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">🇦🇴 LUANDA, ANGOLA</div>
       <div id="info-titulo" style="font-size:34px;font-weight:800;letter-spacing:-1px;background:linear-gradient(to right,#ff9800,#ff5722,#ff9800);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s infinite;">ODJIM Solution</div>
+      <div style="font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-top:6px;">🇦🇴 LUANDA, ANGOLA</div>
       <p id="info-descricao" style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.7;max-width:320px;margin-left:auto;margin-right:auto;">A sua plataforma de confiança para serviços técnicos e domésticos. Rápido, seguro e profissional.</p>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
         <span style="background:rgba(255,152,0,0.15);border:1px solid rgba(255,152,0,0.3);color:var(--accent);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;">✅ Verificados</span>
@@ -405,6 +405,7 @@ select option{background:#1e293b;}
           <div class="form-group"><label>Especialidade</label>
             <select id="nt-esp"><option>Informática</option><option>Redes</option><option>CCTV</option><option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option><option>Pintura</option><option>Limpeza</option><option>Design gráfico</option></select>
           </div>
+          <div class="form-group"><label>Senha Inicial</label><input id="nt-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
           <button class="btn btn-primary" onclick="cadastrarTecnico()">✅ Cadastrar Técnico</button>
         </div>
       </div>
@@ -643,23 +644,34 @@ async function loginTecnico(){
   const email=document.getElementById("t-email").value.trim();
   const pass=document.getElementById("t-pass").value;
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
-  // Verificar se está no Firestore como técnico
   try{
-    const snap=await db.collection("tecnicos").where("email","==",email).get();
-    if(snap.empty){toast("❌ Técnico não encontrado. Contacte o administrador.");return;}
-  }catch(e){toast("❌ Erro ao verificar: "+e.message);return;}
-  try{
+    // Tenta fazer login directamente
     await auth.signInWithEmailAndPassword(email,pass);
+    // Verifica se é técnico no Firestore
+    const snap=await db.collection("tecnicos").where("email","==",email).get();
+    if(snap.empty){
+      await auth.signOut();
+      toast("❌ Não tem permissão de técnico. Contacte o administrador.");
+      return;
+    }
     mostrarPainelTecnico();
     toast("✅ Bem-vindo, Técnico!");
   }catch(e){
     if(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential"){
-      // Criar conta se não existe
+      // Verificar se existe no Firestore e criar conta Auth
       try{
+        const snap=await db.collection("tecnicos").where("email","==",email).get();
+        if(snap.empty){toast("❌ Técnico não encontrado. Contacte o administrador.");return;}
         await auth.createUserWithEmailAndPassword(email,pass);
         mostrarPainelTecnico();
         toast("✅ Conta criada! Bem-vindo!");
-      }catch(e2){toast("❌ Erro: "+e2.message);}
+      }catch(e2){
+        if(e2.code==="auth/email-already-in-use"){
+          toast("❌ Senha incorreta.");
+        } else {
+          toast("❌ Erro: "+e2.message);
+        }
+      }
     } else if(e.code==="auth/wrong-password"){
       toast("❌ Senha incorreta.");
     } else {
@@ -860,7 +872,9 @@ async function ativarNotificacoes(){
 function abrirPerfil(){
   const user = auth.currentUser;
   if(!user){toast("⚠️ Precisa de fazer login primeiro.");return;}
-  document.getElementById("modal-perfil").classList.add("aberto");
+  const modal = document.getElementById("modal-perfil");
+  if(!modal){toast("⚠️ Faça login como Cliente primeiro.");return;}
+  modal.classList.add("aberto");
   // Carregar dados do perfil
   db.collection("clientes").doc(user.uid).get().then(doc=>{
     const nome = user.displayName || "";
@@ -931,4 +945,4 @@ function carregarStatsReais(){
 }
 </script>
 </body>
-</html> 
+</html>
