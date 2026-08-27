@@ -2,6 +2,9 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ODJIM Solution</title>
 <link rel="manifest" href="manifest.json">
@@ -56,14 +59,7 @@ body{background:radial-gradient(circle at top right,#1e1b4b,var(--bg));color:var
 .servicos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 @keyframes pulseServ{0%,100%{transform:scale(1)}50%{transform:scale(1.04);box-shadow:0 4px 16px rgba(255,152,0,0.18)}}
 .servico-item{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px;transition:var(--tr);animation:pulseServ 3s ease-in-out infinite;}
-.servico-item:nth-child(2){animation-delay:0.3s;}
-.servico-item:nth-child(3){animation-delay:0.6s;}
-.servico-item:nth-child(4){animation-delay:0.9s;}
-.servico-item:nth-child(5){animation-delay:1.2s;}
-.servico-item:nth-child(6){animation-delay:1.5s;}
-.servico-item:nth-child(7){animation-delay:1.8s;}
-.servico-item:nth-child(8){animation-delay:2.1s;}
-.servico-item:nth-child(9){animation-delay:2.4s;}
+.servico-item:nth-child(2){animation-delay:0.3s;}.servico-item:nth-child(3){animation-delay:0.6s;}.servico-item:nth-child(4){animation-delay:0.9s;}.servico-item:nth-child(5){animation-delay:1.2s;}.servico-item:nth-child(6){animation-delay:1.5s;}.servico-item:nth-child(7){animation-delay:1.8s;}.servico-item:nth-child(8){animation-delay:2.1s;}.servico-item:nth-child(9){animation-delay:2.4s;}
 .servico-item:hover{border-color:var(--accent);color:var(--text);background:rgba(255,152,0,0.08);}
 .servico-item .ico{font-size:26px;}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
@@ -124,6 +120,16 @@ select option{background:#1e293b;}
 .modal-tabs{display:flex;gap:6px;margin-bottom:20px;}
 .modal-tab{flex:1;padding:10px;border:none;background:rgba(255,255,255,0.04);color:var(--muted);font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:var(--tr);}
 .modal-tab.ativa{background:var(--accent);color:var(--bg);}
+
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+.servico-detalhe{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:var(--tr);}
+.servico-detalhe:hover{border-color:var(--accent);background:rgba(255,152,0,0.05);}
+.servico-header{display:flex;align-items:center;gap:12px;padding:14px 16px;font-size:15px;font-weight:600;}
+.servico-header span:first-child{font-size:22px;}
+.servico-header .seta{margin-left:auto;color:var(--muted);font-size:18px;transition:transform 0.3s;}
+.servico-body{display:none;padding:0 16px 14px;font-size:13px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);}
+.servico-detalhe.aberto .seta{transform:rotate(90deg);}
+.servico-detalhe.aberto .servico-body{display:block;}
 </style>
 </head>
 <body>
@@ -181,35 +187,112 @@ select option{background:#1e293b;}
   <div class="topbar">
     <button class="back" onclick="voltar()">‹</button>
     <h2>ODJIM Solution</h2>
-    <span class="badge" id="badge-cliente">Cliente</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="abrirPerfil()" style="background:rgba(255,152,0,0.15);border:1px solid rgba(255,152,0,0.3);color:var(--accent);padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;">👤 Perfil</button>
+      <span class="badge" id="badge-cliente">Cliente</span>
+    </div>
   </div>
   <div class="conteudo">
-    <div class="hero-odjim fade-up">
-      <div class="logo-big" id="info-titulo">ODJIM Solution</div>
-      <p id="info-descricao">A sua plataforma de confiança para serviços técnicos e domésticos em Luanda. Rápido, seguro e profissional.</p>
-    </div>
-    <div class="stats fade-up">
-      <div class="stat"><div class="num" id="info-stat1">50+</div><div class="lab">Técnicos</div></div>
-      <div class="stat"><div class="num">98%</div><div class="lab">Satisfação</div></div>
-      <div class="stat"><div class="num">24h</div><div class="lab">Disponível</div></div>
-    </div>
-    <div class="card fade-up">
-      <h3>O que Oferecemos</h3>
-      <div class="servicos-grid">
-        <div class="servico-item"><span class="ico">💻</span>Informática</div>
-        <div class="servico-item"><span class="ico">📡</span>Redes</div>
-        <div class="servico-item"><span class="ico">📹</span>CCTV</div>
-        <div class="servico-item"><span class="ico">⚡</span>Electricidade</div>
-        <div class="servico-item"><span class="ico">❄️</span>Ar Cond.</div>
-        <div class="servico-item"><span class="ico">🔧</span>Canalização</div>
-        <div class="servico-item"><span class="ico">🎨</span>Pintura</div>
-        <div class="servico-item"><span class="ico">🧹</span>Limpeza</div>
-        <div class="servico-item"><span class="ico">🎭</span>Design</div>
+
+    <!-- HERO VIBRANTE -->
+    <div style="background:linear-gradient(135deg,#1a0a00,#2d1500,#0f172a);border:1px solid rgba(255,152,0,0.3);border-radius:20px;padding:28px 20px;text-align:center;position:relative;overflow:hidden;" class="fade-up">
+      <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,152,0,0.2),transparent);border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-30px;left:-30px;width:150px;height:150px;background:radial-gradient(circle,rgba(255,87,34,0.15),transparent);border-radius:50%;"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">🇦🇴 LUANDA, ANGOLA</div>
+      <div id="info-titulo" style="font-size:34px;font-weight:800;letter-spacing:-1px;background:linear-gradient(to right,#ff9800,#ff5722,#ff9800);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s infinite;">ODJIM Solution</div>
+      <p id="info-descricao" style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.7;max-width:320px;margin-left:auto;margin-right:auto;">A sua plataforma de confiança para serviços técnicos e domésticos. Rápido, seguro e profissional.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+        <span style="background:rgba(255,152,0,0.15);border:1px solid rgba(255,152,0,0.3);color:var(--accent);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;">✅ Verificados</span>
+        <span style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#4ade80;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;">🟢 Online 24h</span>
+        <span style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;">🔒 Seguro</span>
       </div>
     </div>
+
+    <!-- STATS DINÂMICOS -->
+    <div class="stats fade-up">
+      <div class="stat" style="background:linear-gradient(135deg,rgba(255,152,0,0.1),rgba(255,87,34,0.05));border-color:rgba(255,152,0,0.2);">
+        <div class="num" id="info-stat1" style="font-size:28px;">-</div>
+        <div class="lab">Técnicos</div>
+      </div>
+      <div class="stat" style="background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(16,185,129,0.05));border-color:rgba(34,197,94,0.2);">
+        <div class="num" id="stat-pedidos" style="color:#4ade80;font-size:28px;">-</div>
+        <div class="lab">Pedidos</div>
+      </div>
+      <div class="stat" style="background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(99,102,241,0.05));border-color:rgba(59,130,246,0.2);">
+        <div class="num" style="color:#60a5fa;font-size:28px;">24h</div>
+        <div class="lab">Disponível</div>
+      </div>
+    </div>
+
+    <!-- SERVIÇOS COM DETALHES -->
     <div class="card fade-up">
-      <h3>Sobre a ODJIM</h3>
-      <p id="info-sobre" style="font-size:14px;color:var(--muted);line-height:1.7;">A <strong style="color:var(--text)">ODJIM Solution</strong> é uma empresa angolana especializada em conectar clientes com técnicos qualificados. A nossa missão é garantir que cada angolano tenha acesso rápido e seguro a profissionais de confiança, com total transparência e qualidade garantida.</p>
+      <h3>🛠️ Os Nossos Serviços</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;" id="lista-servicos">
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>💻</span><span>Informática e Tecnologia</span><span class="seta">›</span></div>
+          <div class="servico-body">Reparação de computadores, instalação de sistemas, recuperação de dados, configuração de redes WiFi e suporte técnico geral.<br><span style="color:var(--accent);font-weight:700;">A partir de 3.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>📡</span><span>Redes e Telecomunicações</span><span class="seta">›</span></div>
+          <div class="servico-body">Instalação e configuração de redes LAN/WiFi, cabos estruturados, roteadores e switches para empresas e residências.<br><span style="color:var(--accent);font-weight:700;">A partir de 5.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>📹</span><span>CCTV e Segurança</span><span class="seta">›</span></div>
+          <div class="servico-body">Instalação de câmeras de vigilância, sistemas de alarme, controlo de acesso e monitorização remota 24h.<br><span style="color:var(--accent);font-weight:700;">A partir de 15.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>⚡</span><span>Electricidade</span><span class="seta">›</span></div>
+          <div class="servico-body">Instalações eléctricas, reparações, quadros eléctricos, tomadas, iluminação LED e certificações.<br><span style="color:var(--accent);font-weight:700;">A partir de 4.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>❄️</span><span>Ar Condicionado</span><span class="seta">›</span></div>
+          <div class="servico-body">Instalação, manutenção e reparação de ar condicionado split, central e industrial. Limpeza de filtros incluída.<br><span style="color:var(--accent);font-weight:700;">A partir de 8.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>🔧</span><span>Canalização e Águas</span><span class="seta">›</span></div>
+          <div class="servico-body">Reparação de fugas, instalação de canos, desentupimentos, torneiras e sistemas de água quente.<br><span style="color:var(--accent);font-weight:700;">A partir de 3.500 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>🎨</span><span>Pintura e Decoração</span><span class="seta">›</span></div>
+          <div class="servico-body">Pintura interior e exterior, texturizados, murais artísticos e acabamentos de qualidade.<br><span style="color:var(--accent);font-weight:700;">A partir de 6.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>🧹</span><span>Limpeza Profissional</span><span class="seta">›</span></div>
+          <div class="servico-body">Limpeza residencial e empresarial, limpeza pós-obra, higienização de estofos e tapetes.<br><span style="color:var(--accent);font-weight:700;">A partir de 5.000 Kz</span></div>
+        </div>
+        <div class="servico-detalhe" onclick="toggleServico(this)">
+          <div class="servico-header"><span>🎭</span><span>Design Gráfico e Digital</span><span class="seta">›</span></div>
+          <div class="servico-body">Logótipos, cartazes, posts para redes sociais, websites e identidade visual para o seu negócio.<br><span style="color:var(--accent);font-weight:700;">A partir de 10.000 Kz</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOBRE A ODJIM -->
+    <div style="background:linear-gradient(135deg,rgba(30,41,59,0.8),rgba(15,23,42,0.9));border:1px solid var(--border);border-radius:var(--radius);padding:24px;" class="fade-up">
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:16px;color:var(--accent);">🏢 Sobre a ODJIM Solution</h3>
+      <p id="info-sobre" style="font-size:14px;color:var(--muted);line-height:1.8;">A <strong style="color:var(--text)">ODJIM Solution</strong> nasceu em Luanda com a missão de digitalizar o acesso a serviços técnicos e domésticos em Angola. Conectamos clientes a técnicos verificados e qualificados, garantindo rapidez, transparência e qualidade em cada serviço.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+        <div style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.2);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">🎯</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Missão</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Facilitar o acesso a serviços de qualidade</div>
+        </div>
+        <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">👁️</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Visão</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Ser a referência em serviços em Angola</div>
+        </div>
+        <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">💎</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Valores</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Qualidade, confiança e inovação</div>
+        </div>
+        <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">📍</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);">Localização</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Luanda, Angola</div>
+        </div>
+      </div>
     </div>
     <div class="card fade-up">
       <h3>Solicitar Serviço</h3>
@@ -322,7 +405,6 @@ select option{background:#1e293b;}
           <div class="form-group"><label>Especialidade</label>
             <select id="nt-esp"><option>Informática</option><option>Redes</option><option>CCTV</option><option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option><option>Pintura</option><option>Limpeza</option><option>Design gráfico</option></select>
           </div>
-          <div class="form-group"><label>Senha Inicial</label><input id="nt-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
           <button class="btn btn-primary" onclick="cadastrarTecnico()">✅ Cadastrar Técnico</button>
         </div>
       </div>
@@ -339,22 +421,25 @@ select option{background:#1e293b;}
     </div>
   </div>
 </div>
+
 <script>
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("firebase-messaging-sw.js").catch(e=>console.log(e));
 }
 
+// ── TOAST ──
 function toast(msg,dur=4000){
   const t=document.getElementById("toast");
   t.textContent=msg;t.style.display="block";
   setTimeout(()=>t.style.display="none",dur);
 }
 
+// ── NAVEGAÇÃO ──
 function irPara(tela){
   document.getElementById("splash").style.display="none";
   document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
   document.getElementById("tela-"+tela).classList.add("ativa");
-  if(tela==="cliente"){initMap();carregarInfoEmpresa();}
+  if(tela==="cliente"){initMap();carregarInfoEmpresa();carregarStatsReais();}
   if(tela==="tecnico")verificarTecnico();
   if(tela==="admin")verificarAdmin();
 }
@@ -380,6 +465,7 @@ function modalTab(tab){
   document.querySelectorAll(".modal-tab").forEach((b,i)=>b.classList.toggle("ativa",(i===0&&tab==="login")||(i===1&&tab==="registo")));
 }
 
+// ── CLIENTE ──
 async function loginCliente(){
   const email=document.getElementById("cl-email").value.trim();
   const pass=document.getElementById("cl-pass").value;
@@ -391,7 +477,7 @@ async function loginCliente(){
     document.getElementById("badge-cliente").textContent=cred.user.displayName||"Cliente";
     toast("✅ Bem-vindo de volta!");
   }catch(e){
-    if(e.code==="auth/user-not-found")toast("❌ Email não encontrado.");
+    if(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential")toast("❌ Email ou senha incorretos.");
     else if(e.code==="auth/wrong-password")toast("❌ Senha incorreta.");
     else toast("❌ Erro: "+e.message);
   }
@@ -434,6 +520,7 @@ async function recuperarSenhaCliente(){
 
 async function logoutCliente(){await auth.signOut();voltar();toast("👋 Sessão terminada.");}
 
+// ── MAPA ──
 let map,marker;
 function initMap(){
   if(map){setTimeout(()=>map.invalidateSize(),300);return;}
@@ -448,6 +535,7 @@ function initMap(){
   },400);
 }
 
+// ── PEDIDO ──
 async function enviarPedido(){
   const nome=document.getElementById("c-nome").value.trim();
   const tel=document.getElementById("c-tel").value.trim();
@@ -471,6 +559,7 @@ async function enviarPedido(){
   }catch(e){toast("❌ Erro ao enviar pedido: "+e.message);}
 }
 
+// ── INQUÉRITO ──
 let avaliacaoAtual=null;
 function avaliar(btn,nota,emoji,label){
   document.querySelectorAll(".emoji-btn").forEach(b=>b.classList.remove("sel"));
@@ -488,13 +577,7 @@ async function enviarAvaliacao(){
       comentario:document.getElementById("av-comentario").value,
       data:new Date().toISOString()
     });
-    const msgs={
-      1:"Lamentamos! Vamos melhorar. 🙏",
-      2:"Obrigado pelo feedback! Melhoraremos. 💪",
-      3:"Obrigado! Continuamos a crescer. 🌱",
-      4:"Fico feliz que gostou! 😊",
-      5:"Uau! O seu apoio motiva-nos! 🚀"
-    };
+    const msgs={1:"Lamentamos! Vamos melhorar. 🙏",2:"Obrigado! Melhoraremos. 💪",3:"Obrigado! Continuamos a crescer. 🌱",4:"Fico feliz que gostou! 😊",5:"Uau! O seu apoio motiva-nos! 🚀"};
     document.getElementById("feedback-em").textContent=avaliacaoAtual.emoji;
     document.getElementById("feedback-msg").textContent=msgs[avaliacaoAtual.nota];
     document.getElementById("inq-comentario").style.display="none";
@@ -504,6 +587,7 @@ async function enviarAvaliacao(){
   }catch(e){toast("❌ Erro ao enviar avaliação: "+e.message);}
 }
 
+// ── INFO EMPRESA ──
 function carregarInfoEmpresa(){
   db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
@@ -523,56 +607,64 @@ async function salvarInfo(){
   const stat1=document.getElementById("edit-stat1").value.trim();
   if(!titulo&&!descricao&&!sobre){toast("⚠️ Preencha pelo menos um campo.");return;}
   try{
-    await db.collection("config").doc("empresa").set({
-      titulo:titulo||"ODJIM Solution",
-      descricao,sobre,stat1:stat1||"50+",
-      atualizadoEm:new Date().toISOString()
-    },{merge:true});
-    toast("✅ Informações guardadas com sucesso!");
+    await db.collection("config").doc("empresa").set({titulo:titulo||"ODJIM Solution",descricao,sobre,stat1:stat1||"50+",atualizadoEm:new Date().toISOString()},{merge:true});
+    toast("✅ Informações guardadas!");
     if(titulo)document.getElementById("info-titulo").textContent=titulo;
     if(descricao)document.getElementById("info-descricao").textContent=descricao;
     if(sobre)document.getElementById("info-sobre").textContent=sobre;
     if(stat1)document.getElementById("info-stat1").textContent=stat1;
   }catch(e){toast("❌ Erro ao guardar: "+e.message);}
 }
-  async function verificarTecnico(){
-  const user = await aguardarAuthFirebase();
 
-  if(!user){
-    document.getElementById("tecnico-painel").style.display = "none";
-    document.getElementById("tecnico-login").style.display = "block";
-    return;
-  }
+// ── TÉCNICO ──
+// Aguarda Firebase restaurar sessão
+function aguardarAuth(){
+  return new Promise(resolve=>{
+    if(auth.currentUser){resolve(auth.currentUser);return;}
+    const unsub=auth.onAuthStateChanged(user=>{unsub();resolve(user);});
+  });
+}
 
-  try{
-    const role = await ODJIM.getRole(user);
-
-    if(role === "tecnico"){
+async function verificarTecnico(){
+  const user=await aguardarAuth();
+  if(user){
+    // Verificar se é técnico no Firestore
+    const snap=await db.collection("tecnicos").where("email","==",user.email).get();
+    if(!snap.empty){
       mostrarPainelTecnico();
-    }else{
-      document.getElementById("tecnico-painel").style.display = "none";
-      document.getElementById("tecnico-login").style.display = "block";
-      toast("❌ Esta conta não tem perfil de técnico.");
+      return;
     }
-  }catch(e){
-    console.error("Erro ao verificar técnico:", e);
-    document.getElementById("tecnico-painel").style.display = "none";
-    document.getElementById("tecnico-login").style.display = "block";
   }
+  document.getElementById("tecnico-painel").style.display="none";
+  document.getElementById("tecnico-login").style.display="block";
 }
 
 async function loginTecnico(){
   const email=document.getElementById("t-email").value.trim();
   const pass=document.getElementById("t-pass").value;
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
+  // Verificar se está no Firestore como técnico
+  try{
+    const snap=await db.collection("tecnicos").where("email","==",email).get();
+    if(snap.empty){toast("❌ Técnico não encontrado. Contacte o administrador.");return;}
+  }catch(e){toast("❌ Erro ao verificar: "+e.message);return;}
   try{
     await auth.signInWithEmailAndPassword(email,pass);
     mostrarPainelTecnico();
     toast("✅ Bem-vindo, Técnico!");
   }catch(e){
-    if(e.code==="auth/wrong-password")toast("❌ Senha incorreta.");
-    else if(e.code==="auth/user-not-found")toast("❌ Email não encontrado.");
-    else toast("❌ Erro: "+e.message);
+    if(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential"){
+      // Criar conta se não existe
+      try{
+        await auth.createUserWithEmailAndPassword(email,pass);
+        mostrarPainelTecnico();
+        toast("✅ Conta criada! Bem-vindo!");
+      }catch(e2){toast("❌ Erro: "+e2.message);}
+    } else if(e.code==="auth/wrong-password"){
+      toast("❌ Senha incorreta.");
+    } else {
+      toast("❌ Erro: "+e.message);
+    }
   }
 }
 
@@ -592,51 +684,22 @@ async function logoutTecnico(){
 async function recuperarSenhaTecnico(){
   const email=document.getElementById("t-email").value.trim();
   if(!email){toast("⚠️ Escreva o email no campo acima primeiro.");return;}
-  try{
-    await auth.sendPasswordResetEmail(email);
-    toast("📧 Email de recuperação enviado para "+email+"!");
-  }catch(e){toast("❌ Erro: "+e.message);}
+  try{await auth.sendPasswordResetEmail(email);toast("📧 Email de recuperação enviado!");}
+  catch(e){toast("❌ Erro: "+e.message);}
 }
 
-  // Aguarda o Firebase terminar de restaurar a sessão
-function aguardarAuthFirebase(){
-  return new Promise((resolve) => {
-    if (auth.currentUser) {
-      resolve(auth.currentUser);
+// ── ADMIN ──
+async function verificarAdmin(){
+  const user=await aguardarAuth();
+  if(user){
+    const adminEmail=localStorage.getItem("odjim_admin_email");
+    if(adminEmail && user.email===adminEmail){
+      mostrarPainelAdmin();
       return;
     }
-
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      unsubscribe();
-      resolve(user);
-    });
-  });
-}
-  
-async function verificarAdmin(){
-  const user = await aguardarAuthFirebase();
-
-  if(!user){
-    document.getElementById("admin-login").style.display = "block";
-    document.getElementById("admin-painel").style.display = "none";
-    return;
   }
-
-  try{
-    const role = await ODJIM.getRole(user);
-
-    if(role === "admin" || role === "superadmin"){
-      mostrarPainelAdmin();
-    }else{
-      document.getElementById("admin-painel").style.display = "none";
-      document.getElementById("admin-login").style.display = "block";
-      toast("❌ Acesso administrativo negado.");
-    }
-  }catch(e){
-    console.error("Erro ao verificar administrador:", e);
-    document.getElementById("admin-painel").style.display = "none";
-    document.getElementById("admin-login").style.display = "block";
-  }
+  document.getElementById("admin-login").style.display="block";
+  document.getElementById("admin-painel").style.display="none";
 }
 
 async function loginAdmin(){
@@ -645,12 +708,13 @@ async function loginAdmin(){
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
     await auth.signInWithEmailAndPassword(email,pass);
+    localStorage.setItem("odjim_admin_email",email);
     mostrarPainelAdmin();
     toast("✅ Bem-vindo, Admin!");
   }catch(e){
-    if(e.code==="auth/wrong-password")toast("❌ Senha incorreta.");
+    if(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential")toast("❌ Senha incorreta.");
     else if(e.code==="auth/user-not-found")toast("❌ Email não encontrado.");
-    else toast("❌ Acesso negado: "+e.message);
+    else toast("❌ Erro: "+e.message);
   }
 }
 
@@ -658,6 +722,7 @@ function mostrarPainelAdmin(){
   document.getElementById("admin-login").style.display="none";
   document.getElementById("admin-painel").style.display="block";
   monitorarPedidos("a-pedidos");
+  carregarTecnicos();
   db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
       const d=doc.data();
@@ -671,6 +736,7 @@ function mostrarPainelAdmin(){
 
 async function logoutAdmin(){
   await auth.signOut();
+  localStorage.removeItem("odjim_admin_email");
   document.getElementById("admin-painel").style.display="none";
   document.getElementById("admin-login").style.display="block";
   toast("👋 Sessão terminada.");
@@ -679,10 +745,8 @@ async function logoutAdmin(){
 async function recuperarSenhaAdmin(){
   const email=document.getElementById("a-email").value.trim();
   if(!email){toast("⚠️ Escreva o email no campo acima primeiro.");return;}
-  try{
-    await auth.sendPasswordResetEmail(email);
-    toast("📧 Email de recuperação enviado para "+email+"!");
-  }catch(e){toast("❌ Erro: "+e.message);}
+  try{await auth.sendPasswordResetEmail(email);toast("📧 Email de recuperação enviado!");}
+  catch(e){toast("❌ Erro: "+e.message);}
 }
 
 function abrirTab(id,btn){
@@ -693,43 +757,34 @@ function abrirTab(id,btn){
   if(id==="tab-tecnicos")carregarTecnicos();
 }
 
+// ── CADASTRAR TÉCNICO (sem criar conta Auth - evita logout do Admin) ──
 async function cadastrarTecnico(){
   const nome=document.getElementById("nt-nome").value.trim();
   const email=document.getElementById("nt-email").value.trim();
-  const pass=document.getElementById("nt-pass").value;
   const tel=document.getElementById("nt-tel").value.trim();
   const esp=document.getElementById("nt-esp").value;
-  if(!nome||!email||!pass){toast("⚠️ Preencha todos os campos obrigatórios.");return;}
-  if(pass.length<6){toast("⚠️ Senha mínimo 6 caracteres.");return;}
+  if(!nome||!email){toast("⚠️ Preencha Nome e Email.");return;}
   try{
-    const cred=await auth.createUserWithEmailAndPassword(email,pass);
-    await db.collection("tecnicos").doc(cred.user.uid).set({
+    // Verificar duplicados
+    const existe=await db.collection("tecnicos").where("email","==",email).get();
+    if(!existe.empty){toast("⚠️ Técnico com este email já existe!");return;}
+    // Guardar no Firestore sem criar conta Auth (evita logout do Admin)
+    await db.collection("tecnicos").add({
       nome,email,telefone:tel,especialidade:esp,
-      uid:cred.user.uid,ativo:true,criadoEm:new Date().toISOString()
+      ativo:true,criadoEm:new Date().toISOString()
     });
     toast("✅ Técnico "+nome+" cadastrado com sucesso!");
-    ["nt-nome","nt-email","nt-tel","nt-pass"].forEach(id=>document.getElementById(id).value="");
-  }catch(e){
-    if(e.code==="auth/email-already-in-use"){
-      try{
-        await db.collection("tecnicos").add({
-          nome,email,telefone:tel,especialidade:esp,
-          ativo:true,criadoEm:new Date().toISOString()
-        });
-        toast("✅ Técnico "+nome+" adicionado!");
-        ["nt-nome","nt-email","nt-tel","nt-pass"].forEach(id=>document.getElementById(id).value="");
-      }catch(e2){toast("❌ Erro: "+e2.message);}
-    } else {
-      toast("❌ Erro: "+e.message);
-    }
-  }
+    ["nt-nome","nt-email","nt-tel"].forEach(id=>document.getElementById(id).value="");
+    carregarTecnicos();
+  }catch(e){toast("❌ Erro: "+e.message);}
 }
 
-async function carregarTecnicos(){
+// ── CARREGAR TÉCNICOS (tempo real) ──
+function carregarTecnicos(){
   const el=document.getElementById("a-tecnicos");
+  if(!el)return;
   el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
-  try{
-    const snap=await db.collection("tecnicos").get();
+  db.collection("tecnicos").onSnapshot(snap=>{
     if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>';return;}
     let html="";
     snap.forEach(d=>{
@@ -745,17 +800,15 @@ async function carregarTecnicos(){
       </div>`;
     });
     el.innerHTML=html;
-  }catch(e){el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';}
+  },e=>{el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';});
 }
 
+// ── MONITORAR PEDIDOS (tempo real) ──
 function monitorarPedidos(elId){
   db.collection("pedidos").onSnapshot(snap=>{
     const el=document.getElementById(elId);
     if(!el)return;
-    if(snap.empty){
-      el.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>';
-      return;
-    }
+    if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>';return;}
     const docs=[];
     snap.forEach(d=>docs.push({id:d.id,...d.data()}));
     docs.sort((a,b)=>new Date(b.dataCriacao||0)-new Date(a.dataCriacao||0));
@@ -798,10 +851,84 @@ async function ativarNotificacoes(){
   if(!("Notification" in window)){toast("❌ Este browser não suporta notificações.");return;}
   try{
     const perm=await Notification.requestPermission();
-    if(perm==="granted"){toast("🔔 Notificações ativadas com sucesso!");}
-    else{toast("🔕 Notificações bloqueadas. Ative nas definições do browser.");}
+    if(perm==="granted")toast("🔔 Notificações ativadas com sucesso!");
+    else toast("🔕 Notificações bloqueadas. Ative nas definições do browser.");
   }catch(e){toast("❌ Erro ao ativar notificações.");}
+}
+
+// ── PERFIL CLIENTE ──
+function abrirPerfil(){
+  const user = auth.currentUser;
+  if(!user){toast("⚠️ Precisa de fazer login primeiro.");return;}
+  document.getElementById("modal-perfil").classList.add("aberto");
+  // Carregar dados do perfil
+  db.collection("clientes").doc(user.uid).get().then(doc=>{
+    const nome = user.displayName || "";
+    document.getElementById("perfil-avatar").textContent = nome ? nome[0].toUpperCase() : "?";
+    document.getElementById("perfil-nome-display").textContent = nome || "Sem nome";
+    document.getElementById("perfil-email-display").textContent = user.email || "";
+    document.getElementById("perfil-nome").value = nome;
+    if(doc.exists){
+      const d = doc.data();
+      if(d.telefone) document.getElementById("perfil-tel").value = d.telefone;
+      if(d.morada) document.getElementById("perfil-morada").value = d.morada;
+    }
+  }).catch(()=>{});
+}
+
+function fecharPerfil(){
+  document.getElementById("modal-perfil").classList.remove("aberto");
+}
+
+async function salvarPerfil(){
+  const user = auth.currentUser;
+  if(!user){toast("❌ Não autenticado.");return;}
+  const nome = document.getElementById("perfil-nome").value.trim();
+  const tel = document.getElementById("perfil-tel").value.trim();
+  const morada = document.getElementById("perfil-morada").value.trim();
+  try{
+    if(nome) await user.updateProfile({displayName:nome});
+    await db.collection("clientes").doc(user.uid).set({
+      nome,telefone:tel,morada,email:user.email,uid:user.uid,
+      atualizadoEm:new Date().toISOString()
+    },{merge:true});
+    document.getElementById("badge-cliente").textContent = nome || "Cliente";
+    document.getElementById("perfil-avatar").textContent = nome ? nome[0].toUpperCase() : "?";
+    document.getElementById("perfil-nome-display").textContent = nome;
+    fecharPerfil();
+    toast("✅ Perfil actualizado com sucesso!");
+  }catch(e){toast("❌ Erro ao guardar perfil: "+e.message);}
+}
+
+// ── TOGGLE SERVIÇOS ──
+function toggleServico(el){
+  const aberto = el.classList.contains("aberto");
+  document.querySelectorAll(".servico-detalhe").forEach(s=>s.classList.remove("aberto"));
+  if(!aberto) el.classList.add("aberto");
+}
+
+// ── STATS REAIS DO FIRESTORE ──
+function carregarStatsReais(){
+  // Total de técnicos
+  db.collection("tecnicos").onSnapshot(snap=>{
+    const el = document.getElementById("info-stat1");
+    if(el) el.textContent = snap.size + "+";
+  });
+  // Total de pedidos
+  db.collection("pedidos").onSnapshot(snap=>{
+    const el = document.getElementById("stat-pedidos");
+    if(el) el.textContent = snap.size;
+  });
+  // Média de avaliações
+  db.collection("avaliacoes").onSnapshot(snap=>{
+    const el = document.getElementById("stat-avaliacao");
+    if(!el) return;
+    if(snap.empty){el.textContent = "N/A";return;}
+    let total = 0;
+    snap.forEach(d => total += (d.data().nota||0));
+    el.textContent = (total/snap.size).toFixed(1) + "⭐";
+  });
 }
 </script>
 </body>
-</html>
+</html> 
