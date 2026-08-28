@@ -420,27 +420,53 @@ select option{background:#1e293b;}
       </div>
       <!-- DASHBOARD -->
       <div id="tab-dashboard">
+        <!-- KPIs -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div style="background:linear-gradient(135deg,rgba(255,152,0,0.15),rgba(255,87,34,0.1));border:1px solid rgba(255,152,0,0.3);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:28px;font-weight:800;color:var(--accent);" id="dash-tecnicos">-</div>
+            <div style="font-size:32px;font-weight:800;color:var(--accent);" id="dash-tecnicos">-</div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;">👷 Técnicos</div>
           </div>
           <div style="background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(16,185,129,0.1));border:1px solid rgba(34,197,94,0.3);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:28px;font-weight:800;color:#4ade80;" id="dash-pedidos">-</div>
+            <div style="font-size:32px;font-weight:800;color:#4ade80;" id="dash-pedidos">-</div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;">📋 Pedidos Total</div>
           </div>
           <div style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(99,102,241,0.1));border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:28px;font-weight:800;color:#60a5fa;" id="dash-pendentes">-</div>
+            <div style="font-size:32px;font-weight:800;color:#60a5fa;" id="dash-pendentes">-</div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;">⏳ Aguardando</div>
           </div>
           <div style="background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(139,92,246,0.1));border:1px solid rgba(168,85,247,0.3);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:28px;font-weight:800;color:#c084fc;" id="dash-avaliacoes">-</div>
+            <div style="font-size:32px;font-weight:800;color:#c084fc;" id="dash-avaliacoes">-</div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;">⭐ Avaliação Média</div>
           </div>
         </div>
+
+        <!-- GRÁFICO PIZZA - Estado dos Pedidos -->
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;">
+          <h4 style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--accent);">🥧 Estado dos Pedidos</h4>
+          <div style="display:flex;align-items:center;gap:20px;justify-content:center;flex-wrap:wrap;">
+            <canvas id="grafico-pizza" width="140" height="140"></canvas>
+            <div id="legenda-pizza" style="font-size:13px;display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+        </div>
+
+        <!-- GRÁFICO BARRAS - Serviços mais pedidos -->
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;">
+          <h4 style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--accent);">📊 Serviços Mais Pedidos</h4>
+          <canvas id="grafico-barras" width="100%" height="200" style="width:100%;max-height:200px;"></canvas>
+        </div>
+
+        <!-- GRÁFICO AVALIAÇÕES -->
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;">
+          <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent);">⭐ Distribuição de Avaliações</h4>
+          <div id="grafico-avaliacoes" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- BOTÃO RELATÓRIO -->
         <button class="btn btn-primary" onclick="exportarRelatorio()" style="margin-bottom:12px;">📥 Exportar Relatório CSV</button>
+
+        <!-- ÚLTIMOS PEDIDOS -->
         <div style="background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px;">
-          <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent);">📋 Últimos Pedidos</h4>
+          <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent);">📋 Últimos 5 Pedidos</h4>
           <div id="dash-ultimos-pedidos" style="font-size:13px;color:var(--muted);">A carregar...</div>
         </div>
       </div>
@@ -801,6 +827,7 @@ function mostrarPainelAdmin(){
   document.getElementById("admin-painel").style.display="block";
   monitorarPedidos("a-pedidos");
   carregarTecnicos();
+  carregarDashboard();
   db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
       const d=doc.data();
@@ -828,11 +855,12 @@ async function recuperarSenhaAdmin(){
 }
 
 function abrirTab(id,btn){
-  ["tab-pedidos","tab-tecnicos","tab-cadastrar","tab-info"].forEach(t=>document.getElementById(t).style.display="none");
+  ["tab-dashboard","tab-pedidos","tab-tecnicos","tab-cadastrar","tab-servicos","tab-info"].forEach(t=>{const el=document.getElementById(t);if(el)el.style.display="none";});
   document.getElementById(id).style.display="block";
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("ativa"));
   btn.classList.add("ativa");
   if(id==="tab-tecnicos")carregarTecnicos();
+  if(id==="tab-dashboard")carregarDashboard();
 }
 
 // ── CADASTRAR TÉCNICO (sem criar conta Auth - evita logout do Admin) ──
@@ -1011,6 +1039,156 @@ function carregarStatsReais(){
     let total = 0;
     snap.forEach(d => total += (d.data().nota||0));
     el.textContent = (total/snap.size).toFixed(1) + "⭐";
+  });
+}
+
+// ── DASHBOARD COM GRÁFICOS ──
+function carregarDashboard(){
+  // KPIs
+  db.collection("tecnicos").onSnapshot(snap=>{
+    const el=document.getElementById("dash-tecnicos");
+    if(el)el.textContent=snap.size;
+  });
+
+  db.collection("pedidos").onSnapshot(snap=>{
+    const total=snap.size;
+    let pendentes=0, concluidos=0;
+    const servicos={};
+
+    snap.forEach(d=>{
+      const p=d.data();
+      if(p.estado==="Aguardando técnico")pendentes++;
+      else concluidos++;
+      const s=p.servico||"Outro";
+      servicos[s]=(servicos[s]||0)+1;
+    });
+
+    const elT=document.getElementById("dash-pedidos");
+    const elP=document.getElementById("dash-pendentes");
+    if(elT)elT.textContent=total;
+    if(elP)elP.textContent=pendentes;
+
+    // Gráfico Pizza
+    desenharPizza(pendentes, concluidos);
+
+    // Gráfico Barras - Serviços
+    desenharBarras(servicos);
+
+    // Últimos pedidos
+    const docs=[];
+    snap.forEach(d=>docs.push({id:d.id,...d.data()}));
+    docs.sort((a,b)=>new Date(b.dataCriacao||0)-new Date(a.dataCriacao||0));
+    const el=document.getElementById("dash-ultimos-pedidos");
+    if(!el)return;
+    if(docs.length===0){el.textContent="Nenhum pedido ainda.";return;}
+    let html="";
+    docs.slice(0,5).forEach(p=>{
+      const data=p.dataCriacao?new Date(p.dataCriacao).toLocaleDateString("pt-PT"):"";
+      const cor=p.estado==="Aguardando técnico"?"#facc15":"#4ade80";
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);">${p.nome||""}</div>
+          <div style="font-size:11px;color:var(--muted);">${p.servico||""} · ${data}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:${cor}22;color:${cor};">${p.estado||""}</span>
+      </div>`;
+    });
+    el.innerHTML=html;
+  });
+
+  // Avaliações
+  db.collection("avaliacoes").onSnapshot(snap=>{
+    if(snap.empty){
+      const el=document.getElementById("dash-avaliacoes");
+      if(el)el.textContent="-";
+      return;
+    }
+    let total=0;
+    const dist={1:0,2:0,3:0,4:0,5:0};
+    snap.forEach(d=>{
+      const nota=d.data().nota||0;
+      total+=nota;
+      if(dist[nota]!==undefined)dist[nota]++;
+    });
+    const media=(total/snap.size).toFixed(1);
+    const el=document.getElementById("dash-avaliacoes");
+    if(el)el.textContent=media+"⭐";
+
+    // Gráfico de barras das avaliações
+    const el2=document.getElementById("grafico-avaliacoes");
+    if(!el2)return;
+    const emojis={1:"😡",2:"😕",3:"😐",4:"😊",5:"🤩"};
+    const max=Math.max(...Object.values(dist))||1;
+    let html="";
+    [5,4,3,2,1].forEach(n=>{
+      const pct=Math.round((dist[n]/max)*100);
+      html+=`<div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;width:24px;">${emojis[n]}</span>
+        <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:20px;height:14px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(to right,var(--accent),var(--accent2));border-radius:20px;transition:width 1s ease;"></div>
+        </div>
+        <span style="font-size:12px;color:var(--muted);width:20px;text-align:right;">${dist[n]}</span>
+      </div>`;
+    });
+    el2.innerHTML=html;
+  });
+}
+
+function desenharPizza(pendentes, concluidos){
+  const canvas=document.getElementById("grafico-pizza");
+  if(!canvas)return;
+  const ctx=canvas.getContext("2d");
+  const total=pendentes+concluidos;
+  if(total===0){ctx.clearRect(0,0,140,140);return;}
+  ctx.clearRect(0,0,140,140);
+  const cx=70,cy=70,r=60;
+  const angPend=(pendentes/total)*Math.PI*2;
+  // Pendentes - amarelo
+  ctx.beginPath();ctx.moveTo(cx,cy);
+  ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+angPend);
+  ctx.closePath();ctx.fillStyle="#facc15";ctx.fill();
+  // Concluídos - verde
+  ctx.beginPath();ctx.moveTo(cx,cy);
+  ctx.arc(cx,cy,r,-Math.PI/2+angPend,-Math.PI/2+Math.PI*2);
+  ctx.closePath();ctx.fillStyle="#4ade80";ctx.fill();
+  // Centro branco
+  ctx.beginPath();ctx.arc(cx,cy,35,0,Math.PI*2);
+  ctx.fillStyle="#1e293b";ctx.fill();
+  ctx.fillStyle="#f8fafc";ctx.font="bold 14px Outfit";
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText(total,cx,cy);
+
+  const leg=document.getElementById("legenda-pizza");
+  if(leg)leg.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:14px;background:#facc15;border-radius:4px;"></div><span>Aguardando (${pendentes})</span></div>
+    <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:14px;background:#4ade80;border-radius:4px;"></div><span>Concluídos (${concluidos})</span></div>`;
+}
+
+function desenharBarras(servicos){
+  const canvas=document.getElementById("grafico-barras");
+  if(!canvas)return;
+  const entries=Object.entries(servicos).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(entries.length===0)return;
+  const ctx=canvas.getContext("2d");
+  const W=canvas.offsetWidth||300;
+  canvas.width=W;canvas.height=200;
+  ctx.clearRect(0,0,W,200);
+  const max=Math.max(...entries.map(e=>e[1]))||1;
+  const barW=Math.floor((W-60)/entries.length)-10;
+  const cores=["#ff9800","#4ade80","#60a5fa","#c084fc","#fb923c"];
+  entries.forEach(([nome,val],i)=>{
+    const x=40+i*(barW+10);
+    const h=Math.round((val/max)*140);
+    const y=160-h;
+    ctx.fillStyle=cores[i%cores.length];
+    ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(x,y,barW,h,6):ctx.rect(x,y,barW,h);
+    ctx.fill();
+    ctx.fillStyle="#f8fafc";ctx.font="bold 13px Outfit";
+    ctx.textAlign="center";ctx.fillText(val,x+barW/2,y-6);
+    ctx.fillStyle="#94a3b8";ctx.font="10px Outfit";
+    const nomeShort=nome.length>8?nome.substring(0,8)+"…":nome;
+    ctx.fillText(nomeShort,x+barW/2,178);
   });
 }
 </script>
