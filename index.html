@@ -532,7 +532,7 @@ function irPara(tela){
   document.getElementById("splash").style.display="none";
   document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
   document.getElementById("tela-"+tela).classList.add("ativa");
-  if(tela==="cliente"){initMap();carregarInfoEmpresa();carregarStatsReais();}
+  if(tela==="cliente"){initMap();carregarInfoEmpresa();carregarStatsReais();carregarServicosCliente();}
   if(tela==="tecnico")verificarTecnico();
   if(tela==="admin")verificarAdmin();
 }
@@ -828,6 +828,7 @@ function mostrarPainelAdmin(){
   monitorarPedidos("a-pedidos");
   carregarTecnicos();
   carregarDashboard();
+  carregarServicosAdmin();
   db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
       const d=doc.data();
@@ -861,6 +862,7 @@ function abrirTab(id,btn){
   btn.classList.add("ativa");
   if(id==="tab-tecnicos")carregarTecnicos();
   if(id==="tab-dashboard")carregarDashboard();
+  if(id==="tab-servicos")carregarServicosAdmin();
 }
 
 // ── CADASTRAR TÉCNICO (sem criar conta Auth - evita logout do Admin) ──
@@ -1189,6 +1191,101 @@ function desenharBarras(servicos){
     ctx.fillStyle="#94a3b8";ctx.font="10px Outfit";
     const nomeShort=nome.length>8?nome.substring(0,8)+"…":nome;
     ctx.fillText(nomeShort,x+barW/2,178);
+  });
+}
+
+// ── GESTÃO DE SERVIÇOS ──
+async function adicionarServico(){
+  const nome=document.getElementById("srv-nome").value.trim();
+  const emoji=document.getElementById("srv-emoji").value.trim();
+  const desc=document.getElementById("srv-desc").value.trim();
+  const preco=document.getElementById("srv-preco").value.trim();
+  if(!nome||!emoji){toast("⚠️ Preencha o Nome e o Emoji.");return;}
+  try{
+    await db.collection("servicos").add({
+      nome,emoji,descricao:desc,preco,
+      ativo:true,criadoEm:new Date().toISOString()
+    });
+    toast("✅ Serviço "+nome+" adicionado!");
+    ["srv-nome","srv-emoji","srv-desc","srv-preco"].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value="";
+    });
+    carregarServicosAdmin();
+    carregarServicosCliente();
+  }catch(e){toast("❌ Erro: "+e.message);}
+}
+
+async function removerServico(id){
+  if(!confirm("Tem a certeza que quer remover este serviço?"))return;
+  try{
+    await db.collection("servicos").doc(id).delete();
+    toast("🗑️ Serviço removido.");
+    carregarServicosAdmin();
+    carregarServicosCliente();
+  }catch(e){toast("❌ Erro: "+e.message);}
+}
+
+function carregarServicosAdmin(){
+  const el=document.getElementById("lista-servicos-admin");
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px;">A carregar...</div>';
+  db.collection("servicos").onSnapshot(snap=>{
+    if(snap.empty){
+      el.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px;">Nenhum serviço adicionado ainda.</div>';
+      return;
+    }
+    let html="";
+    snap.forEach(d=>{
+      const s=d.data();
+      html+=`<div style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <span style="font-size:26px;">${s.emoji||"🔧"}</span>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:14px;">${s.nome||""}</div>
+          <div style="font-size:12px;color:var(--muted);">${s.descricao||""}</div>
+          <div style="font-size:12px;color:var(--accent);font-weight:600;">${s.preco||""}</div>
+        </div>
+        <button onclick="removerServico('${d.id}')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>
+      </div>`;
+    });
+    el.innerHTML=html;
+  });
+}
+
+function carregarServicosCliente(){
+  const el=document.getElementById("lista-servicos");
+  if(!el)return;
+  db.collection("servicos").onSnapshot(snap=>{
+    if(snap.empty){
+      // Mostrar serviços padrão se não há serviços no Firestore
+      return;
+    }
+    let html="";
+    snap.forEach(d=>{
+      const s=d.data();
+      html+=`<div class="servico-detalhe" onclick="toggleServico(this)">
+        <div class="servico-header">
+          <span>${s.emoji||"🔧"}</span>
+          <span>${s.nome||""}</span>
+          <span class="seta">›</span>
+        </div>
+        <div class="servico-body">
+          ${s.descricao||"Serviço profissional disponível."}<br>
+          ${s.preco?`<span style="color:var(--accent);font-weight:700;">${s.preco}</span>`:""}
+        </div>
+      </div>`;
+    });
+    el.innerHTML=html;
+    // Actualizar select do formulário de pedido
+    const select=document.getElementById("c-servico");
+    if(select){
+      select.innerHTML="";
+      snap.forEach(d=>{
+        const opt=document.createElement("option");
+        opt.value=d.data().nome;
+        opt.textContent=d.data().nome;
+        select.appendChild(opt);
+      });
+    }
   });
 }
 </script>
