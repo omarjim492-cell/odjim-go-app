@@ -900,29 +900,46 @@ async function cadastrarTecnico(){
   const email=document.getElementById("nt-email").value.trim();
   const tel=document.getElementById("nt-tel").value.trim();
   const esp=document.getElementById("nt-esp").value;
+  const passEl=document.getElementById("nt-pass");
+  const pass=passEl?passEl.value.trim():"";
   if(!nome||!email){toast("⚠️ Preencha Nome e Email.");return;}
   try{
-    // Verificar duplicados
+    // Verificar duplicados com query
     const existe=await db.collection("tecnicos").where("email","==",email).get();
-    if(!existe.empty){toast("⚠️ Técnico com este email já existe!");return;}
-    // Guardar no Firestore sem criar conta Auth (evita logout do Admin)
-    await db.collection("tecnicos").add({
+    if(!existe.empty){
+      toast("⚠️ Técnico com este email já existe!");
+      return;
+    }
+    // Guardar no Firestore (sem criar conta Auth para não fazer logout do Admin)
+    const docRef=await db.collection("tecnicos").add({
       nome,email,telefone:tel,especialidade:esp,
-      ativo:true,criadoEm:new Date().toISOString()
+      senha:pass,ativo:true,criadoEm:new Date().toISOString()
     });
+    console.log("Técnico guardado com ID:", docRef.id);
     toast("✅ Técnico "+nome+" cadastrado com sucesso!");
-    ["nt-nome","nt-email","nt-tel"].forEach(id=>document.getElementById(id).value="");
-    carregarTecnicos();
-  }catch(e){toast("❌ Erro: "+e.message);}
+    ["nt-nome","nt-email","nt-tel"].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value="";
+    });
+    if(passEl)passEl.value="";
+  }catch(e){
+    console.error("Erro cadastrar técnico:",e);
+    toast("❌ Erro: "+e.message);
+  }
 }
 
-// ── CARREGAR TÉCNICOS (tempo real) ──
+// ── CARREGAR TÉCNICOS (tempo real com listener único) ──
+let tecnicosListener=null;
 function carregarTecnicos(){
   const el=document.getElementById("a-tecnicos");
   if(!el)return;
   el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
-  db.collection("tecnicos").onSnapshot(snap=>{
-    if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>';return;}
+  // Cancelar listener anterior se existir
+  if(tecnicosListener){tecnicosListener();tecnicosListener=null;}
+  tecnicosListener=db.collection("tecnicos").onSnapshot(snap=>{
+    if(snap.empty){
+      el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>';
+      return;
+    }
     let html="";
     snap.forEach(d=>{
       const t=d.data();
@@ -934,10 +951,19 @@ function carregarTecnicos(){
           <p>${t.especialidade||""} · ${t.telefone||""}</p>
           <p style="color:var(--muted);font-size:11px;">${t.email||""}</p>
         </div>
+        <button onclick="removerTecnico('${d.id}')" style="margin-left:auto;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;flex-shrink:0;">🗑️</button>
       </div>`;
     });
     el.innerHTML=html;
   },e=>{el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';});
+}
+
+async function removerTecnico(id){
+  if(!confirm("Tem a certeza que quer remover este técnico?"))return;
+  try{
+    await db.collection("tecnicos").doc(id).delete();
+    toast("🗑️ Técnico removido com sucesso.");
+  }catch(e){toast("❌ Erro: "+e.message);}
 }
 
 // ── MONITORAR PEDIDOS (tempo real) ──
