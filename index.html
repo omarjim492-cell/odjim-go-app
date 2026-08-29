@@ -722,11 +722,21 @@ function aguardarAuth(){
 
 async function verificarTecnico(){
   const tecEmail=localStorage.getItem("odjim_tecnico_email");
-  if(tecEmail){
-    const user=await aguardarAuth();
-    if(user && user.email===tecEmail){
-      mostrarPainelTecnico();
-      return;
+  const tecPass=localStorage.getItem("odjim_tecnico_pass");
+  if(tecEmail&&tecPass){
+    try{
+      const user=await aguardarAuth();
+      if(user && user.email===tecEmail){
+        mostrarPainelTecnico();
+        return;
+      } else {
+        await auth.signInWithEmailAndPassword(tecEmail,tecPass);
+        mostrarPainelTecnico();
+        return;
+      }
+    }catch(e){
+      localStorage.removeItem("odjim_tecnico_email");
+      localStorage.removeItem("odjim_tecnico_pass");
     }
   }
   document.getElementById("tecnico-painel").style.display="none";
@@ -748,6 +758,7 @@ async function loginTecnico(){
       return;
     }
     localStorage.setItem("odjim_tecnico_email", email);
+    localStorage.setItem("odjim_tecnico_pass", pass);
     mostrarPainelTecnico();
     toast("✅ Bem-vindo, Técnico!");
   }catch(e){
@@ -783,6 +794,7 @@ function mostrarPainelTecnico(){
 async function logoutTecnico(){
   await auth.signOut();
   localStorage.removeItem("odjim_tecnico_email");
+  localStorage.removeItem("odjim_tecnico_pass");
   document.getElementById("tecnico-painel").style.display="none";
   document.getElementById("tecnico-login").style.display="block";
   toast("👋 Sessão terminada.");
@@ -798,21 +810,24 @@ async function recuperarSenhaTecnico(){
 // ── ADMIN ──
 async function verificarAdmin(){
   const adminEmail=localStorage.getItem("odjim_admin_email");
-  if(!adminEmail){
+  const adminPass=localStorage.getItem("odjim_admin_pass");
+  if(!adminEmail||!adminPass){
     document.getElementById("admin-login").style.display="block";
     document.getElementById("admin-painel").style.display="none";
     return;
   }
-  const user=await aguardarAuth();
-  if(user && user.email===adminEmail){
-    mostrarPainelAdmin();
-  } else if(!user && adminEmail){
-    // Tentar re-autenticar silenciosamente
-    document.getElementById("admin-login").style.display="block";
-    document.getElementById("admin-painel").style.display="none";
-    toast("⚠️ Sessão expirou. Faça login novamente.");
+  try{
+    // Re-autenticar automaticamente com credenciais guardadas
+    const user=await aguardarAuth();
+    if(user && user.email===adminEmail){
+      mostrarPainelAdmin();
+    } else {
+      await auth.signInWithEmailAndPassword(adminEmail, adminPass);
+      mostrarPainelAdmin();
+    }
+  }catch(e){
     localStorage.removeItem("odjim_admin_email");
-  } else {
+    localStorage.removeItem("odjim_admin_pass");
     document.getElementById("admin-login").style.display="block";
     document.getElementById("admin-painel").style.display="none";
   }
@@ -825,6 +840,7 @@ async function loginAdmin(){
   try{
     await auth.signInWithEmailAndPassword(email,pass);
     localStorage.setItem("odjim_admin_email",email);
+    localStorage.setItem("odjim_admin_pass",pass);
     mostrarPainelAdmin();
     toast("✅ Bem-vindo, Admin!");
   }catch(e){
@@ -855,6 +871,7 @@ function mostrarPainelAdmin(){
 async function logoutAdmin(){
   await auth.signOut();
   localStorage.removeItem("odjim_admin_email");
+  localStorage.removeItem("odjim_admin_pass");
   document.getElementById("admin-painel").style.display="none";
   document.getElementById("admin-login").style.display="block";
   toast("👋 Sessão terminada.");
