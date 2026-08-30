@@ -464,7 +464,10 @@ select option{background:#1e293b;}
         </div>
 
         <!-- BOTÃO RELATÓRIO -->
-        <button class="btn btn-primary" onclick="exportarRelatorio()" style="margin-bottom:12px;">📥 Exportar Relatório CSV</button>
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="exportarCSV()" style="flex:1;">📥 Exportar CSV</button>
+          <button class="btn" onclick="exportarPDF()" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;box-shadow:0 4px 14px rgba(239,68,68,0.3);">📄 Exportar PDF</button>
+        </div>
 
         <!-- ÚLTIMOS PEDIDOS -->
         <div style="background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px;">
@@ -1408,6 +1411,138 @@ function carregarServicosCliente(){
       });
     }
   });
+}
+
+// ── EXPORTAR CSV ──
+async function exportarCSV(){
+  try{
+    toast("⏳ A gerar relatório CSV...");
+    const snap=await db.collection("pedidos").get();
+    if(snap.empty){toast("⚠️ Não há pedidos para exportar.");return;}
+
+    const rows=[["Nome","Telefone","Email","Serviço","Local","Descrição","Estado","Data Início","Data Fim","Data Criação"]];
+    snap.forEach(d=>{
+      const p=d.data();
+      rows.push([
+        p.nome||"",
+        p.telefone||"",
+        p.email||"",
+        p.servico||"",
+        p.local||"",
+        p.descricao||"",
+        p.estado||"",
+        p.inicio||"",
+        p.fim||"",
+        p.dataCriacao?new Date(p.dataCriacao).toLocaleString("pt-PT"):""
+      ]);
+    });
+
+    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("
+");
+    const bom="﻿"; // BOM para Excel reconhecer UTF-8
+    const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=`ODJIM_Relatorio_${new Date().toLocaleDateString("pt-PT").replace(/\//g,"-")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("✅ Relatório CSV exportado com sucesso!");
+  }catch(e){toast("❌ Erro ao exportar: "+e.message);}
+}
+
+// ── EXPORTAR PDF ──
+async function exportarPDF(){
+  try{
+    toast("⏳ A gerar relatório PDF...");
+    const snap=await db.collection("pedidos").get();
+    const snapTec=await db.collection("tecnicos").get();
+    const snapAv=await db.collection("avaliacoes").get();
+
+    let pendentes=0,concluidos=0;
+    snap.forEach(d=>{if(d.data().estado==="Aguardando técnico")pendentes++;else concluidos++;});
+
+    let totalAv=0;
+    snapAv.forEach(d=>totalAv+=d.data().nota||0);
+    const mediaAv=snapAv.size>0?(totalAv/snapAv.size).toFixed(1):"N/A";
+
+    const data=new Date().toLocaleDateString("pt-PT");
+    const hora=new Date().toLocaleTimeString("pt-PT");
+
+    let linhasPedidos="";
+    const docs=[];
+    snap.forEach(d=>docs.push({...d.data()}));
+    docs.sort((a,b)=>new Date(b.dataCriacao||0)-new Date(a.dataCriacao||0));
+    docs.slice(0,20).forEach((p,i)=>{
+      const cor=p.estado==="Aguardando técnico"?"#f59e0b":"#10b981";
+      const dataPed=p.dataCriacao?new Date(p.dataCriacao).toLocaleDateString("pt-PT"):"";
+      linhasPedidos+=`<tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;">${i+1}</td>
+        <td style="padding:8px 12px;font-weight:600;">${p.nome||""}</td>
+        <td style="padding:8px 12px;">${p.telefone||""}</td>
+        <td style="padding:8px 12px;">${p.servico||""}</td>
+        <td style="padding:8px 12px;">${p.local||""}</td>
+        <td style="padding:8px 12px;"><span style="background:${cor}22;color:${cor};padding:3px 8px;border-radius:20px;font-size:12px;font-weight:700;">${p.estado||""}</span></td>
+        <td style="padding:8px 12px;">${dataPed}</td>
+      </tr>`;
+    });
+
+    const html=`<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Relatório ODJIM Solution</title>
+<style>
+  body{font-family:'Segoe UI',sans-serif;margin:0;padding:0;color:#1f2937;background:#fff;}
+  .header{background:linear-gradient(135deg,#ff9800,#ff5722);padding:30px 40px;color:white;}
+  .header h1{margin:0;font-size:28px;font-weight:800;}
+  .header p{margin:4px 0 0;opacity:0.9;font-size:14px;}
+  .kpis{display:flex;gap:20px;padding:24px 40px;background:#f9fafb;border-bottom:1px solid #e5e7eb;flex-wrap:wrap;}
+  .kpi{flex:1;min-width:120px;background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .kpi .num{font-size:28px;font-weight:800;color:#ff9800;}
+  .kpi .lab{font-size:12px;color:#6b7280;margin-top:4px;}
+  .section{padding:24px 40px;}
+  .section h2{font-size:18px;font-weight:700;margin-bottom:16px;color:#111827;border-left:4px solid #ff9800;padding-left:10px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:#f3f4f6;padding:10px 12px;text-align:left;font-weight:700;color:#374151;}
+  tr:hover{background:#fafafa;}
+  .footer{text-align:center;padding:20px;color:#9ca3af;font-size:12px;border-top:1px solid #e5e7eb;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🇦🇴 ODJIM Solution</h1>
+  <p>Relatório de Gestão — Gerado em ${data} às ${hora}</p>
+</div>
+<div class="kpis">
+  <div class="kpi"><div class="num">${snap.size}</div><div class="lab">📋 Total Pedidos</div></div>
+  <div class="kpi"><div class="num">${pendentes}</div><div class="lab">⏳ Aguardando</div></div>
+  <div class="kpi"><div class="num">${concluidos}</div><div class="lab">✅ Concluídos</div></div>
+  <div class="kpi"><div class="num">${snapTec.size}</div><div class="lab">👷 Técnicos</div></div>
+  <div class="kpi"><div class="num">${mediaAv}⭐</div><div class="lab">Avaliação Média</div></div>
+</div>
+<div class="section">
+  <h2>Lista de Pedidos (últimos 20)</h2>
+  <table>
+    <thead><tr><th>#</th><th>Cliente</th><th>Telefone</th><th>Serviço</th><th>Local</th><th>Estado</th><th>Data</th></tr></thead>
+    <tbody>${linhasPedidos}</tbody>
+  </table>
+</div>
+<div class="footer">ODJIM Solution • Luanda, Angola • ${data}</div>
+</body>
+</html>`;
+
+    const blob=new Blob([html],{type:"text/html;charset=utf-8;"});
+    const url=URL.createObjectURL(blob);
+    const win=window.open(url,"_blank");
+    if(win){
+      win.onload=()=>{
+        win.print();
+        URL.revokeObjectURL(url);
+      };
+    }
+    toast("✅ PDF aberto! Usa Ctrl+P / Imprimir para guardar.");
+  }catch(e){toast("❌ Erro ao gerar PDF: "+e.message);}
 }
 </script>
 </body>
