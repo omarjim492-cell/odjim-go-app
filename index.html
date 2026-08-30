@@ -789,6 +789,7 @@ function mostrarPainelTecnico(){
   document.getElementById("tecnico-login").style.display="none";
   document.getElementById("tecnico-painel").style.display="block";
   monitorarPedidos("t-pedidos");
+  notificarNovosPedidos();
 }
 
 async function logoutTecnico(){
@@ -1010,13 +1011,78 @@ async function aceitarPedido(id){
   }catch(e){toast("❌ Erro ao aceitar pedido: "+e.message);}
 }
 
+const VAPID_KEY = "BJKg7cCzoji6MiA83LgN6kx0TUPXulMOxLb9kjWS_yz3ycMl_99ll9Gf2UHdPFS6TRimDUqGxKSNG1s2LVUABBw";
+
 async function ativarNotificacoes(){
   if(!("Notification" in window)){toast("❌ Este browser não suporta notificações.");return;}
   try{
     const perm=await Notification.requestPermission();
-    if(perm==="granted")toast("🔔 Notificações ativadas com sucesso!");
-    else toast("🔕 Notificações bloqueadas. Ative nas definições do browser.");
-  }catch(e){toast("❌ Erro ao ativar notificações.");}
+    if(perm!=="granted"){
+      toast("🔕 Notificações bloqueadas. Ative nas definições do browser.");
+      return;
+    }
+    // Registar Service Worker
+    const reg=await navigator.serviceWorker.register("firebase-messaging-sw.js");
+    await navigator.serviceWorker.ready;
+
+    // Obter token FCM
+    const messaging=firebase.messaging();
+    const token=await messaging.getToken({
+      vapidKey:VAPID_KEY,
+      serviceWorkerRegistration:reg
+    });
+
+    if(token){
+      console.log("[FCM] Token:", token);
+      // Guardar token no Firestore
+      const user=auth.currentUser;
+      await db.collection("tokens_fcm").doc(token.substring(0,20)).set({
+        token,
+        uid:user?user.uid:"anonimo",
+        email:user?user.email:"",
+        plataforma:"web",
+        criadoEm:new Date().toISOString()
+      });
+      toast("🔔 Notificações ativadas com sucesso!");
+
+      // Notificação em foreground
+      messaging.onMessage(function(payload){
+        const title=payload.notification?.title||"ODJIM Solution";
+        const body=payload.notification?.body||"Nova actualização.";
+        mostrarNotifForeground(title, body);
+      });
+    }
+  }catch(e){
+    console.error("[FCM] Erro:", e);
+    toast("❌ Erro ao ativar notificações: "+e.message);
+  }
+}
+
+function mostrarNotifForeground(titulo, mensagem){
+  const div=document.createElement("div");
+  div.style.cssText="position:fixed;top:20px;right:20px;z-index:9999;background:rgba(30,41,59,0.97);border:1px solid rgba(255,152,0,0.4);border-left:4px solid #ff9800;color:#f8fafc;padding:16px 20px;border-radius:12px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:'Outfit',sans-serif;cursor:pointer;animation:fadeUp 0.3s ease;";
+  div.innerHTML=`<div style="font-weight:700;font-size:14px;margin-bottom:4px;">🔔 ${titulo}</div><div style="font-size:13px;color:#94a3b8;">${mensagem}</div>`;
+  div.onclick=()=>div.remove();
+  document.body.appendChild(div);
+  setTimeout(()=>{if(div.parentNode)div.remove();},6000);
+}
+
+// Notificar técnicos quando há novo pedido
+async function notificarNovosPedidos(){
+  db.collection("pedidos").onSnapshot(async snap=>{
+    snap.docChanges().forEach(change=>{
+      if(change.type==="added"){
+        const p=change.doc.data();
+        // Notificação local para técnicos logados
+        if(document.getElementById("tecnico-painel")?.style.display!=="none"){
+          mostrarNotifForeground(
+            "🔧 Novo Pedido!",
+            `${p.nome} precisa de ${p.servico}`
+          );
+        }
+      }
+    });
+  });
 }
 
 // ── PERFIL CLIENTE ──
