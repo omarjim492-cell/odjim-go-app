@@ -1,361 +1,198 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrador - ODJIM Solution</title>
-  
-  <!-- Fontes Premium -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Leaflet para Mapas -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>Painel Administrador - ODJIM Solution</title>
 
-  <!-- FIREBASE (v10 Modular) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
-      authDomain: "odjim-solution.firebaseapp.com",
-      projectId: "odjim-solution",
-      storageBucket: "odjim-solution.firebasestorage.app",
-      messagingSenderId: "165673018775",
-      appId: "1:165673018775:web:c8b4cc6345b854763950d2",
-      measurementId: "G-8ED4Y2EG5Y",
-      databaseURL: "https://odjim-solution-default-rtdb.firebaseio.com"
-    };
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-
-    // Expõe globalmente as dependências e o banco de dados do Realtime Database
-    window.db = db;
-    window.ref = ref;
-    window.onValue = onValue;
-    window.remove = remove;
-    window.auth = auth;
-    window.onAuthStateChanged = onAuthStateChanged;
-  </script>
-
-  <style>
-    :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --accent: #ff5722;
-      --accent-hover: #e64a19;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --glass-bg: rgba(30, 41, 59, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --card-radius: 16px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    body {
-      background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary));
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    header {
-      width: 100%;
-      max-width: 900px;
-      text-align: center;
-      margin-top: 10px;
-      margin-bottom: 25px;
-    }
-
-    header h2 {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      background: linear-gradient(to right, #ff5722, #ff9800);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 5px;
-    }
-
-    header p {
-      font-size: 14px;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    /* Container Principal */
-    .container {
-      width: 100%;
-      max-width: 900px;
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Cards */
-    .card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      padding: 24px;
-      border-radius: var(--card-radius);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .card h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-left: 4px solid var(--accent);
-      padding-left: 10px;
-    }
-
-    /* Mapa */
-    #mapaAdmin {
-      height: 450px;
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      z-index: 1;
-    }
-
-    /* Lista de técnicos */
-    .tecnicos-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 450px;
-      overflow-y: auto;
-    }
-
-    .tecnico-item {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid var(--glass-border);
-      padding: 12px 16px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: var(--transition);
-    }
-
-    .tecnico-item:hover {
-      background: rgba(30, 41, 59, 0.7);
-      border-color: rgba(255, 87, 34, 0.3);
-    }
-
-    .tecnico-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .btn-remover {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .btn-remover:hover {
-      background: #ef4444;
-      color: white;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-voltar {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--glass-border);
-      color: var(--text-main);
-      padding: 10px 20px;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-      align-self: flex-start;
-      transition: var(--transition);
-    }
-
-    .btn-voltar:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateX(-2px);
-    }
-  </style>
+<style>
+:root{--bg-primary:#0f172a;--bg-secondary:#1e293b;--accent:#ff5722;--accent-hover:#e64a19;--text-main:#f8fafc;--text-muted:#94a3b8;--glass-bg:rgba(30,41,59,0.7);--glass-border:rgba(255,255,255,0.08);--card-radius:16px;--transition:all 0.3s cubic-bezier(0.4,0,0.2,1);}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Outfit',sans-serif;}
+body{background:radial-gradient(circle at top right,#1e1b4b,var(--bg-primary));color:var(--text-main);min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;}
+header{width:100%;max-width:900px;text-align:center;margin-top:10px;margin-bottom:25px;}
+header h2{font-size:32px;font-weight:800;letter-spacing:-1px;background:linear-gradient(to right,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px;}
+header p{font-size:14px;color:var(--text-muted);font-weight:400;}
+.container{width:100%;max-width:900px;display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+@media(max-width:768px){.container{grid-template-columns:1fr;}}
+.card{background:var(--glass-bg);backdrop-filter:blur(16px);border:1px solid var(--glass-border);padding:24px;border-radius:var(--card-radius);box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+.card h3{font-size:18px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--accent);padding-left:10px;}
+#mapaAdmin{height:450px;width:100%;border-radius:12px;border:1px solid var(--glass-border);z-index:1;}
+.tecnicos-list{display:flex;flex-direction:column;gap:12px;max-height:450px;overflow-y:auto;}
+.tecnico-item{background:rgba(30,41,59,0.5);border:1px solid var(--glass-border);padding:12px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;transition:var(--transition);}
+.tecnico-item:hover{background:rgba(30,41,59,0.7);border-color:rgba(255,87,34,0.3);}
+.tecnico-info{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;}
+.btn-remover{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:6px 12px;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;transition:var(--transition);}
+.btn-remover:hover{background:#ef4444;color:white;box-shadow:0 4px 12px rgba(239,68,68,0.3);}
+.btn-voltar{background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);color:var(--text-main);padding:10px 20px;text-decoration:none;font-size:14px;font-weight:600;border-radius:10px;display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;align-self:flex-start;transition:var(--transition);}
+.btn-voltar:hover{background:rgba(255,255,255,0.1);transform:translateX(-2px);}
+.status-online{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;display:inline-block;margin-right:6px;}
+.status-offline{width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:6px;}
+</style>
 </head>
 <body>
 
-  <header>
-    <h2>Painel Administrador</h2>
-    <p>Monitoramento e Controle em Tempo Real - ODJIM Solution</p>
-  </header>
+<header>
+  <h2>Painel Administrador</h2>
+  <p>Monitoramento e Controle em Tempo Real - ODJIM Solution</p>
+</header>
 
-  <a href="index.html" class="btn-voltar">
-    <svg style="width:16px; height:16px; fill:currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-    Voltar ao App Principal
-  </a>
+<a href="index.html" class="btn-voltar">
+  <svg style="width:16px;height:16px;fill:currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  Voltar ao App Principal
+</a>
 
-  <div class="container">
-    
-    <!-- MAPA -->
-    <div class="card">
-      <h3>Mapa de Técnicos</h3>
-      <div id="mapaAdmin"></div>
-    </div>
-
-    <!-- TÉCNICOS ONLINE -->
-    <div class="card">
-      <h3>Técnicos Online</h3>
-      <div class="tecnicos-list" id="listaTecnicos">
-        <div style="text-align: center; color: var(--text-muted); padding: 20px;">Carregando técnicos...</div>
-      </div>
-    </div>
-
+<div class="container">
+  <div class="card">
+    <h3>Mapa de Técnicos</h3>
+    <div id="mapaAdmin"></div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">📍 Os técnicos com localização ativa aparecem no mapa. Atualização em tempo real.</p>
   </div>
 
-  <script>
-    let mapaAdmin;
-    let marcadores = {};
+  <div class="card">
+    <h3>Técnicos Online</h3>
+    <div class="tecnicos-list" id="listaTecnicos">
+      <div style="text-align:center;color:var(--text-muted);padding:20px;">Carregando técnicos...</div>
+    </div>
+  </div>
+</div>
 
-    function iniciarMapa() {
-      // Coordenadas Luanda (-8.8383, 13.2344)
-      mapaAdmin = L.map('mapaAdmin').setView([-8.8383, 13.2344], 13);
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(mapaAdmin);
+const firebaseConfig = {
+  apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
+  authDomain: "odjim-solution.firebaseapp.com",
+  projectId: "odjim-solution",
+  storageBucket: "odjim-solution.firebasestorage.app",
+  messagingSenderId: "165673018775",
+  appId: "1:165673018775:web:c8b4cc6345b854763950d2"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let mapaAdmin;
+let marcadores = {};
+
+function iniciarMapa() {
+  mapaAdmin = L.map('mapaAdmin').setView([-8.8383, 13.2344], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(mapaAdmin);
+}
+
+function ouvirTecnicos() {
+  const tecnicosRef = collection(db, "tecnicos");
+  const locRef = collection(db, "localizacoes");
+
+  // Ouvir técnicos
+  onSnapshot(tecnicosRef, (snap) => {
+    const el = document.getElementById("listaTecnicos");
+    if (!el) return;
+
+    if (snap.empty) {
+      el.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Nenhum técnico cadastrado.</div>';
+      return;
     }
 
-    function ouvirTecnicos() {
-      if (!window.db) {
-        setTimeout(ouvirTecnicos, 500); // Aguarda inicialização do Firebase v10
+    let html = "";
+    snap.forEach((d) => {
+      const t = d.data();
+      const online = t.ultimaAtualizacao && (Date.now() - t.ultimaAtualizacao.toMillis?.() || 0) < 300000;
+      const statusClass = online ? 'status-online' : 'status-offline';
+      const statusText = online ? 'Online' : 'Offline';
+
+      html += `
+        <div class="tecnico-item">
+          <div class="tecnico-info">
+            <span>🔧</span>
+            <div>
+              <div>${t.nome || "Sem nome"}</div>
+              <div style="font-size:11px;color:var(--text-muted);">${t.especialidade || ""} · ${t.telefone || ""}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:var(--text-muted);"><span class="${statusClass}"></span>${statusText}</span>
+            <button class="btn-remover" onclick="removerTecnico('${d.id}')">Remover</button>
+          </div>
+        </div>
+      `;
+    });
+    el.innerHTML = html;
+  });
+
+  // Ouvir localizações em tempo real
+  onSnapshot(locRef, (snap) => {
+    snap.docChanges().forEach((change) => {
+      const data = change.doc.data();
+      const uid = change.doc.id;
+      const nome = data.nome || uid;
+
+      if (change.type === "removed" || !data.lat || !data.lng) {
+        if (marcadores[uid]) {
+          mapaAdmin.removeLayer(marcadores[uid]);
+          delete marcadores[uid];
+        }
         return;
       }
 
-      const tecnicosRef = window.ref(window.db, "tecnicos");
-      
-      window.onValue(tecnicosRef, (snapshot) => {
-        let listaHTML = "";
-        const dados = snapshot.val();
-
-        if (!dados) {
-          listaHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Nenhum técnico online no momento.</div>`;
-          // Remove todos os marcadores do mapa
-          Object.keys(marcadores).forEach(nome => {
-            mapaAdmin.removeLayer(marcadores[nome]);
-          });
-          marcadores = {};
-          document.getElementById("listaTecnicos").innerHTML = listaHTML;
-          return;
-        }
-
-        // Loop sobre os técnicos
-        Object.keys(dados).forEach((key) => {
-          const t = dados[key];
-          
-          listaHTML += `
-            <div class="tecnico-item">
-              <div class="tecnico-info">
-                <span>🔧</span>
-                <span>${t.nome}</span>
-              </div>
-              <button class="btn-remover" onclick="removerTecnico('${key}')">Remover</button>
-            </div>
-          `;
-
-          // Gerenciar marcador no mapa
-          if (t.lat && t.lon) {
-            if (!marcadores[t.nome]) {
-              marcadores[t.nome] = L.marker([t.lat, t.lon])
-                .addTo(mapaAdmin)
-                .bindPopup("<b>🔧 Técnico:</b> " + t.nome);
-            } else {
-              marcadores[t.nome].setLatLng([t.lat, t.lon]);
-            }
-          }
-        });
-
-        // Limpar marcadores de técnicos que saíram
-        Object.keys(marcadores).forEach(nome => {
-          const aindaExiste = Object.values(dados).some(t => t.nome === nome);
-          if (!aindaExiste) {
-            mapaAdmin.removeLayer(marcadores[nome]);
-            delete marcadores[nome];
-          }
-        });
-
-        document.getElementById("listaTecnicos").innerHTML = listaHTML;
-      });
-    }
-
-    async function removerTecnico(nome) {
-      if (confirm(`Deseja realmente remover o técnico "${nome}"?`)) {
-        try {
-          const tecnicoRef = window.ref(window.db, `tecnicos/${nome}`);
-          await window.remove(tecnicoRef);
-          alert("Técnico removido com sucesso!");
-        } catch (error) {
-          console.error("Erro ao remover técnico: ", error);
-          alert("Não foi possível remover o técnico.");
-        }
+      if (!marcadores[uid]) {
+        marcadores[uid] = L.marker([data.lat, data.lng])
+          .addTo(mapaAdmin)
+          .bindPopup(`<b>🔧 ${nome}</b><br>${data.especialidade || ""}<br><small>Atualizado: ${new Date(data.atualizadoEm?.toDate?.() || Date.now()).toLocaleTimeString("pt-PT")}</small>`);
+      } else {
+        marcadores[uid].setLatLng([data.lat, data.lng]);
+        marcadores[uid].setPopupContent(`<b>🔧 ${nome}</b><br>${data.especialidade || ""}<br><small>Atualizado: ${new Date(data.atualizadoEm?.toDate?.() || Date.now()).toLocaleTimeString("pt-PT")}</small>`);
       }
+    });
+  });
+}
+
+window.removerTecnico = async (id) => {
+  if (!confirm(`Deseja realmente remover o técnico?`)) return;
+  try {
+    await deleteDoc(doc(db, "tecnicos", id));
+    // Também remover localização se existir
+    await deleteDoc(doc(db, "localizacoes", id)).catch(() => {});
+    alert("Técnico removido com sucesso!");
+  } catch (error) {
+    console.error("Erro ao remover técnico:", error);
+    alert("Não foi possível remover o técnico.");
+  }
+};
+
+window.onload = () => {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("Acesso restrito! Faça login como Administrador na tela inicial.");
+      window.location.href = "index.html";
+      return;
     }
-
-    // Expor a função globalmente para o clique de botão
-    window.removerTecnico = removerTecnico;
-
-    window.onload = function() {
-      if (!window.auth) return;
-      window.onAuthStateChanged(window.auth, (user) => {
-        if (user) {
-          // Usuário autenticado, carrega o mapa e lista
-          iniciarMapa();
-          ouvirTecnicos();
-        } else {
-          // Redireciona para o login
-          alert("Acesso restrito! Por favor, faça login como Administrador na tela inicial.");
-          window.location.href = "index.html";
-        }
-      });
-    };
-  </script>
+    // Verificar se é admin
+    const userSnap = await getDoc(doc(db, "usuarios", user.uid));
+    const role = userSnap.exists() ? userSnap.data().role : null;
+    if (role !== "admin") {
+      alert("Acesso restrito a administradores.");
+      window.location.href = "index.html";
+      return;
+    }
+    iniciarMapa();
+    ouvirTecnicos();
+  });
+};
+</script>
 
 </body>
 </html>

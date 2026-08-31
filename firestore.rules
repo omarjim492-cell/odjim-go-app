@@ -1,39 +1,112 @@
-    match /avaliacoes/{id} {
-      allow read: if signedIn() && (isAdmin() || resource.data.clienteUid == request.auth.uid);
-      allow create: if isClient() && request.resource.data.clienteUid == request.auth.uid;
-      allow update, delete: if isAdmin();
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Funções auxiliares
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function userDoc() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+    function isAdmin() { return signedIn() && userDoc().role == "admin"; }
+    function isTecnico() { return signedIn() && userDoc().role == "tecnico"; }
+    function isCliente() { return signedIn() && userDoc().role == "cliente"; }
+    function role() {
+      return signedIn() ? userDoc().role : "anonimo";
     }
 
-    match /notificacoes/{id} {
-      allow read, update: if signedIn() && resource.data.destinatarioUid == request.auth.uid;
-      allow create: if signedIn() && (isAdmin() || isTechnician());
+    // Coleção usuarios (perfis com roles)
+    match /usuarios/{uid} {
+      allow read: if signedIn() && (isOwner(uid) || isAdmin());
+      allow create: if signedIn() && isOwner(uid);
+      allow update: if signedIn() && (isOwner(uid) || isAdmin());
       allow delete: if isAdmin();
     }
 
-    match /dispositivos/{id} {
-      allow read, create, update, delete: if signedIn() && resource.data.uid == request.auth.uid;
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+    // Coleção tecnicos (apenas metadados — SEM senhas!)
+    match /tecnicos/{id} {
+      allow read: if signedIn() && (isAdmin() || isTecnico() || isCliente());
+      allow create, update, delete: if isAdmin();
     }
 
+    // Coleção clientes
+    match /clientes/{uid} {
+      allow read: if signedIn() && (isOwner(uid) || isAdmin());
+      allow create: if signedIn() && isOwner(uid);
+      allow update: if signedIn() && (isOwner(uid) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Coleção pedidos
+    match /pedidos/{id} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.clienteUid == request.auth.uid ||
+        resource.data.tecnicoUid == request.auth.uid
+      );
+      allow create: if signedIn() && (isCliente() || isAdmin()) && request.resource.data.clienteUid == request.auth.uid;
+      allow update: if signedIn() && (
+        isAdmin() ||
+        resource.data.clienteUid == request.auth.uid ||
+        resource.data.tecnicoUid == request.auth.uid
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Coleção avaliacoes
+    match /avaliacoes/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.clienteUid == request.auth.uid);
+      allow create: if isCliente() && request.resource.data.clienteUid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Coleção notificacoes
+    match /notificacoes/{id} {
+      allow read, update: if signedIn() && resource.data.destinatarioUid == request.auth.uid;
+      allow create: if signedIn() && (isAdmin() || isTecnico());
+      allow delete: if isAdmin();
+    }
+
+    // Coleção tokens_fcm
+    match /tokens_fcm/{id} {
+      allow read: if isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin() || resource.data.uid == request.auth.uid;
+    }
+
+    // Coleção servicos
     match /servicos/{id} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
+    // Coleção config
     match /config/{id} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
+    // Coleção auditoria (logs)
     match /auditoria/{id} {
       allow read: if isAdmin();
-      allow create: if signedIn() && request.resource.data.atorUid == request.auth.uid
-        && request.resource.data.atorRole == role();
+      allow create: if signedIn() && request.resource.data.atorUid == request.auth.uid;
       allow update, delete: if false;
     }
 
+    // Coleção financeiro
     match /financeiro/{id} {
       allow read, write: if isAdmin();
+    }
+
+    // Coleção localizacoes (para tracking de técnicos)
+    match /localizacoes/{uid} {
+      allow read: if signedIn() && (isAdmin() || isOwner(uid));
+      allow create, update: if signedIn() && isOwner(uid);
+      allow delete: if isAdmin();
+    }
+
+    // Negar tudo o resto por defeito
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
