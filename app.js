@@ -5,12 +5,12 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore, initializeFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
-  addDoc, onSnapshot, query, where, orderBy, limit, startAfter,
-  getDocs, serverTimestamp, writeBatch
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail,
+  setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
+  initializeFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
   addDoc, onSnapshot, query, where, orderBy, limit, startAfter,
   getDocs, serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
