@@ -5,10 +5,10 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail,
-  setPersistence, browserLocalPersistence
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  getFirestore, initializeFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
+  addDoc, onSnapshot, query, where, orderBy, limit, startAfter,
+  getDocs, serverTimestamp, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
   getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
   addDoc, onSnapshot, query, where, orderBy, limit, startAfter,
@@ -30,7 +30,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true
+});
 let messaging = null;
 try { messaging = getMessaging(app); } catch(e) { console.log("FCM não disponível"); }
 
