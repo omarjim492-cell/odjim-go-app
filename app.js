@@ -30,9 +30,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true
-});
+const db = getFirestore(app);
 let messaging = null;
 try { messaging = getMessaging(app); } catch(e) { console.log("FCM não disponível"); }
 
@@ -431,9 +429,18 @@ window.loginAdmin = async () => {
 
   setLoading(btn, true);
   try {
+    console.log("[DEBUG] Login attempt:", email);
     const cred = await signInWithEmailAndPassword(auth, email, pass);
+    console.log("[DEBUG] Auth OK, UID:", cred.user.uid);
+    
+    console.log("[DEBUG] Reading Firestore document...");
     const userSnap = await getDoc(doc(db, "usuarios", cred.user.uid));
+    console.log("[DEBUG] Document exists:", userSnap.exists());
+    if (userSnap.exists()) {
+      console.log("[DEBUG] Data:", JSON.stringify(userSnap.data()));
+    }
     const role = userSnap.exists() ? userSnap.data().role : null;
+    console.log("[DEBUG] Role:", role);
 
     if (role !== "admin") {
       await signOut(auth);
