@@ -10,7 +10,7 @@ import {
   setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  initializeFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
+  getFirestore, collection, doc, setDoc, getDoc, updateDoc, deleteDoc,
   addDoc, onSnapshot, query, where, orderBy, limit, startAfter,
   getDocs, serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -89,7 +89,12 @@ window.irPara = (tela) => {
   const el = $("tela-" + tela);
   if (el) el.classList.add("ativa");
 
-  if (tela === "cliente") { initMap(); carregarInfoEmpresa(); carregarStatsReais(); carregarServicosCliente(); }
+  if (tela === "cliente") {
+    try { initMap(); } catch(e) { console.error("initMap erro:", e); }
+    try { carregarInfoEmpresa(); } catch(e) { console.error("carregarInfoEmpresa erro:", e); }
+    try { carregarStatsReais(); } catch(e) { console.error("carregarStatsReais erro:", e); }
+    try { carregarServicosCliente(); } catch(e) { console.error("carregarServicosCliente erro:", e); }
+  }
   if (tela === "tecnico") verificarTecnico();
   if (tela === "admin") verificarAdmin();
 };
@@ -122,10 +127,26 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ── CLIENTE ──
-window.irCliente = () => {
+window.irCliente = async () => {
+  // Se o usuário está logado mas o role ainda não carregou, esperar
+  if (state.user && state.role === null) {
+    toast("⏳ A verificar sessão...");
+    // Tentar carregar role manualmente
+    try {
+      const snap = await getDoc(doc(db, "usuarios", state.user.uid));
+      state.perfil = snap.exists() ? snap.data() : {};
+      state.role = state.perfil.role || "cliente";
+    } catch(e) {
+      console.error("Erro ao carregar perfil:", e);
+    }
+  }
+
   if (state.user && state.role === "cliente") {
     irPara("cliente");
     $("badge-cliente").textContent = state.user.displayName || "Cliente";
+  } else if (state.user && state.role && state.role !== "cliente") {
+    toast("❌ Esta conta é de " + state.role + ". Use o acesso correto.");
+    await signOut(auth);
   } else {
     $("modal-cadastro").classList.add("aberto");
   }
@@ -340,19 +361,28 @@ window.salvarInfo = async () => {
 };
 
 // ── TÉCNICO ──
-window.verificarTecnico = async () => {
+window.verificarAdmin = async () => {
   if (!state.user) {
-    $("tecnico-painel").style.display = "none";
-    $("tecnico-login").style.display = "block";
+    $("admin-login").style.display = "block";
+    $("admin-painel").style.display = "none";
     return;
   }
-  if (state.role !== "tecnico") {
-    $("tecnico-painel").style.display = "none";
-    $("tecnico-login").style.display = "block";
-    toast("❌ Acesso restrito a técnicos.");
+  // Se role ainda não carregou, tentar carregar
+  if (state.role === null) {
+    try {
+      const snap = await getDoc(doc(db, "usuarios", state.user.uid));
+      state.perfil = snap.exists() ? snap.data() : {};
+      state.role = state.perfil.role || null;
+    } catch(e) { console.error(e); }
+  }
+  
+  if (state.role !== "admin") {
+    $("admin-login").style.display = "block";
+    $("admin-painel").style.display = "none";
+    toast("❌ Acesso restrito a administradores.");
     return;
   }
-  mostrarPainelTecnico();
+  mostrarPainelAdmin();
 };
 
 window.loginTecnico = async () => {
