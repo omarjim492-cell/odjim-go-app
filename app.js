@@ -182,6 +182,7 @@ function initMap(){
 // ── PEDIDO ──
 async function enviarPedido(){
   const user = auth.currentUser;
+  const btnEnviar = document.querySelector("#tela-cliente button[onclick='enviarPedido()']");
 
   let nome = document.getElementById("c-nome").value.trim();
   let tel = document.getElementById("c-tel").value.trim();
@@ -201,6 +202,22 @@ async function enviarPedido(){
   }
 
   try {
+    // Desativar botão temporariamente contra cliques duplos
+    if(btnEnviar){ btnEnviar.disabled = true; btnEnviar.textContent = "⏳ A enviar..."; }
+
+    // Verificar se já existe um pedido igual pendente nos últimos 2 minutos
+    const recentCheck = await db.collection("pedidos")
+      .where("telefone", "==", tel)
+      .where("servico", "==", servico)
+      .where("estado", "==", "Aguardando técnico")
+      .get();
+
+    if(!recentCheck.empty){
+      toast("⚠️ Já tem um pedido idêntico aguardando atendimento.");
+      if(btnEnviar){ btnEnviar.disabled = false; btnEnviar.textContent = "🚀 Enviar Pedido"; }
+      return;
+    }
+
     const docRef = await db.collection("pedidos").add({
       nome: nome,
       telefone: tel,
@@ -208,40 +225,45 @@ async function enviarPedido(){
       local: local,
       servico: servico,
       descricao: desc,
-      inicio: document.getElementById("c-inicio").value || "",
-      fim: document.getElementById("c-fim").value || "",
+      inicio: document.getElementById("c-inicio") ? document.getElementById("c-inicio").value : "",
+      fim: document.getElementById("c-fim") ? document.getElementById("c-fim").value : "",
       estado: "Aguardando técnico",
       clienteUid: user ? user.uid : "",
       dataCriacao: new Date().toISOString()
     });
 
-    toast("✅ Pedido enviado!");
+    // Notificação de sucesso no ecrã da App
+    toast("🎉 Pedido efetuado com sucesso! Código: " + docRef.id.substring(0,6));
 
-    // Mensagem formatada para o WhatsApp
+    // Mensagem Formatada para WhatsApp Central ODJIM
     const mensagemZap = 
-`*--- ODJIM GO | NOVO PEDIDO ---*
+`*--- ODJIM SOLUTION | NOVO PEDIDO ---*
 
 👤 *Cliente:* ${nome}
 📞 *Contacto:* ${tel}
 📍 *Local:* ${local}
 🛠️ *Serviço:* ${servico}
-📝 *Detalhes:* ${desc || "Sem observações"}
-🆔 *Ref:* ${docRef.id}`;
+📝 *Detalhes:* ${desc || "Sem observações adicionais"}
+🆔 *Ref:* ${docRef.id}
 
-    // Altera o número abaixo para o teu contacto principal (com código do país 244)
-    const numeroEmpresa = "244900000000"; 
+---
+_Solicitação registada via Plataforma ODJIM GO_`;
+
+    const numeroEmpresa = "244900000000"; // Substitui pelo número oficial
     const urlZap = `https://wa.me/${numeroEmpresa}?text=${encodeURIComponent(mensagemZap)}`;
     window.open(urlZap, "_blank");
 
-    // Limpeza do formulário
+    // Limpeza
     ["c-nome","c-tel","c-email","c-local","c-desc","c-inicio","c-fim"].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.value = "";
     });
-    if(marker){ map.removeLayer(marker); marker = null; }
+    if(marker && map){ map.removeLayer(marker); marker = null; }
 
   } catch(e) {
-    toast("❌ Erro: " + e.message);
+    toast("❌ Erro ao submeter pedido: " + e.message);
+  } finally {
+    if(btnEnviar){ btnEnviar.disabled = false; btnEnviar.textContent = "🚀 Enviar Pedido"; }
   }
 }
 
@@ -518,22 +540,51 @@ function abrirTab(id,btn){
 }
 
 // ── TÉCNICOS ADMIN ──
-let tecnicosListener=null;
-function carregarTecnicos(){
-  const el=document.getElementById("a-tecnicos");
-  if(!el)return;
-  el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';
-  if(tecnicosListener){tecnicosListener();tecnicosListener=null;}
-  tecnicosListener=db.collection("tecnicos").onSnapshot(snap=>{
-    if(snap.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico cadastrado.</div>';return;}
-    let html="";
-    snap.forEach(d=>{
-      const t=d.data();
-      const ini=t.nome?t.nome[0].toUpperCase():"T";
-      html+='<div class="tecnico-card"><div class="tecnico-avatar">'+ini+'</div><div class="tecnico-info"><h4>'+t.nome+'</h4><p>'+t.especialidade+' · '+t.telefone+'</p><p style="color:var(--muted);font-size:11px;">'+t.email+'</p></div><button onclick="removerTecnico(\''+d.id+'\')" style="margin-left:auto;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button></div>';
+async function aceitarPedido(id){
+  try {
+    const docRef = db.collection("pedidos").doc(id);
+    const doc = await docRef.get();
+    
+    if(!doc.exists){
+      toast("❌ Pedido não encontrado.");
+      return;
+    }
+
+    const p = doc.data();
+    await docRef.update({ 
+      estado: "Técnico a caminho",
+      tecnicoAtribuido: auth.currentUser ? auth.currentUser.email : "Técnico ODJIM"
     });
-    el.innerHTML=html;
-  },e=>{el.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Erro: '+e.message+'</div>';});
+
+    toast("✅ Pedido aceite com sucesso!");
+
+    // Preparar mensagem formal para o cliente no WhatsApp
+    const zapCliente = (p.telefone || "").replace(/[^0-9]/g, "");
+    
+    const mensagemFormal = 
+`*ESTIMA-DO(A) ${p.nome.toUpperCase()}*
+
+Gostaríamos de informar que o seu pedido de serviço foi aceite e já se encontra em processamento.
+
+📌 *Resumo do Atendimento:*
+• *Serviço:* ${p.servico}
+• *Ref. Pedido:* ${id}
+• *Estado:* Técnico a caminho / Em atendimento
+
+A equipa técnica da *ODJIM Solution* entrará em contacto para dar seguimento ao seu atendimento na localização indicada (${p.local}).
+
+---
+*ODJIM Solution | Prestação de Serviços em Luanda*
+_A sua plataforma de confiança para serviços técnicos e domésticos._`;
+
+    if(zapCliente){
+      const urlZap = `https://wa.me/244${zapCliente}?text=${encodeURIComponent(mensagemFormal)}`;
+      window.open(urlZap, "_blank");
+    }
+
+  } catch(e){
+    toast("❌ Erro ao aceitar pedido: " + e.message);
+  }
 }
 
 async function removerTecnico(id){
