@@ -748,7 +748,6 @@ async function exportarCSV() {
   }
 }
 
-
 async function exportarPDF(){
   try{
     toast("⏳ A gerar PDF...");
