@@ -399,23 +399,36 @@ async function loginTecnico(){
 function mostrarPainelTecnico(){
   document.getElementById("tecnico-login").style.display="none";
   document.getElementById("tecnico-painel").style.display="block";
-  monitorarPedidos("t-pedidos");
-}
+  
+  // Limpar listener anterior se existir
+  if (window.pedidosTecnicoListener) window.pedidosTecnicoListener();
+  
+  window.pedidosTecnicoListener = db.collection("pedidos")
+    .orderBy("dataCriacao", "desc")
+    .onSnapshot(snap => {
+      const el = document.getElementById("t-pedidos");
+      if(!el) return;
+      if(snap.empty){
+        el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;">Nenhum pedido no momento.</div>';
+        return;
+      }
+      
+      let html = "";
+      snap.forEach(d => {
+        const p = d.data();
+        const sc = p.estado === "Aguardando técnico" ? "s-aguardando" : "s-caminho";
+        const zap = (p.telefone || "").replace(/[^0-9]/g, "");
+        
+        const btn = p.estado === "Aguardando técnico"
+          ? `<button onclick="aceitarPedido('${d.id}')" style="margin-top:8px;background:var(--accent);border:none;color:var(--bg);padding:11px;width:100%;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">✅ Aceitar Pedido</button>`
+          : `<a href="https://wa.me/244${zap}?text=${encodeURIComponent('Olá! Aceitei o seu pedido na ODJIM Solution.')}" target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:11px;border-radius:8px;font-weight:700;font-size:13px;margin-top:8px;">💬 Contactar Cliente</a>`;
 
-async function logoutTecnico(){
-  await auth.signOut();
-  localStorage.removeItem("odjim_tecnico_email");
-  localStorage.removeItem("odjim_tecnico_pass");
-  document.getElementById("tecnico-painel").style.display="none";
-  document.getElementById("tecnico-login").style.display="block";
-  toast("👋 Sessão terminada.");
-}
-
-async function recuperarSenhaTecnico(){
-  const email=document.getElementById("t-email").value.trim();
-  if(!email){toast("⚠️ Escreva o email primeiro.");return;}
-  try{await auth.sendPasswordResetEmail(email);toast("📧 Email enviado! Verifique o Spam.");}
-  catch(e){toast("📧 Email enviado! Verifique o Spam.");}
+        html += `<div class="pedido-card"><div class="pedido-top"><span class="pedido-servico">${p.servico||""}</span><span class="badge-status ${sc}">${p.estado||""}</span></div><div class="pedido-info"><p><strong>${p.nome||""}</strong> · ${p.telefone||""}</p><p>📍 ${p.local||""}</p>${p.descricao?'<p>📝 '+p.descricao+'</p>':""}</div>${btn}</div>`;
+      });
+      el.innerHTML = html;
+    }, err => {
+      console.error("Erro ao carregar pedidos do técnico:", err);
+    });
 }
 
 // ── ADMIN ──
