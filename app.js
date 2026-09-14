@@ -703,25 +703,51 @@ function desenharBarras(servicos){
 }
 
 // ── RELATÓRIOS ──
-async function exportarCSV(){
-  try{
+async function exportarCSV() {
+  try {
     toast("⏳ A gerar CSV...");
-    const snap=await db.collection("pedidos").get();
-    if(snap.empty){toast("⚠️ Não há pedidos.");return;}
-    const rows=[["Nome","Telefone","Email","Serviço","Local","Descrição","Estado","Data Início","Data Fim","Data Criação"]];
-    snap.forEach(d=>{
-      const p=d.data();
-      rows.push([p.nome||"",p.telefone||"",p.email||"",p.servico||"",p.local||"",p.descricao||"",p.estado||"",p.inicio||"",p.fim||"",p.dataCriacao?new Date(p.dataCriacao).toLocaleString("pt-PT"):""]);
+    const snap = await db.collection("pedidos").get();
+    if (snap.empty) {
+      toast("⚠️ Não há pedidos para exportar.");
+      return;
+    }
+
+    // Cabeçalho do CSV
+    let csvContent = "\uFEFF"; // BOM para garantir compatibilidade de carateres (acentos/UTF-8) no Excel
+    csvContent += "Nome;Telefone;Email;Serviço;Localização;Descrição;Estado;Data\n";
+
+    snap.forEach(doc => {
+      const p = doc.data();
+      const nome = (p.nome || "").replace(/;/g, ",");
+      const tel = (p.telefone || "").replace(/;/g, ",");
+      const email = (p.email || "").replace(/;/g, ",");
+      const servico = (p.servico || "").replace(/;/g, ",");
+      const local = (p.local || "").replace(/;/g, ",");
+      const desc = (p.descricao || "").replace(/;/g, ",").replace(/\n/g, " ");
+      const estado = (p.estado || "").replace(/;/g, ",");
+      const data = p.dataCriacao ? new Date(p.dataCriacao).toLocaleDateString("pt-PT") : "";
+
+      csvContent += `"${nome}";"${tel}";"${email}";"${servico}";"${local}";"${desc}";"${estado}";"${data}"\n`;
     });
-    const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
-    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;a.download="ODJIM_"+new Date().toLocaleDateString("pt-PT").replace(/\//g,"-")+".csv";
-    a.click();URL.revokeObjectURL(url);
-    toast("✅ CSV exportado!");
-  }catch(e){toast("❌ Erro: "+e.message);}
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const hoje = new Date().toISOString().split("T")[0];
+    
+    a.href = url;
+    a.download = `ODJIM_Pedidos_${hoje}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast("✅ Ficheiro CSV exportado com sucesso!");
+  } catch (e) {
+    toast("❌ Erro ao exportar CSV: " + e.message);
+  }
 }
+
 
 async function exportarPDF(){
   try{
