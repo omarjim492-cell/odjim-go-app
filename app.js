@@ -43,6 +43,18 @@ function irCliente(){
   if(user){
     irPara("cliente");
     document.getElementById("badge-cliente").textContent=user.displayName||"Cliente";
+    
+    // Preenche automaticamente o nome e email do utilizador logado
+    if(document.getElementById("c-nome")) document.getElementById("c-nome").value = user.displayName || "";
+    if(document.getElementById("c-email")) document.getElementById("c-email").value = user.email || "";
+    
+    // Procura o telefone no perfil salvo no Firestore
+    db.collection("clientes").doc(user.uid).get().then(doc => {
+      if(doc.exists && doc.data().telefone){
+        if(document.getElementById("c-tel")) document.getElementById("c-tel").value = doc.data().telefone;
+      }
+    }).catch(()=>{});
+
   } else {
     document.getElementById("modal-cadastro").classList.add("aberto");
   }
@@ -169,26 +181,68 @@ function initMap(){
 
 // ── PEDIDO ──
 async function enviarPedido(){
-  const nome=document.getElementById("c-nome").value.trim();
-  const tel=document.getElementById("c-tel").value.trim();
-  const local=document.getElementById("c-local").value.trim();
-  if(!nome||!tel||!local){toast("⚠️ Preencha Nome, Telefone e Localização.");return;}
-  try{
-    await db.collection("pedidos").add({
-      nome,telefone:tel,
-      email:document.getElementById("c-email").value,
-      local,servico:document.getElementById("c-servico").value,
-      descricao:document.getElementById("c-desc").value,
-      inicio:document.getElementById("c-inicio").value||"",
-      fim:document.getElementById("c-fim").value||"",
-      estado:"Aguardando técnico",
-      clienteUid:auth.currentUser?auth.currentUser.uid:"",
-      dataCriacao:new Date().toISOString()
+  const user = auth.currentUser;
+
+  let nome = document.getElementById("c-nome").value.trim();
+  let tel = document.getElementById("c-tel").value.trim();
+  let email = document.getElementById("c-email").value.trim();
+  const local = document.getElementById("c-local").value.trim();
+  const servico = document.getElementById("c-servico").value;
+  const desc = document.getElementById("c-desc").value.trim();
+
+  if (user) {
+    if (!nome) nome = user.displayName || "Cliente Registado";
+    if (!email) email = user.email || "";
+  }
+
+  if (!nome || !tel || !local) {
+    toast("⚠️ Preencha Nome, Telefone e Localização.");
+    return;
+  }
+
+  try {
+    const docRef = await db.collection("pedidos").add({
+      nome: nome,
+      telefone: tel,
+      email: email,
+      local: local,
+      servico: servico,
+      descricao: desc,
+      inicio: document.getElementById("c-inicio").value || "",
+      fim: document.getElementById("c-fim").value || "",
+      estado: "Aguardando técnico",
+      clienteUid: user ? user.uid : "",
+      dataCriacao: new Date().toISOString()
     });
-    toast("✅ Pedido enviado! Entraremos em contacto em breve.");
-    ["c-nome","c-tel","c-email","c-local","c-desc","c-inicio","c-fim"].forEach(id=>document.getElementById(id).value="");
-    if(marker){map.removeLayer(marker);marker=null;}
-  }catch(e){toast("❌ Erro: "+e.message);}
+
+    toast("✅ Pedido enviado!");
+
+    // Mensagem formatada para o WhatsApp
+    const mensagemZap = 
+`*--- ODJIM GO | NOVO PEDIDO ---*
+
+👤 *Cliente:* ${nome}
+📞 *Contacto:* ${tel}
+📍 *Local:* ${local}
+🛠️ *Serviço:* ${servico}
+📝 *Detalhes:* ${desc || "Sem observações"}
+🆔 *Ref:* ${docRef.id}`;
+
+    // Altera o número abaixo para o teu contacto principal (com código do país 244)
+    const numeroEmpresa = "244900000000"; 
+    const urlZap = `https://wa.me/${numeroEmpresa}?text=${encodeURIComponent(mensagemZap)}`;
+    window.open(urlZap, "_blank");
+
+    // Limpeza do formulário
+    ["c-nome","c-tel","c-email","c-local","c-desc","c-inicio","c-fim"].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.value = "";
+    });
+    if(marker){ map.removeLayer(marker); marker = null; }
+
+  } catch(e) {
+    toast("❌ Erro: " + e.message);
+  }
 }
 
 // ── INQUÉRITO ──
@@ -673,6 +727,7 @@ async function exportarPDF(){
   try{
     toast("⏳ A gerar PDF...");
     const snap=await db.collection("pedidos").get();
+    if(snap.empty){toast("⚠️ Não há pedidos.");return;}
     let pendentes=0,concluidos=0;
     snap.forEach(d=>{if(d.data().estado==="Aguardando técnico")pendentes++;else concluidos++;});
     const data=new Date().toLocaleDateString("pt-PT");
@@ -682,15 +737,40 @@ async function exportarPDF(){
     docs.slice(0,20).forEach((p,i)=>{
       const cor=p.estado==="Aguardando técnico"?"#f59e0b":"#10b981";
       const dataPed=p.dataCriacao?new Date(p.dataCriacao).toLocaleDateString("pt-PT"):"";
-      linhas+="<tr><td>"+(i+1)+"</td><td>"+(p.nome||"")+"</td><td>"+(p.telefone||"")+"</td><td>"+(p.servico||"")+"</td><td><span style='background:"+cor+"22;color:"+cor+";padding:2px 8px;border-radius:10px;font-size:11px;'>"+(p.estado||"")+"</span></td><td>"+dataPed+"</td></tr>";
+      linhas+="<tr><td>"+(i+1)+"</td><td>"+(p.nome||"")+"</td><td>"+(p.servico||"")+"</td><td>"+(p.local||"")+"</td><td style='color:"+cor+";font-weight:bold;'>"+(p.estado||"")+"</td><td>"+dataPed+"</td></tr>";
     });
-    const html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Relatório ODJIM</title><style>body{font-family:sans-serif;margin:0;padding:0;}header{background:linear-gradient(135deg,#ff9800,#ff5722);padding:24px 32px;color:white;}h1{margin:0;font-size:24px;}p{margin:4px 0 0;opacity:.9;font-size:13px;}.kpis{display:flex;gap:16px;padding:20px 32px;background:#f9fafb;}.kpi{background:white;border-radius:10px;padding:14px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08);}.kpi .n{font-size:24px;font-weight:800;color:#ff9800;}.kpi .l{font-size:11px;color:#6b7280;}.section{padding:20px 32px;}h2{font-size:16px;font-weight:700;border-left:4px solid #ff9800;padding-left:8px;}table{width:100%;border-collapse:collapse;font-size:12px;}th{background:#f3f4f6;padding:8px;text-align:left;}td{padding:8px;border-bottom:1px solid #e5e7eb;}footer{text-align:center;padding:16px;color:#9ca3af;font-size:11px;border-top:1px solid #e5e7eb;}</style></head><body><header><h1>🇦🇴 ODJIM Solution</h1><p>Relatório gerado em "+data+"</p></header><div class='kpis'><div class='kpi'><div class='n'>"+snap.size+"</div><div class='l'>Total Pedidos</div></div><div class='kpi'><div class='n'>"+pendentes+"</div><div class='l'>Aguardando</div></div><div class='kpi'><div class='n'>"+concluidos+"</div><div class='l'>Concluídos</div></div></div><div class='section'><h2>Últimos 20 Pedidos</h2><table><thead><tr><th>#</th><th>Cliente</th><th>Telefone</th><th>Serviço</th><th>Estado</th><th>Data</th></tr></thead><tbody>"+linhas+"</tbody></table></div><footer>ODJIM Solution • Luanda, Angola • "+data+"</footer></body></html>";
-    const blob=new Blob([html],{type:"text/html;charset=utf-8;"});
-    const url=URL.createObjectURL(blob);
-    const win=window.open(url,"_blank");
-    if(win){win.onload=()=>{win.print();URL.revokeObjectURL(url);};}
-    toast("✅ PDF aberto! Usa Imprimir para guardar.");
-  }catch(e){toast("❌ Erro: "+e.message);}
+
+    const html = `
+      <html>
+      <head>
+        <style>
+          body{font-family:sans-serif;padding:20px;color:#333;}
+          h1{color:#ff9800;}
+          table{width:100%;border-collapse:collapse;margin-top:20px;}
+          th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:12px;}
+          th{background:#f4f4f4;}
+        </style>
+      </head>
+      <body>
+        <h1>ODJIM Solution - Relatório de Pedidos</h1>
+        <p>Data de emissão: ${data}</p>
+        <p><strong>Resumo:</strong> Pendentes: ${pendentes} | Concluídos: ${concluidos}</p>
+        <table>
+          <thead>
+            <tr><th>#</th><th>Cliente</th><th>Serviço</th><th>Local</th><th>Estado</th><th>Data</th></tr>
+          </thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </body>
+      </html>`;
+
+    const win = window.open("","","width=800,height=600");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(()=>{ win.print(); win.close(); }, 500);
+    toast("✅ PDF pronto para impressão!");
+  }catch(e){toast("❌ Erro ao exportar PDF: "+e.message);}
 }
 
 // ── NOTIFICAÇÕES ──
