@@ -3,7 +3,7 @@
 
 // ── SERVICE WORKER ──
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("firebase-messaging-sw.js").catch(e=>console.log(e));
+  navigator.serviceWorker.register("firebase-messaging-sw.js?v=2").catch(e=>console.log(e));
 }
 
 // ── TOAST ──
@@ -27,7 +27,9 @@ function aguardarAuth(){
 function irPara(tela){
   document.getElementById("splash").style.display="none";
   document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
-  document.getElementById("tela-"+tela).classList.add("ativa");
+  const elTela = document.getElementById("tela-"+tela);
+  if(elTela) elTela.classList.add("ativa");
+  
   if(tela==="cliente"){initMap();carregarInfoEmpresa();carregarStatsReais();carregarServicosCliente();}
   if(tela==="tecnico")verificarTecnico();
   if(tela==="admin")verificarAdmin();
@@ -42,7 +44,8 @@ function irCliente(){
   const user=auth.currentUser;
   if(user){
     irPara("cliente");
-    document.getElementById("badge-cliente").textContent=user.displayName||"Cliente";
+    const badge = document.getElementById("badge-cliente");
+    if(badge) badge.textContent=user.displayName||"Cliente";
     
     if(document.getElementById("c-nome")) document.getElementById("c-nome").value = user.displayName || "";
     if(document.getElementById("c-email")) document.getElementById("c-email").value = user.email || "";
@@ -54,13 +57,16 @@ function irCliente(){
     }).catch(()=>{});
 
   } else {
-    document.getElementById("modal-cadastro").classList.add("aberto");
+    const modal = document.getElementById("modal-cadastro");
+    if(modal) modal.classList.add("aberto");
   }
 }
 
 function modalTab(tab){
-  document.getElementById("modal-login").style.display=tab==="login"?"block":"none";
-  document.getElementById("modal-registo").style.display=tab==="registo"?"block":"none";
+  const mLogin = document.getElementById("modal-login");
+  const mReg = document.getElementById("modal-registo");
+  if(mLogin) mLogin.style.display=tab==="login"?"block":"none";
+  if(mReg) mReg.style.display=tab==="registo"?"block":"none";
   document.querySelectorAll(".modal-tab").forEach((b,i)=>b.classList.toggle("ativa",(i===0&&tab==="login")||(i===1&&tab==="registo")));
 }
 
@@ -71,9 +77,11 @@ async function loginCliente(){
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
     const cred=await auth.signInWithEmailAndPassword(email,pass);
-    document.getElementById("modal-cadastro").classList.remove("aberto");
+    const modal = document.getElementById("modal-cadastro");
+    if(modal) modal.classList.remove("aberto");
     irPara("cliente");
-    document.getElementById("badge-cliente").textContent=cred.user.displayName||"Cliente";
+    const badge = document.getElementById("badge-cliente");
+    if(badge) badge.textContent=cred.user.displayName||"Cliente";
     toast("✅ Bem-vindo de volta!");
   }catch(e){
     toast("❌ Email ou senha incorretos.");
@@ -93,9 +101,11 @@ async function cadastrarCliente(){
     await db.collection("clientes").doc(cred.user.uid).set({
       nome,email,telefone:tel,uid:cred.user.uid,criadoEm:new Date().toISOString()
     });
-    document.getElementById("modal-cadastro").classList.remove("aberto");
+    const modal = document.getElementById("modal-cadastro");
+    if(modal) modal.classList.remove("aberto");
     irPara("cliente");
-    document.getElementById("badge-cliente").textContent=nome;
+    const badge = document.getElementById("badge-cliente");
+    if(badge) badge.textContent=nome;
     toast("🎉 Bem-vindo, "+nome+"!");
   }catch(e){
     if(e.code==="auth/email-already-in-use")toast("❌ Email já registado. Use Entrar.");
@@ -122,22 +132,28 @@ async function logoutCliente(){
 function abrirPerfil(){
   const user=auth.currentUser;
   if(!user){
-    document.getElementById("modal-cadastro").classList.add("aberto");
+    const modal = document.getElementById("modal-cadastro");
+    if(modal) modal.classList.add("aberto");
     return;
   }
   const modal=document.getElementById("modal-perfil");
   if(!modal){return;}
   modal.classList.add("aberto");
   const nome=user.displayName||"";
-  document.getElementById("perfil-avatar").textContent=nome?nome[0].toUpperCase():"?";
-  document.getElementById("perfil-nome-display").textContent=nome||"Sem nome";
-  document.getElementById("perfil-email-display").textContent=user.email||"";
-  document.getElementById("perfil-nome").value=nome;
+  const avatar = document.getElementById("perfil-avatar");
+  if(avatar) avatar.textContent=nome?nome[0].toUpperCase():"?";
+  const pNomeDisp = document.getElementById("perfil-nome-display");
+  if(pNomeDisp) pNomeDisp.textContent=nome||"Sem nome";
+  const pEmailDisp = document.getElementById("perfil-email-display");
+  if(pEmailDisp) pEmailDisp.textContent=user.email||"";
+  const pNome = document.getElementById("perfil-nome");
+  if(pNome) pNome.value=nome;
+  
   db.collection("clientes").doc(user.uid).get().then(doc=>{
     if(doc.exists){
       const d=doc.data();
-      if(d.telefone)document.getElementById("perfil-tel").value=d.telefone;
-      if(d.morada)document.getElementById("perfil-morada").value=d.morada;
+      if(d.telefone && document.getElementById("perfil-tel")) document.getElementById("perfil-tel").value=d.telefone;
+      if(d.morada && document.getElementById("perfil-morada")) document.getElementById("perfil-morada").value=d.morada;
     }
   }).catch(()=>{});
 }
@@ -156,7 +172,8 @@ async function salvarPerfil(){
   try{
     if(nome)await user.updateProfile({displayName:nome});
     await db.collection("clientes").doc(user.uid).set({nome,telefone:tel,morada,email:user.email,uid:user.uid,atualizadoEm:new Date().toISOString()},{merge:true});
-    document.getElementById("badge-cliente").textContent=nome||"Cliente";
+    const badge = document.getElementById("badge-cliente");
+    if(badge) badge.textContent=nome||"Cliente";
     fecharPerfil();
     toast("✅ Perfil actualizado!");
   }catch(e){toast("❌ Erro: "+e.message);}
@@ -165,6 +182,8 @@ async function salvarPerfil(){
 // ── MAPA ──
 let map,marker;
 function initMap(){
+  const elMap = document.getElementById("mapa");
+  if(!elMap) return;
   if(map){setTimeout(()=>map.invalidateSize(),300);return;}
   setTimeout(()=>{
     map=L.map("mapa").setView([-8.8383,13.2344],13);
@@ -172,7 +191,8 @@ function initMap(){
     map.on("click",e=>{
       const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);
       if(marker)marker.setLatLng(e.latlng);else marker=L.marker(e.latlng).addTo(map);
-      document.getElementById("c-local").value="Lat: "+lat+", Lon: "+lng;
+      const cLocal = document.getElementById("c-local");
+      if(cLocal) cLocal.value="Lat: "+lat+", Lon: "+lng;
     });
   },400);
 }
@@ -182,12 +202,12 @@ async function enviarPedido(){
   const user = auth.currentUser;
   const btnEnviar = document.querySelector("#tela-cliente button[onclick='enviarPedido()']");
 
-  let nome = document.getElementById("c-nome").value.trim();
-  let tel = document.getElementById("c-tel").value.trim();
-  let email = document.getElementById("c-email").value.trim();
-  const local = document.getElementById("c-local").value.trim();
-  const servico = document.getElementById("c-servico").value;
-  const desc = document.getElementById("c-desc").value.trim();
+  let nome = document.getElementById("c-nome") ? document.getElementById("c-nome").value.trim() : "";
+  let tel = document.getElementById("c-tel") ? document.getElementById("c-tel").value.trim() : "";
+  let email = document.getElementById("c-email") ? document.getElementById("c-email").value.trim() : "";
+  const local = document.getElementById("c-local") ? document.getElementById("c-local").value.trim() : "";
+  const servico = document.getElementById("c-servico") ? document.getElementById("c-servico").value : "";
+  const desc = document.getElementById("c-desc") ? document.getElementById("c-desc").value.trim() : "";
 
   if (user) {
     if (!nome) nome = user.displayName || "Cliente Registado";
@@ -202,7 +222,6 @@ async function enviarPedido(){
   try {
     if(btnEnviar){ btnEnviar.disabled = true; btnEnviar.textContent = "⏳ A enviar..."; }
 
-    // Evita duplicados em aberto com o mesmo telefone e serviço
     const recentCheck = await db.collection("pedidos")
       .where("telefone", "==", tel)
       .where("servico", "==", servico)
@@ -267,20 +286,30 @@ function avaliar(btn,nota,emoji,label){
   document.querySelectorAll(".emoji-btn").forEach(b=>b.classList.remove("sel"));
   btn.classList.add("sel");
   avaliacaoAtual={nota,emoji,label};
-  document.getElementById("inq-comentario").style.display="block";
-  document.getElementById("inq-feedback").style.display="none";
+  const inqCom = document.getElementById("inq-comentario");
+  if(inqCom) inqCom.style.display="block";
+  const inqFeed = document.getElementById("inq-feedback");
+  if(inqFeed) inqFeed.style.display="none";
 }
 
 async function enviarAvaliacao(){
   if(!avaliacaoAtual){toast("⚠️ Selecione primeiro.");return;}
   try{
-    await db.collection("avaliacoes").add({...avaliacaoAtual,comentario:document.getElementById("av-comentario").value,data:new Date().toISOString()});
+    const comEl = document.getElementById("av-comentario");
+    await db.collection("avaliacoes").add({...avaliacaoAtual,comentario:comEl?comEl.value:"",data:new Date().toISOString()});
     const msgs={1:"Lamentamos! Vamos melhorar. 🙏",2:"Obrigado! Melhoraremos. 💪",3:"Obrigado! Continuamos. 🌱",4:"Fico feliz! 😊",5:"Uau! Motiva-nos! 🚀"};
-    document.getElementById("feedback-em").textContent=avaliacaoAtual.emoji;
-    document.getElementById("feedback-msg").textContent=msgs[avaliacaoAtual.nota];
-    document.getElementById("inq-comentario").style.display="none";
-    document.getElementById("inq-feedback").style.display="block";
-    document.getElementById("av-comentario").value="";
+    
+    const fEm = document.getElementById("feedback-em");
+    if(fEm) fEm.textContent=avaliacaoAtual.emoji;
+    const fMsg = document.getElementById("feedback-msg");
+    if(fMsg) fMsg.textContent=msgs[avaliacaoAtual.nota];
+    
+    const inqCom = document.getElementById("inq-comentario");
+    if(inqCom) inqCom.style.display="none";
+    const inqFeed = document.getElementById("inq-feedback");
+    if(inqFeed) inqFeed.style.display="block";
+    
+    if(comEl) comEl.value="";
     avaliacaoAtual=null;
   }catch(e){toast("❌ Erro: "+e.message);}
 }
@@ -290,27 +319,27 @@ function carregarInfoEmpresa(){
   db.collection("config").doc("empresa").get().then(doc=>{
     if(doc.exists){
       const d=doc.data();
-      if(d.titulo)document.getElementById("info-titulo").textContent=d.titulo;
-      if(d.descricao)document.getElementById("info-descricao").textContent=d.descricao;
-      if(d.sobre)document.getElementById("info-sobre").textContent=d.sobre;
-      if(d.stat1)document.getElementById("info-stat1").textContent=d.stat1;
+      if(d.titulo && document.getElementById("info-titulo")) document.getElementById("info-titulo").textContent=d.titulo;
+      if(d.descricao && document.getElementById("info-descricao")) document.getElementById("info-descricao").textContent=d.descricao;
+      if(d.sobre && document.getElementById("info-sobre")) document.getElementById("info-sobre").textContent=d.sobre;
+      if(d.stat1 && document.getElementById("info-stat1")) document.getElementById("info-stat1").textContent=d.stat1;
     }
   }).catch(()=>{});
 }
 
 async function salvarInfo(){
-  const titulo=document.getElementById("edit-titulo").value.trim();
-  const descricao=document.getElementById("edit-descricao").value.trim();
-  const sobre=document.getElementById("edit-sobre").value.trim();
-  const stat1=document.getElementById("edit-stat1").value.trim();
+  const titulo=document.getElementById("edit-titulo") ? document.getElementById("edit-titulo").value.trim() : "";
+  const descricao=document.getElementById("edit-descricao") ? document.getElementById("edit-descricao").value.trim() : "";
+  const sobre=document.getElementById("edit-sobre") ? document.getElementById("edit-sobre").value.trim() : "";
+  const stat1=document.getElementById("edit-stat1") ? document.getElementById("edit-stat1").value.trim() : "";
   if(!titulo&&!descricao&&!sobre){toast("⚠️ Preencha pelo menos um campo.");return;}
   try{
     await db.collection("config").doc("empresa").set({titulo:titulo||"ODJIM Solution",descricao,sobre,stat1:stat1||"50+",atualizadoEm:new Date().toISOString()},{merge:true});
     toast("✅ Informações guardadas!");
-    if(titulo)document.getElementById("info-titulo").textContent=titulo;
-    if(descricao)document.getElementById("info-descricao").textContent=descricao;
-    if(sobre)document.getElementById("info-sobre").textContent=sobre;
-    if(stat1)document.getElementById("info-stat1").textContent=stat1;
+    if(titulo && document.getElementById("info-titulo")) document.getElementById("info-titulo").textContent=titulo;
+    if(descricao && document.getElementById("info-descricao")) document.getElementById("info-descricao").textContent=descricao;
+    if(sobre && document.getElementById("info-sobre")) document.getElementById("info-sobre").textContent=sobre;
+    if(stat1 && document.getElementById("info-stat1")) document.getElementById("info-stat1").textContent=stat1;
   }catch(e){toast("❌ Erro: "+e.message);}
 }
 
@@ -349,7 +378,7 @@ function carregarServicosCliente(){
     let html="";
     snap.forEach(d=>{
       const s=d.data();
-      html+='<div class="servico-detalhe" onclick="toggleServico(this)"><div class="servico-header"><span>'+s.emoji+'</span><span>'+s.nome+'</span><span class="seta">›</span></div><div class="servico-body">'+s.descricao+'<br>'+(s.preco?'<span style="color:var(--accent);font-weight:700;">'+s.preco+'</span>':'')+'</div></div>';
+      html+='<div class="servico-detalhe" onclick="toggleServico(this)"><div class="servico-header"><span>'+(s.emoji||'🛠️')+'</span><span>'+s.nome+'</span><span class="seta">›</span></div><div class="servico-body">'+s.descricao+'<br>'+(s.preco?'<span style="color:var(--accent);font-weight:700;">'+s.preco+'</span>':'')+'</div></div>';
     });
     el.innerHTML=html;
     const select=document.getElementById("c-servico");
@@ -366,21 +395,29 @@ function carregarServicosCliente(){
 
 // ── TÉCNICO ──
 async function verificarTecnico(){
-  const tecEmail=localStorage.getItem("odjim_tecnico_email");
-  const tecPass=localStorage.getItem("odjim_tecnico_pass");
-  if(tecEmail&&tecPass){
+  let tecEmail = "", tecPass = "";
+  try {
+    tecEmail = localStorage.getItem("odjim_tecnico_email");
+    tecPass = localStorage.getItem("odjim_tecnico_pass");
+  } catch(e){}
+
+  if(tecEmail && tecPass){
     try{
       const user=await aguardarAuth();
-      if(user&&user.email===tecEmail){mostrarPainelTecnico();return;}
+      if(user && user.email===tecEmail){mostrarPainelTecnico();return;}
       await auth.signInWithEmailAndPassword(tecEmail,tecPass);
       mostrarPainelTecnico();return;
     }catch(e){
-      localStorage.removeItem("odjim_tecnico_email");
-      localStorage.removeItem("odjim_tecnico_pass");
+      try {
+        localStorage.removeItem("odjim_tecnico_email");
+        localStorage.removeItem("odjim_tecnico_pass");
+      } catch(e2){}
     }
   }
-  document.getElementById("tecnico-painel").style.display="none";
-  document.getElementById("tecnico-login").style.display="block";
+  const pTec = document.getElementById("tecnico-painel");
+  if(pTec) pTec.style.display="none";
+  const lTec = document.getElementById("tecnico-login");
+  if(lTec) lTec.style.display="block";
 }
 
 async function loginTecnico(){
@@ -391,8 +428,10 @@ async function loginTecnico(){
     await auth.signInWithEmailAndPassword(email,pass);
     const snap=await db.collection("tecnicos").where("email","==",email).get();
     if(snap.empty){await auth.signOut();toast("❌ Não tem acesso de técnico.");return;}
-    localStorage.setItem("odjim_tecnico_email",email);
-    localStorage.setItem("odjim_tecnico_pass",pass);
+    try {
+      localStorage.setItem("odjim_tecnico_email",email);
+      localStorage.setItem("odjim_tecnico_pass",pass);
+    } catch(e){}
     mostrarPainelTecnico();
     toast("✅ Bem-vindo, Técnico!");
   }catch(e){
@@ -401,8 +440,10 @@ async function loginTecnico(){
         const snap=await db.collection("tecnicos").where("email","==",email).get();
         if(snap.empty){toast("❌ Técnico não encontrado. Contacte o administrador.");return;}
         await auth.createUserWithEmailAndPassword(email,pass);
-        localStorage.setItem("odjim_tecnico_email",email);
-        localStorage.setItem("odjim_tecnico_pass",pass);
+        try {
+          localStorage.setItem("odjim_tecnico_email",email);
+          localStorage.setItem("odjim_tecnico_pass",pass);
+        } catch(e2){}
         mostrarPainelTecnico();
         toast("✅ Conta criada! Bem-vindo!");
       }catch(e2){toast("❌ Erro: "+e2.message);}
@@ -413,10 +454,14 @@ async function loginTecnico(){
 }
 
 function mostrarPainelTecnico(){
-  document.getElementById("tecnico-login").style.display="none";
-  document.getElementById("tecnico-painel").style.display="block";
+  const lTec = document.getElementById("tecnico-login");
+  if(lTec) lTec.style.display="none";
+  const pTec = document.getElementById("tecnico-painel");
+  if(pTec) pTec.style.display="block";
   
-  if (window.pedidosTecnicoListener) window.pedidosTecnicoListener();
+  if (typeof window.pedidosTecnicoListener === 'function') {
+    window.pedidosTecnicoListener();
+  }
   
   window.pedidosTecnicoListener = db.collection("pedidos")
     .onSnapshot(snap => {
@@ -492,26 +537,36 @@ A equipa técnica da *ODJIM Solution* entrará em contacto para o atendimento na
 
 // ── ADMIN ──
 async function verificarAdmin(){
-  const adminEmail=localStorage.getItem("odjim_admin_email");
-  const adminPass=localStorage.getItem("odjim_admin_pass");
-  if(!adminEmail||!adminPass){
-    document.getElementById("admin-login").style.display="block";
-    document.getElementById("admin-painel").style.display="none";
+  let adminEmail = "", adminPass = "";
+  try {
+    adminEmail = localStorage.getItem("odjim_admin_email");
+    adminPass = localStorage.getItem("odjim_admin_pass");
+  } catch(e){}
+
+  if(!adminEmail || !adminPass){
+    const lAdmin = document.getElementById("admin-login");
+    if(lAdmin) lAdmin.style.display="block";
+    const pAdmin = document.getElementById("admin-painel");
+    if(pAdmin) pAdmin.style.display="none";
     return;
   }
   try{
     const user=await aguardarAuth();
-    if(user&&user.email===adminEmail){
+    if(user && user.email===adminEmail){
       mostrarPainelAdmin();
     }else{
       await auth.signInWithEmailAndPassword(adminEmail,adminPass);
       mostrarPainelAdmin();
     }
   }catch(e){
-    localStorage.removeItem("odjim_admin_email");
-    localStorage.removeItem("odjim_admin_pass");
-    document.getElementById("admin-login").style.display="block";
-    document.getElementById("admin-painel").style.display="none";
+    try {
+      localStorage.removeItem("odjim_admin_email");
+      localStorage.removeItem("odjim_admin_pass");
+    } catch(e2){}
+    const lAdmin = document.getElementById("admin-login");
+    if(lAdmin) lAdmin.style.display="block";
+    const pAdmin = document.getElementById("admin-painel");
+    if(pAdmin) pAdmin.style.display="none";
   }
 }
 
@@ -521,8 +576,10 @@ async function loginAdmin(){
   if(!email||!pass){toast("⚠️ Preencha email e senha.");return;}
   try{
     await auth.signInWithEmailAndPassword(email,pass);
-    localStorage.setItem("odjim_admin_email",email);
-    localStorage.setItem("odjim_admin_pass",pass);
+    try {
+      localStorage.setItem("odjim_admin_email",email);
+      localStorage.setItem("odjim_admin_pass",pass);
+    } catch(e){}
     mostrarPainelAdmin();
     toast("✅ Bem-vindo, Admin!");
   }catch(e){
@@ -533,8 +590,10 @@ async function loginAdmin(){
 }
 
 function mostrarPainelAdmin(){
-  document.getElementById("admin-login").style.display="none";
-  document.getElementById("admin-painel").style.display="block";
+  const lAdmin = document.getElementById("admin-login");
+  if(lAdmin) lAdmin.style.display="none";
+  const pAdmin = document.getElementById("admin-painel");
+  if(pAdmin) pAdmin.style.display="block";
   carregarTecnicos();
 }
 
@@ -568,7 +627,7 @@ function carregarTecnicos(){
   });
 }
 
-// ── EXPORTAÇÃO EXCEL / CSV CORRIGIDA ──
+// ── EXPORTAÇÃO EXCEL / CSV ──
 async function exportarCSV() {
   try {
     toast("⏳ A gerar CSV...");
