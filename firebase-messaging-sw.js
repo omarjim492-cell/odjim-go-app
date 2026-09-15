@@ -17,12 +17,12 @@ messaging.onBackgroundMessage((payload) => {
   console.log("[SW] Background message:", payload);
   const title = payload.notification?.title || "ODJIM Solution";
   const body = payload.notification?.body || "Nova notificação.";
-  const icon = payload.notification?.icon || "/icon-192.png";
+  const icon = payload.notification?.icon || "/icon.png";
 
   self.registration.showNotification(title, {
     body,
     icon,
-    badge: "/icon-192.png",
+    badge: "/icon.png",
     vibrate: [200, 100, 200],
     data: payload.data || {},
     tag: payload.data?.pedidoId || "odjim-default",
