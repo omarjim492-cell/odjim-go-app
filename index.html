@@ -1,258 +1,316 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ODJIM Solution</title>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script>
-firebase.initializeApp({
-  apiKey:"AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
-  authDomain:"odjim-solution.firebaseapp.com",
-  projectId:"odjim-solution",
-  storageBucket:"odjim-solution.firebasestorage.app",
-  messagingSenderId:"165673018775",
-  appId:"1:165673018775:web:c8b4cc6345b854763950d2"
-});
-const db=firebase.firestore();
-const auth=firebase.auth();
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-</script>
-<style>
-:root{--bg:#0f172a;--accent:#ff9800;--accent2:#ff5722;--text:#f8fafc;--muted:#94a3b8;--glass:rgba(30,41,59,0.75);--border:rgba(255,255,255,0.08);--radius:16px;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
-body{background:radial-gradient(circle at top right,#1e1b4b,var(--bg));color:var(--text);min-height:100vh;}
-#splash{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;gap:24px;}
-.logo{font-size:40px;font-weight:900;background:linear-gradient(to right,#ff9800,#ff5722);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;}
-.sub{color:var(--muted);text-align:center;font-size:14px;}
-.cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:380px;}
-.card-btn{display:flex;align-items:center;gap:16px;background:var(--glass);border:1px solid var(--border);padding:18px 22px;border-radius:14px;cursor:pointer;transition:all 0.3s;}
-.card-btn:hover{border-color:var(--accent);}
-.card-btn .ico{font-size:28px;}
-.card-btn h3{font-size:16px;font-weight:700;margin:0;}
-.card-btn p{font-size:12px;color:var(--muted);margin:2px 0 0;}
-.card-btn .arr{margin-left:auto;color:var(--muted);}
-.tela{display:none;min-height:100vh;flex-direction:column;}
-.tela.ativa{display:flex;}
-.top{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--glass);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
-.top .back{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
-.top h2{font-size:17px;font-weight:700;flex:1;}
-.top .badge{background:var(--accent);color:#000;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
-.cont{flex:1;padding:18px;max-width:480px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
-.box{background:var(--glass);border:1px solid var(--border);padding:20px;border-radius:var(--radius);}
-.box h3{font-size:16px;font-weight:700;margin-bottom:14px;border-left:3px solid var(--accent);padding-left:8px;}
-.fg{margin-bottom:12px;}
-.fg label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-input,select,textarea{width:100%;background:rgba(15,23,42,0.7);border:1px solid var(--border);padding:12px;font-size:14px;color:var(--text);border-radius:10px;outline:none;}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);}
-textarea{resize:none;height:80px;}
-.btn{border:none;padding:14px;width:100%;font-size:14px;font-weight:700;border-radius:10px;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:8px;}
-.btn-p{background:linear-gradient(135deg,#ff9800,#ff5722);color:white;}
-.btn-o{background:transparent;border:1px solid var(--border);color:var(--muted);}
-.btn-d{background:transparent;border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 14px;width:auto;font-size:12px;border-radius:8px;}
-.tabs{display:flex;gap:6px;background:var(--glass);border:1px solid var(--border);padding:5px;border-radius:12px;overflow-x:auto;}
-.tab{flex:1;padding:9px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:600;border-radius:9px;cursor:pointer;white-space:nowrap;}
-.tab.on{background:var(--accent);color:#000;}
-.tc{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-.ta{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ff9800,#ff5722);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;flex-shrink:0;}
-.pc{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
-.pt{display:flex;justify-content:space-between;align-items:center;}
-.ps{font-weight:700;color:var(--accent);font-size:14px;}
-.bs{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;}
-.sa{background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.3);}
-.sc{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);}
-.pi{font-size:12px;color:var(--muted);line-height:1.5;}
-.pi strong{color:var(--text);}
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px;}
-.mo.on{display:flex;}
-.md{background:#1e293b;border:1px solid var(--border);border-radius:var(--radius);padding:22px;width:100%;max-width:390px;}
-.md h3{font-size:17px;font-weight:700;margin-bottom:18px;text-align:center;}
-.mt{display:flex;gap:6px;margin-bottom:18px;}
-.mtb{flex:1;padding:9px;border:none;background:rgba(255,255,255,0.04);color:var(--muted);font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;}
-.mtb.on{background:var(--accent);color:#000;}
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:none;background:rgba(30,41,59,0.97);border-left:4px solid var(--accent);color:var(--text);padding:12px 18px;border-radius:10px;max-width:300px;width:90%;text-align:center;font-size:13px;font-weight:600;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ODJIM Solution - Prestações de serviço Angola</title>
+  
+  <!-- Configurações PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- Leaflet CSS (Mapa) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- SDKs do Firebase (Compatibilidade v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Inicialização Firebase -->
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCUB0t9wvZp2pXhjYmv2G7AeToWNekJRTg",
+      authDomain: "odjim-solution.firebaseapp.com",
+      projectId: "odjim-solution",
+      storageBucket: "odjim-solution.firebasestorage.app",
+      messagingSenderId: "165673018775",
+      appId: "1:165673018775:web:c8b4cc6345b854763950d2"
+    });
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  </script>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --accent: #ff9800;
+      --accent2: #ff5722;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --glass: rgba(30, 41, 59, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: radial-gradient(circle at top right, #1e1b4b, var(--bg)); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    
+    #splash { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; gap: 24px; }
+    .logo { font-size: 38px; font-weight: 900; background: linear-gradient(to right, #ff9800, #ff5722); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
+    .sub { color: var(--muted); text-align: center; font-size: 13px; line-height: 1.5; }
+    
+    .cards { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 380px; }
+    .card-btn { display: flex; align-items: center; gap: 16px; background: var(--glass); border: 1px solid var(--border); padding: 18px 22px; border-radius: 14px; cursor: pointer; transition: all 0.3s; }
+    .card-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-btn .ico { font-size: 28px; }
+    .card-btn h3 { font-size: 16px; font-weight: 700; margin: 0; }
+    .card-btn p { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+    .card-btn .arr { margin-left: auto; color: var(--muted); }
+
+    .tela { display: none; min-height: 100vh; flex-direction: column; }
+    .tela.ativa { display: flex; }
+    
+    .top { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: var(--glass); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+    .top .back { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+    .top h2 { font-size: 17px; font-weight: 700; flex: 1; }
+    .top .badge { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; cursor: pointer; }
+
+    .cont { flex: 1; padding: 18px; max-width: 480px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .box { background: var(--glass); border: 1px solid var(--border); padding: 20px; border-radius: var(--radius); }
+    .box h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; border-left: 3px solid var(--accent); padding-left: 8px; }
+
+    .fg { margin-bottom: 12px; }
+    .fg label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+    input, select, textarea { width: 100%; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border); padding: 12px; font-size: 14px; color: var(--text); border-radius: 10px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: none; height: 80px; }
+
+    .btn { border: none; padding: 14px; width: 100%; font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-p { background: linear-gradient(135deg, #ff9800, #ff5722); color: white; }
+    .btn-o { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+    .btn-d { background: transparent; border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 8px 14px; width: auto; font-size: 12px; border-radius: 8px; }
+
+    #mapa { height: 180px; width: 100%; border-radius: 10px; margin-top: 8px; border: 1px solid var(--border); }
+
+    .servico-detalhe { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; cursor: pointer; }
+    .servico-header { padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
+    .servico-header .seta { margin-left: auto; color: var(--muted); transition: transform 0.3s; }
+    .servico-body { display: none; padding: 0 14px 12px 14px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; }
+    .servico-detalhe.aberto .servico-body { display: block; }
+    .servico-detalhe.aberto .seta { transform: rotate(90deg); }
+
+    .pedido-card { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+    .pedido-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .pedido-servico { font-weight: 700; color: var(--accent); font-size: 14px; }
+    .badge-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
+    .s-aguardando { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+    .s-caminho { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 200; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+    .modal-overlay.aberto { display: flex; }
+    .modal-doc { background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; width: 100%; max-width: 390px; }
+    .modal-tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+    .modal-tab { flex: 1; padding: 9px; border: none; background: rgba(255, 255, 255, 0.04); color: var(--muted); font-size: 13px; font-weight: 600; border-radius: 9px; cursor: pointer; }
+    .modal-tab.ativa { background: var(--accent); color: #000; }
+
+    .emoji-rating { display: flex; justify-content: space-between; margin: 10px 0; }
+    .emoji-btn { background: none; border: 1px solid var(--border); font-size: 24px; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.2s; }
+    .emoji-btn.sel { border-color: var(--accent); background: rgba(255, 152, 0, 0.2); transform: scale(1.1); }
+
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: none; background: rgba(30, 41, 59, 0.97); border-left: 4px solid var(--accent); color: var(--text); padding: 12px 18px; border-radius: 10px; max-width: 320px; width: 90%; text-align: center; font-size: 13px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+  </style>
 </head>
 <body>
+
 <div id="toast"></div>
 
-<div class="mo" id="mo-login">
-<div class="md">
-<h3>👤 Entrar / Cadastrar</h3>
-<div class="mt">
-<button class="mtb on" onclick="mTab('lg')">Entrar</button>
-<button class="mtb" onclick="mTab('rg')">Cadastrar</button>
-</div>
-<div id="m-lg">
-<div class="fg"><label>Email</label><input id="cl-e" type="email" placeholder="email@exemplo.com"></div>
-<div class="fg"><label>Senha</label><input id="cl-p" type="password" placeholder="••••••••"></div>
-<button class="btn btn-p" onclick="loginCliente()">Entrar</button>
-<div style="text-align:center;margin-top:10px;"><a href="#" onclick="recSenha()" style="color:var(--accent);font-size:12px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
-</div>
-<div id="m-rg" style="display:none;">
-<div class="fg"><label>Nome</label><input id="cr-n" placeholder="O seu nome"></div>
-<div class="fg"><label>Email</label><input id="cr-e" type="email" placeholder="email@exemplo.com"></div>
-<div class="fg"><label>Telefone</label><input id="cr-t" placeholder="923 000 000"></div>
-<div class="fg"><label>Senha</label><input id="cr-p" type="password" placeholder="Mínimo 6 caracteres"></div>
-<button class="btn btn-p" onclick="regCliente()">Criar Conta</button>
-</div>
-</div>
+<!-- MODAL CADASTRO / LOGIN CLIENTE -->
+<div class="modal-overlay" id="modal-cadastro">
+  <div class="modal-doc">
+    <h3 style="text-align:center;margin-bottom:14px;">👤 Entrar / Cadastrar</h3>
+    <div class="modal-tabs">
+      <button class="modal-tab ativa" onclick="modalTab('login')">Entrar</button>
+      <button class="modal-tab" onclick="modalTab('registo')">Cadastrar</button>
+    </div>
+    
+    <div id="modal-login">
+      <div class="fg"><label>Email</label><input id="cl-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="fg"><label>Senha</label><input id="cl-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-p" onclick="loginCliente()">Entrar</button>
+      <div style="text-align:center;margin-top:10px;">
+        <a href="#" onclick="recuperarSenhaCliente()" style="color:var(--accent);font-size:12px;text-decoration:none;">🔑 Esqueceu a senha?</a>
+      </div>
+    </div>
+
+    <div id="modal-registo" style="display:none;">
+      <div class="fg"><label>Nome</label><input id="cr-nome" placeholder="O seu nome"></div>
+      <div class="fg"><label>Email</label><input id="cr-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="fg"><label>Telefone</label><input id="cr-tel" placeholder="923 000 000"></div>
+      <div class="fg"><label>Senha</label><input id="cr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn btn-p" onclick="cadastrarCliente()">Criar Conta</button>
+    </div>
+  </div>
 </div>
 
+<!-- MODAL PERFIL -->
+<div class="modal-overlay" id="modal-perfil">
+  <div class="modal-doc">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3>Meu Perfil</h3>
+      <button onclick="fecharPerfil()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div id="perfil-avatar" style="width:50px;height:50px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;margin:0 auto 8px;">?</div>
+      <h4 id="perfil-nome-display">Carregando...</h4>
+      <p id="perfil-email-display" style="font-size:12px;color:var(--muted);"></p>
+    </div>
+    <div class="fg"><label>Nome Completo</label><input id="perfil-nome"></div>
+    <div class="fg"><label>Telefone</label><input id="perfil-tel"></div>
+    <div class="fg"><label>Morada Habitual</label><input id="perfil-morada" placeholder="Ex: Talatona"></div>
+    <button class="btn btn-p" onclick="salvarPerfil()">💾 Guardar Perfil</button>
+  </div>
+</div>
+
+<!-- SPLASH / ECRÃ INICIAL -->
 <div id="splash">
-<div class="logo">ODJIM Solution</div>
-<div class="sub">Tecnologia e Serviços ao seu Alcance 🚀<br>Luanda, Angola • Disponível 24h</div>
-<div class="cards">
-<div class="card-btn" onclick="irCliente()">
-<span class="ico">👤</span>
-<div><h3>Sou Cliente</h3><p>Solicitar serviços e suporte técnico</p></div>
-<span class="arr">›</span>
-</div>
-<div class="card-btn" onclick="ir('tecnico')">
-<span class="ico">🔧</span>
-<div><h3>Sou Técnico</h3><p>Ver pedidos e gerir serviços</p></div>
-<span class="arr">›</span>
-</div>
-<div class="card-btn" onclick="ir('admin')">
-<span class="ico">🛡️</span>
-<div><h3>Administrador</h3><p>Gerir técnicos, pedidos e relatórios</p></div>
-<span class="arr">›</span>
-</div>
-</div>
+  <div class="logo">ODJIM Solution</div>
+  <div class="sub">Tecnologia e Serviços ao seu Alcance 🚀<br>Luanda, Angola • Disponível 24h</div>
+  
+  <div class="cards">
+    <div class="card-btn" onclick="irCliente()">
+      <span class="ico">👤</span>
+      <div><h3>Sou Cliente</h3><p>Solicitar serviços e suporte técnico</p></div>
+      <span class="arr">›</span>
+    </div>
+    <div class="card-btn" onclick="irPara('tecnico')">
+      <span class="ico">🔧</span>
+      <div><h3>Sou Técnico</h3><p>Ver pedidos e gerir serviços</p></div>
+      <span class="arr">›</span>
+    </div>
+    <div class="card-btn" onclick="irPara('admin')">
+      <span class="ico">🛡️</span>
+      <div><h3>Administrador</h3><p>Gerir técnicos, pedidos e relatórios</p></div>
+      <span class="arr">›</span>
+    </div>
+  </div>
 </div>
 
+<!-- ECRÃ CLIENTE -->
 <div id="tela-cliente" class="tela">
-<div class="top"><button class="back" onclick="voltar()">‹</button><h2>ODJIM Solution</h2><span class="badge" id="badge-c">Cliente</span></div>
-<div class="cont">
-<div class="box" style="background:linear-gradient(135deg,rgba(255,152,0,0.15),rgba(255,87,34,0.1));border-color:rgba(255,152,0,0.3);text-align:center;">
-<div style="font-size:30px;font-weight:800;background:linear-gradient(to right,#ff9800,#ff5722);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ODJIM Solution</div>
-<div style="font-size:12px;color:var(--accent);margin-top:4px;">🇦🇴 LUANDA, ANGOLA</div>
-<p style="color:var(--muted);font-size:13px;margin-top:8px;">A sua plataforma de confiança para serviços técnicos e domésticos em Luanda.</p>
-</div>
-<div class="box">
-<h3>Solicitar Serviço</h3>
-<div class="fg"><label>Nome</label><input id="c-n" placeholder="O seu nome"></div>
-<div class="fg"><label>Telefone</label><input id="c-t" placeholder="923 000 000"></div>
-<div class="fg"><label>Serviço</label>
-<select id="c-s"><option>Informática</option><option>Redes</option><option>CCTV</option><option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option><option>Pintura</option><option>Limpeza</option><option>Design gráfico</option></select>
-</div>
-<div class="fg"><label>Descrição</label><textarea id="c-d" placeholder="Descreva o problema..."></textarea></div>
-<div class="fg"><label>Localização</label><input id="c-l" placeholder="Ex: Talatona, Luanda"></div>
-<button class="btn btn-p" onclick="enviarPedido()">🚀 Enviar Pedido</button>
-</div>
-<button class="btn btn-o" onclick="logout()">Sair da Conta</button>
-</div>
+  <div class="top">
+    <button class="back" onclick="voltar()">‹</button>
+    <h2>ODJIM Solution</h2>
+    <span class="badge" id="badge-cliente" onclick="abrirPerfil()">Cliente</span>
+  </div>
+  
+  <div class="cont">
+    <!-- Banner Info -->
+    <div class="box" style="background:linear-gradient(135deg,rgba(255,152,0,0.15),rgba(255,87,34,0.1));border-color:rgba(255,152,0,0.3);text-align:center;">
+      <div id="info-titulo" style="font-size:24px;font-weight:800;background:linear-gradient(to right,#ff9800,#ff5722);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ODJIM Solution</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:2px;">🇦🇴 LUANDA, ANGOLA</div>
+      <p id="info-descricao" style="color:var(--muted);font-size:12px;margin-top:6px;">A sua plataforma de confiança para serviços técnicos e domésticos em Luanda.</p>
+    </div>
+
+    <!-- Nossos Serviços -->
+    <div class="box">
+      <h3>Nossos Serviços</h3>
+      <div id="lista-servicos"></div>
+    </div>
+
+    <!-- Form Pedido -->
+    <div class="box">
+      <h3>Solicitar Serviço</h3>
+      <div class="fg"><label>Nome</label><input id="c-nome" placeholder="O seu nome"></div>
+      <div class="fg"><label>Telefone</label><input id="c-tel" placeholder="923 000 000"></div>
+      <div class="fg"><label>Email</label><input id="c-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="fg">
+        <label>Serviço Pretendido</label>
+        <select id="c-servico">
+          <option>Informática</option><option>Redes</option><option>CCTV</option>
+          <option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option>
+          <option>Pintura</option><option>Limpeza</option><option>Design gráfico</option>
+        </select>
+      </div>
+      <div class="fg"><label>Descrição do Problema</label><textarea id="c-desc" placeholder="Descreva o que precisa..."></textarea></div>
+      <div class="fg">
+        <label>Localização (Selecione no Mapa ou Escreva)</label>
+        <input id="c-local" placeholder="Ex: Talatona, Luanda">
+        <div id="mapa"></div>
+      </div>
+      <button class="btn btn-p" onclick="enviarPedido()">🚀 Enviar Pedido</button>
+    </div>
+
+    <!-- Inquérito / Avaliação -->
+    <div class="box">
+      <h3>Avalie a sua Experiência</h3>
+      <div class="emoji-rating">
+        <button class="emoji-btn" onclick="avaliar(this,1,'😠','Muito Mau')">😠</button>
+        <button class="emoji-btn" onclick="avaliar(this,2,'🙁','Mau')">🙁</button>
+        <button class="emoji-btn" onclick="avaliar(this,3,'😐','Neutro')">😐</button>
+        <button class="emoji-btn" onclick="avaliar(this,4,'😊','Bom')">😊</button>
+        <button class="emoji-btn" onclick="avaliar(this,5,'🚀','Excelente')">🚀</button>
+      </div>
+      <div id="inq-comentario" style="display:none;margin-top:10px;">
+        <textarea id="av-comentario" placeholder="Deixe um comentário opcional..."></textarea>
+        <button class="btn btn-p" style="margin-top:8px;" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+      </div>
+      <div id="inq-feedback" style="display:none;text-align:center;padding:10px;">
+        <span id="feedback-em" style="font-size:30px;"></span>
+        <p id="feedback-msg" style="font-size:13px;color:var(--accent);margin-top:4px;"></p>
+      </div>
+    </div>
+
+    <button class="btn btn-o" onclick="logoutCliente()">Sair da Conta</button>
+  </div>
 </div>
 
+<!-- ECRÃ TÉCNICO -->
 <div id="tela-tecnico" class="tela">
-<div class="top"><button class="back" onclick="voltar()">‹</button><h2>Painel Técnico</h2><span class="badge">Técnico</span></div>
-<div class="cont">
-<div class="box" id="tec-login">
-<h3>Entrar como Técnico</h3>
-<div class="fg"><label>Email</label><input id="t-e" type="email" placeholder="email@tecnico.com"></div>
-<div class="fg"><label>Senha</label><input id="t-p" type="password" placeholder="••••••••"></div>
-<button class="btn btn-p" onclick="loginTecnico()">Entrar</button>
-<div style="text-align:center;margin-top:10px;"><a href="#" onclick="recSenhaTec()" style="color:var(--accent);font-size:12px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
-</div>
-<div id="tec-painel" style="display:none;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-<div><strong style="font-size:16px;">Olá, Técnico! 👋</strong><p style="font-size:12px;color:var(--muted);">Pedidos em tempo real</p></div>
-<button class="btn-d" onclick="logoutTec()">Sair</button>
-</div>
-<div id="t-pedidos"><div style="text-align:center;color:var(--muted);padding:24px;">A carregar...</div></div>
-</div>
-</div>
+  <div class="top"><button class="back" onclick="voltar()">‹</button><h2>Painel Técnico</h2><span class="badge">Técnico</span></div>
+  <div class="cont">
+    <div class="box" id="tecnico-login">
+      <h3>Entrar como Técnico</h3>
+      <div class="fg"><label>Email</label><input id="t-email" type="email" placeholder="tecnico@odjim.com"></div>
+      <div class="fg"><label>Senha</label><input id="t-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-p" onclick="loginTecnico()">Entrar</button>
+    </div>
+
+    <div id="tecnico-painel" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div><strong style="font-size:16px;">Olá, Técnico! 👋</strong><p style="font-size:12px;color:var(--muted);">Pedidos em tempo real</p></div>
+        <button class="btn-d" onclick="logoutCliente()">Sair</button>
+      </div>
+      <div id="t-pedidos"><div style="text-align:center;color:var(--muted);padding:24px;">A carregar pedidos...</div></div>
+    </div>
+  </div>
 </div>
 
+<!-- ECRÃ ADMIN -->
 <div id="tela-admin" class="tela">
-<div class="top"><button class="back" onclick="voltar()">‹</button><h2>Administração</h2><span class="badge">Admin</span></div>
-<div class="cont">
-<div class="box" id="adm-login">
-<h3>🛡️ Acesso Restrito</h3>
-<div class="fg"><label>Email Admin</label><input id="a-e" type="email" placeholder="admin@odjim.com"></div>
-<div class="fg"><label>Senha</label><input id="a-p" type="password" placeholder="••••••••"></div>
-<button class="btn btn-p" onclick="loginAdmin()">Entrar no Painel</button>
-<div style="text-align:center;margin-top:10px;"><a href="#" onclick="recSenhaAdm()" style="color:var(--accent);font-size:12px;text-decoration:none;">🔑 Esqueceu a senha?</a></div>
-</div>
-<div id="adm-painel" style="display:none;">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-<div><strong style="font-size:16px;">Painel Admin 🛡️</strong><p style="font-size:12px;color:var(--muted);">Gestão completa</p></div>
-<button class="btn-d" onclick="logoutAdm()">Sair</button>
-</div>
-<div class="tabs" style="margin-bottom:16px;">
-<button class="tab on" onclick="tab('p',this)">Pedidos</button>
-<button class="tab" onclick="tab('t',this)">Técnicos</button>
-<button class="tab" onclick="tab('c',this)">+ Técnico</button>
-<button class="tab" onclick="tab('s',this)">+ Serviço</button>
-<button class="tab" onclick="tab('i',this)">Info</button>
-</div>
-<div id="tab-p"><div id="a-pedidos" style="color:var(--muted);padding:20px;text-align:center;">A carregar...</div></div>
-<div id="tab-t" style="display:none;"><div id="a-tecnicos" style="color:var(--muted);padding:20px;text-align:center;">A carregar...</div></div>
-<div id="tab-c" style="display:none;" class="box">
-<h3>Cadastrar Técnico</h3>
-<div class="fg"><label>Nome</label><input id="nt-n" placeholder="Nome do técnico"></div>
-<div class="fg"><label>Email</label><input id="nt-e" type="email" placeholder="tecnico@odjim.com"></div>
-<div class="fg"><label>Telefone</label><input id="nt-t" placeholder="923 000 000"></div>
-<div class="fg"><label>Especialidade</label>
-<select id="nt-s"><option>Informática</option><option>Redes</option><option>CCTV</option><option>Electricidade</option><option>Ar condicionado</option><option>Canalização</option><option>Pintura</option><option>Limpeza</option><option>Design gráfico</option></select>
-</div>
-<button class="btn btn-p" onclick="addTecnico()">✅ Cadastrar Técnico</button>
-</div>
-<div id="tab-s" style="display:none;" class="box">
-<h3>Adicionar Serviço</h3>
-<div class="fg"><label>Nome</label><input id="srv-n" placeholder="Ex: Jardinagem"></div>
-<div class="fg"><label>Emoji</label><input id="srv-e" placeholder="Ex: 🌿"></div>
-<div class="fg"><label>Descrição</label><textarea id="srv-d" placeholder="Descreva o serviço..."></textarea></div>
-<div class="fg"><label>Preço</label><input id="srv-p" placeholder="Ex: A partir de 5.000 Kz"></div>
-<button class="btn btn-p" onclick="addServico()">✅ Adicionar Serviço</button>
-<div id="lista-srv" style="margin-top:14px;"></div>
-</div>
-<div id="tab-i" style="display:none;" class="box">
-<h3>Info da ODJIM</h3>
-<div class="fg"><label>Título</label><input id="inf-t" placeholder="ODJIM Solution"></div>
-<div class="fg"><label>Descrição</label><textarea id="inf-d" placeholder="Descrição..."></textarea></div>
-<button class="btn btn-p" onclick="saveInfo()">💾 Guardar</button>
-</div>
-<button class="btn btn-p" style="margin-top:12px;" onclick="exportCSV()">📥 Exportar CSV</button>
-</div>
-</div>
+  <div class="top"><button class="back" onclick="voltar()">‹</button><h2>Administração</h2><span class="badge">Admin</span></div>
+  <div class="cont">
+    <div class="box" id="admin-login">
+      <h3>🛡️ Acesso Restrito</h3>
+      <div class="fg"><label>Email Admin</label><input id="a-email" type="email" placeholder="admin@odjim.com"></div>
+      <div class="fg"><label>Senha</label><input id="a-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-p" onclick="loginAdmin()">Entrar no Painel</button>
+    </div>
+
+    <div id="admin-painel" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div><strong style="font-size:16px;">Painel Admin 🛡️</strong><p style="font-size:12px;color:var(--muted);">Gestão do Sistema</p></div>
+        <button class="btn-d" onclick="logoutCliente()">Sair</button>
+      </div>
+      
+      <div class="box" style="margin-bottom:12px;">
+        <h3>Equipa de Técnicos</h3>
+        <div id="a-tecnicos"><div style="text-align:center;color:var(--muted);padding:10px;">A carregar...</div></div>
+      </div>
+
+      <button class="btn btn-p" onclick="exportarCSV()">📥 Exportar Relatório CSV</button>
+    </div>
+  </div>
 </div>
 
-<script>
-function T(m,d=4000){var t=document.getElementById("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",d);}
-function ir(p){document.getElementById("splash").style.display="none";document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));document.getElementById("tela-"+p).classList.add("ativa");if(p==="admin")chkAdm();if(p==="tecnico")chkTec();}
-function voltar(){document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));document.getElementById("splash").style.display="flex";}
-function irCliente(){if(auth.currentUser){ir("cliente");document.getElementById("badge-c").textContent=auth.currentUser.displayName||"Cliente";}else{document.getElementById("mo-login").classList.add("on");}}
-function mTab(x){document.getElementById("m-lg").style.display=x==="lg"?"block":"none";document.getElementById("m-rg").style.display=x==="rg"?"block":"none";document.querySelectorAll(".mtb").forEach((b,i)=>b.classList.toggle("on",(i===0&&x==="lg")||(i===1&&x==="rg")));}
-async function loginCliente(){var e=document.getElementById("cl-e").value.trim(),p=document.getElementById("cl-p").value;if(!e||!p){T("⚠️ Preencha email e senha.");return;}try{var c=await auth.signInWithEmailAndPassword(e,p);document.getElementById("mo-login").classList.remove("on");ir("cliente");document.getElementById("badge-c").textContent=c.user.displayName||"Cliente";T("✅ Bem-vindo!");}catch(x){T("❌ Email ou senha incorretos.");}}
-async function regCliente(){var n=document.getElementById("cr-n").value.trim(),e=document.getElementById("cr-e").value.trim(),t=document.getElementById("cr-t").value.trim(),p=document.getElementById("cr-p").value;if(!n||!e||!p){T("⚠️ Preencha todos os campos.");return;}if(p.length<6){T("⚠️ Senha mínimo 6 caracteres.");return;}try{var c=await auth.createUserWithEmailAndPassword(e,p);await c.user.updateProfile({displayName:n});await db.collection("clientes").doc(c.user.uid).set({nome:n,email:e,telefone:t,uid:c.user.uid,criadoEm:new Date().toISOString()});document.getElementById("mo-login").classList.remove("on");ir("cliente");document.getElementById("badge-c").textContent=n;T("🎉 Bem-vindo, "+n+"!");}catch(x){if(x.code==="auth/email-already-in-use")T("❌ Email já registado. Use Entrar.");else T("❌ Erro: "+x.message);}}
-async function recSenha(){var e=document.getElementById("cl-e").value.trim();if(!e){T("⚠️ Escreva o email primeiro.");return;}try{await auth.sendPasswordResetEmail(e);}catch(x){}T("📧 Se o email existe, receberás o link. Verifique o Spam!");}
-async function logout(){await auth.signOut();voltar();T("👋 Sessão terminada.");}
-async function enviarPedido(){var n=document.getElementById("c-n").value.trim(),t=document.getElementById("c-t").value.trim(),l=document.getElementById("c-l").value.trim();if(!n||!t||!l){T("⚠️ Preencha Nome, Telefone e Localização.");return;}try{await db.collection("pedidos").add({nome:n,telefone:t,servico:document.getElementById("c-s").value,descricao:document.getElementById("c-d").value,local:l,estado:"Aguardando técnico",clienteUid:auth.currentUser?auth.currentUser.uid:"",dataCriacao:new Date().toISOString()});T("✅ Pedido enviado!");["c-n","c-t","c-d","c-l"].forEach(i=>document.getElementById(i).value="");}catch(x){T("❌ Erro: "+x.message);}}
-async function chkTec(){var e=localStorage.getItem("tec_e"),p=localStorage.getItem("tec_p");if(e&&p){try{await auth.signInWithEmailAndPassword(e,p);showTec();return;}catch(x){localStorage.removeItem("tec_e");localStorage.removeItem("tec_p");}}document.getElementById("tec-painel").style.display="none";document.getElementById("tec-login").style.display="block";}
-async function loginTecnico(){var e=document.getElementById("t-e").value.trim(),p=document.getElementById("t-p").value;if(!e||!p){T("⚠️ Preencha email e senha.");return;}try{await auth.signInWithEmailAndPassword(e,p);localStorage.setItem("tec_e",e);localStorage.setItem("tec_p",p);showTec();T("✅ Bem-vindo, Técnico!");}catch(x){if(x.code==="auth/user-not-found"||x.code==="auth/invalid-credential"){try{var sn=await db.collection("tecnicos").where("email","==",e).get();if(sn.empty){T("❌ Técnico não encontrado.");return;}await auth.createUserWithEmailAndPassword(e,p);localStorage.setItem("tec_e",e);localStorage.setItem("tec_p",p);showTec();T("✅ Bem-vindo!");}catch(x2){T("❌ Erro: "+x2.message);}}else{T("❌ Senha incorreta.");}}}
-function showTec(){document.getElementById("tec-login").style.display="none";document.getElementById("tec-painel").style.display="block";monPedidos("t-pedidos");}
-async function logoutTec(){await auth.signOut();localStorage.removeItem("tec_e");localStorage.removeItem("tec_p");document.getElementById("tec-painel").style.display="none";document.getElementById("tec-login").style.display="block";T("👋 Saiu.");}
-async function recSenhaTec(){var e=document.getElementById("t-e").value.trim();if(!e){T("⚠️ Escreva o email.");return;}try{await auth.sendPasswordResetEmail(e);}catch(x){}T("📧 Email enviado! Verifique o Spam.");}
-async function chkAdm(){var e=localStorage.getItem("adm_e"),p=localStorage.getItem("adm_p");if(e&&p){try{await auth.signInWithEmailAndPassword(e,p);showAdm();return;}catch(x){localStorage.removeItem("adm_e");localStorage.removeItem("adm_p");}}document.getElementById("adm-login").style.display="block";document.getElementById("adm-painel").style.display="none";}
-async function loginAdmin(){var e=document.getElementById("a-e").value.trim(),p=document.getElementById("a-p").value;if(!e||!p){T("⚠️ Preencha email e senha.");return;}try{await auth.signInWithEmailAndPassword(e,p);localStorage.setItem("adm_e",e);localStorage.setItem("adm_p",p);showAdm();T("✅ Bem-vindo, Admin!");}catch(x){if(x.code==="auth/network-request-failed")T("❌ Sem internet. Verifica a ligação.");else T("❌ Email ou senha incorretos.");}}
-function showAdm(){document.getElementById("adm-login").style.display="none";document.getElementById("adm-painel").style.display="block";monPedidos("a-pedidos");loadTecs();}
-async function logoutAdm(){await auth.signOut();localStorage.removeItem("adm_e");localStorage.removeItem("adm_p");document.getElementById("adm-painel").style.display="none";document.getElementById("adm-login").style.display="block";T("👋 Saiu.");}
-async function recSenhaAdm(){var e=document.getElementById("a-e").value.trim();if(!e){T("⚠️ Escreva o email.");return;}try{await auth.sendPasswordResetEmail(e);}catch(x){}T("📧 Email enviado! Verifique o Spam.");}
-function tab(x,b){["p","t","c","s","i"].forEach(i=>{var el=document.getElementById("tab-"+i);if(el)el.style.display="none";});document.getElementById("tab-"+x).style.display="block";document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));b.classList.add("on");if(x==="t")loadTecs();if(x==="s")loadSrvs();}
-function monPedidos(id){db.collection("pedidos").onSnapshot(sn=>{var el=document.getElementById(id);if(!el)return;if(sn.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:24px;">Nenhum pedido ainda.</div>';return;}var d=[],h="";sn.forEach(x=>d.push({id:x.id,...x.data()}));d.sort((a,b)=>new Date(b.dataCriacao||0)-new Date(a.dataCriacao||0));d.forEach(p=>{var z=(p.telefone||"").replace(/[^0-9]/g,""),sc=p.estado==="Aguardando técnico"?"sa":"sc",bt=p.estado==="Aguardando técnico"?'<button onclick="aceitar(\''+p.id+'\')" style="margin-top:8px;background:var(--accent);border:none;color:#000;padding:10px;width:100%;border-radius:8px;font-weight:700;cursor:pointer;">✅ Aceitar</button>':'<a href="https://wa.me/244'+z+'?text=Olá! Aceitei o seu pedido." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;text-decoration:none;padding:10px;border-radius:8px;font-weight:700;font-size:13px;margin-top:8px;">💬 WhatsApp</a>';h+='<div class="pc"><div class="pt"><span class="ps">'+(p.servico||"")+'</span><span class="bs '+sc+'">'+(p.estado||"")+'</span></div><div class="pi"><p><strong>'+(p.nome||"")+'</strong> · '+(p.telefone||"")+'</p><p>📍 '+(p.local||"")+'</p>'+(p.descricao?'<p>📝 '+p.descricao+'</p>':"")+'</div>'+bt+'</div>';});el.innerHTML=h;},err=>{var el=document.getElementById(id);if(el)el.innerHTML='<div style="color:#f87171;padding:20px;text-align:center;">Erro: '+err.message+'</div>';});}
-async function aceitar(id){try{await db.collection("pedidos").doc(id).update({estado:"Técnico a caminho"});T("✅ Pedido aceite!");}catch(x){T("❌ Erro: "+x.message);}}
-var tecLis=null;
-function loadTecs(){var el=document.getElementById("a-tecnicos");if(!el)return;el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">A carregar...</div>';if(tecLis)tecLis();tecLis=db.collection("tecnicos").onSnapshot(sn=>{if(sn.empty){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">Nenhum técnico.</div>';return;}var h="";sn.forEach(d=>{var t=d.data(),i=t.nome?t.nome[0].toUpperCase():"T";h+='<div class="tc"><div class="ta">'+i+'</div><div style="flex:1;"><strong>'+t.nome+'</strong><p style="font-size:12px;color:var(--muted);">'+t.especialidade+' · '+t.telefone+'</p><p style="font-size:11px;color:var(--muted);">'+t.email+'</p></div><button onclick="delTec(\''+d.id+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:5px 9px;border-radius:7px;cursor:pointer;font-size:11px;">🗑️</button></div>';});el.innerHTML=h;},e=>{el.innerHTML='<div style="color:#f87171;padding:20px;text-align:center;">Erro: '+e.message+'</div>';});}
-async function addTecnico(){var n=document.getElementById("nt-n").value.trim(),e=document.getElementById("nt-e").value.trim(),t=document.getElementById("nt-t").value.trim(),s=document.getElementById("nt-s").value;if(!n||!e){T("⚠️ Preencha Nome e Email.");return;}try{var x=await db.collection("tecnicos").where("email","==",e).get();if(!x.empty){T("⚠️ Email já existe!");return;}await db.collection("tecnicos").add({nome:n,email:e,telefone:t,especialidade:s,ativo:true,criadoEm:new Date().toISOString()});T("✅ Técnico "+n+" cadastrado!");["nt-n","nt-e","nt-t"].forEach(i=>{var el=document.getElementById(i);if(el)el.value="";});}catch(x){T("❌ Erro: "+x.message);}}
-async function delTec(id){if(!confirm("Remover técnico?"))return;try{await db.collection("tecnicos").doc(id).delete();T("🗑️ Removido.");}catch(x){T("❌ Erro: "+x.message);}}
-async function addServico(){var n=document.getElementById("srv-n").value.trim(),e=document.getElementById("srv-e").value.trim(),d=document.getElementById("srv-d").value.trim(),p=document.getElementById("srv-p").value.trim();if(!n||!e){T("⚠️ Preencha Nome e Emoji.");return;}try{await db.collection("servicos").add({nome:n,emoji:e,descricao:d,preco:p,ativo:true,criadoEm:new Date().toISOString()});T("✅ Serviço adicionado!");["srv-n","srv-e","srv-d","srv-p"].forEach(i=>{var el=document.getElementById(i);if(el)el.value="";});loadSrvs();}catch(x){T("❌ Erro: "+x.message);}}
-function loadSrvs(){var el=document.getElementById("lista-srv");if(!el)return;db.collection("servicos").onSnapshot(sn=>{if(sn.empty){el.innerHTML="";return;}var h="";sn.forEach(d=>{var s=d.data();h+='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;margin-top:8px;"><span style="font-size:20px;">'+s.emoji+'</span><div style="flex:1;"><strong style="font-size:13px;">'+s.nome+'</strong><p style="font-size:11px;color:var(--muted);">'+s.preco+'</p></div><button onclick="delSrv(\''+d.id+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;">🗑️</button></div>';});el.innerHTML=h;});}
-async function delSrv(id){try{await db.collection("servicos").doc(id).delete();T("🗑️ Serviço removido.");}catch(x){T("❌ Erro: "+x.message);}}
-async function saveInfo(){var t=document.getElementById("inf-t").value.trim(),d=document.getElementById("inf-d").value.trim();try{await db.collection("config").doc("empresa").set({titulo:t,descricao:d,atualizadoEm:new Date().toISOString()},{merge:true});T("✅ Informações guardadas!");}catch(x){T("❌ Erro: "+x.message);}}
-async function exportCSV(){try{var sn=await db.collection("pedidos").get();if(sn.empty){T("⚠️ Sem pedidos.");return;}var rows=[["Nome","Telefone","Serviço","Local","Estado","Data"]];sn.forEach(d=>{var p=d.data();rows.push([p.nome||"",p.telefone||"",p.servico||"",p.local||"",p.estado||"",p.dataCriacao?new Date(p.dataCriacao).toLocaleDateString("pt-PT"):""]);});var csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="ODJIM_"+new Date().toLocaleDateString("pt-PT").replace(/\//g,"-")+".csv";a.click();URL.revokeObjectURL(url);T("✅ CSV exportado!");}catch(x){T("❌ Erro: "+x.message);}}
-</script>
+<!-- Carregamento da Lógica JS Separada -->
+<script src="app.js?v=2.0"></script>
 </body>
 </html>
